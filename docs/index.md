@@ -56,3 +56,20 @@ If you would like to add a feature, please reach out via [ticket](https://github
 A feature is most likely to be added if you build it!
 
 Don't forget to check out the [Contributors guide](https://github.com/wang-boyu/mesa-llm/blob/main/CONTRIBUTING.md).
+
+
+
+```{toctree}
+---
+maxdepth: 2
+hidden: true
+---
+Introduction <self>
+API Documentation <apis/api_main>
+```
+
+## Indices and tables
+
+- {ref}`genindex`
+- {ref}`modindex`
+- {ref}`search`
