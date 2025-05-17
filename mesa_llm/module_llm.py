@@ -14,9 +14,20 @@ class ModuleLLM:
 
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, system_prompt: str = None) -> str:
+        if system_prompt:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ]
+        else:
+            messages = [
+                {"role": "user", "content": prompt}
+            ]
+            
         response = completion(
-            model="openai/gpt-4o", messages=[{"content": prompt, "role": "user"}]
+            model="openai/gpt-4o", 
+            messages=messages
         )
         return response
 
