@@ -25,6 +25,17 @@ class ModuleLLM:
         provider = self.model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
+    def set_system_prompt(self, system_prompt: str):
+        """Set or update the system prompt."""
+        self.system_prompt = system_prompt
+    
+    def set_model(self, api_key: str, model: str):
+        """Set or update the model and API key."""
+        self.api_key = api_key
+        self.model = model
+        provider = self.model.split("/")[0].upper()
+        os.environ[f"{provider}_API_KEY"] = self.api_key
+
     def generate(self, prompt: str) -> str:
         if self.system_prompt:
             messages = [
