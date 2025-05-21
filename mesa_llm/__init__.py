@@ -1,6 +1,10 @@
 import datetime
+from .tools import ToolManager
 
-__all__ = []
+
+__all__ = [
+    "ToolManager",
+]
 
 __title__ = "Mesa-LLM"
 __version__ = "0.0.2"
