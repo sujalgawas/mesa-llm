@@ -15,16 +15,6 @@ class LLMAgent:
         llm (ModuleLLM): The internal LLM interface used by the agent.
         memory (Memory | None): The memory module attached to this agent, if any.
 
-    Methods:
-        attach_memory(memory):
-            Attach a memory instance to this agent. Raises an error if a memory is already attached.
-
-        set_model(api_key, model):
-            Update the LLM model used by the agent.
-
-        set_system_prompt(system_prompt):
-            Update the system prompt used in completions.
-
     Notes:
         - Each agent can only have one memory instance associated with it.
         - If no memory is passed at initialization, one can be attached later using `attach_memory()`.
