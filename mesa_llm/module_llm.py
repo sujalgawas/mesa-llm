@@ -46,6 +46,22 @@ class ModuleLLM:
             messages = [{"role": "user", "content": prompt}]
         response = completion(model=self.model, messages=messages)
         return response
+    
+    def generate_with_tools(self, prompt, tool_schema):
+        if self.system_prompt:
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+        else:
+            messages = [{"role": "user", "content": prompt}]
+        response = completion(
+            model=self.model,
+            messages=messages,
+            tools=tool_schema,
+            tool_choice="auto",  
+        )
+        return response
 
 
 # test the module

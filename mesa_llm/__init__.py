@@ -4,6 +4,8 @@ from .tools import ToolManager
 
 __all__ = [
     "ToolManager",
+    "Observation",
+    "Plan",
 ]
 
 __title__ = "Mesa-LLM"
