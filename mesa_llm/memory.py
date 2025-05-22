@@ -1,9 +1,12 @@
 import os
 from collections import deque
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from mesa_llm.llm_agent import LLMAgent
 from mesa_llm.module_llm import ModuleLLM
+
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
 
 
 @dataclass
@@ -30,7 +33,7 @@ class Memory:
 
     def __init__(
         self,
-        agent: LLMAgent,
+        agent: "LLMAgent",
         short_term_capacity: int = 5,
         consolidation_capacity: int = 2,
         api_key: str = os.getenv("OPENAI_API_KEY"),
@@ -84,6 +87,12 @@ class Memory:
         Get the short term memory
         """
         return list(self.short_term_memory)
+
+    def get_long_term_memory(self) -> str:
+        """
+        Get the long term memory
+        """
+        return self.long_term_memory
 
     def update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
         """

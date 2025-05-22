@@ -16,10 +16,6 @@ class LLMAgent:
         llm (ModuleLLM): The internal LLM interface used by the agent.
         memory (Memory | None): The memory module attached to this agent, if any.
 
-    Notes:
-        - Each agent can only have one memory instance associated with it.
-        - If no memory is passed at initialization, one can be attached later using `attach_memory()`.
-        - Reassigning or replacing memory after it's been attached is not allowed and will raise a ValueError.
     """
 
     def __init__(
@@ -27,7 +23,6 @@ class LLMAgent:
         api_key: str,
         model: str = "openai/gpt-4o",
         system_prompt: str | None = None,
-        memory: Memory | None = None,
     ):
         self.llm = ModuleLLM(api_key=api_key, model=model, system_prompt=system_prompt)
         self._memory = Memory(

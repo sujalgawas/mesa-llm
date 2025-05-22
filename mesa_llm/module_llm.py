@@ -20,7 +20,7 @@ class ModuleLLM:
             system_prompt: The system prompt to use for the LLM
         """
         self.api_key = api_key
-        self.model=model
+        self.model = model
         self.system_prompt = system_prompt
         provider = self.model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
@@ -28,7 +28,7 @@ class ModuleLLM:
     def set_system_prompt(self, system_prompt: str):
         """Set or update the system prompt."""
         self.system_prompt = system_prompt
-    
+
     def set_model(self, api_key: str, model: str):
         """Set or update the model and API key."""
         self.api_key = api_key
@@ -53,9 +53,10 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
 
     load_dotenv()
+    print("ready to go ------------------------------")
 
-    api_key = os.getenv("OPENAI_API_KEY")  # Or simply your API key
-    llm = ModuleLLM(api_key, "openai/gpt-4o")
+    api_key = os.getenv("GEMINI_API_KEY")  # Or simply your API key
+    llm = ModuleLLM(api_key, "gemini/gemini-2.0-flash")
 
     response = llm.generate("Hello, how are you?")
     print(response.choices[0].message.content)
