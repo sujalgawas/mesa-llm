@@ -36,7 +36,7 @@ class ModuleLLM:
         provider = self.model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt:str, tool_schema:list[dict] | None=None)-> str:
         if self.system_prompt:
             messages = [
                 {"role": "system", "content": self.system_prompt},
@@ -44,24 +44,18 @@ class ModuleLLM:
             ]
         else:
             messages = [{"role": "user", "content": prompt}]
-        response = completion(model=self.model, messages=messages)
-        return response
-    
-    def generate_with_tools(self, prompt, tool_schema):
-        if self.system_prompt:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-        else:
-            messages = [{"role": "user", "content": prompt}]
-        response = completion(
+        if tool_schema:
+            response = completion(
             model=self.model,
             messages=messages,
             tools=tool_schema,
             tool_choice="auto",  
         )
+        else:
+            response = completion(model=self.model, messages=messages)
         return response
+
+
 
 
 # test the module

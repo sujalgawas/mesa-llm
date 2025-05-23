@@ -94,14 +94,13 @@ class Reasoning(ABC):
         memory: Memory,
         llm: ModuleLLM,
         tool_schema:list[dict] | None,
-        max_tokens:int,
         step:int,
         ttl: int=1
     ) -> Plan:
         pass
 
 class ReActReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, max_tokens, step):
+    def plan(self, prompt, obs, memory, llm, tool_schema, step):
         long_term_memory = memory.long_term_memory()
         short_term_memory = memory.short_term_memory()
         short_term_memory=_format_short_term_memory(short_term_memory)
@@ -143,8 +142,6 @@ class ReActReasoning(Reasoning):
 
         Even if multiple actions need to be taken, come up with the first action that needs to be taken at this moment.
         Refer the tools available to you while deciding the action.
-        Ensure the response takes up a maximum of {max_tokens} only.
-
         ---
 
         # Response:
@@ -167,7 +164,7 @@ class ReActReasoning(Reasoning):
         return react_plan
     
 class CoTReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, max_tokens, step):
+    def plan(self, prompt, obs, memory, llm, tool_schema, step):
         long_term_memory = memory.long_term_memory()
         short_term_memory = _format_short_term_memory(memory.short_term_memory())
         obs_str = _format_observation(obs)
@@ -209,7 +206,6 @@ class CoTReasoning(Reasoning):
 
         Keep the reasoning grounded in the current context and relevant history.
         Refer the tools available to you while deciding the action.
-        Ensure the entire response is under {max_tokens} tokens.
 
         ---
 
@@ -237,7 +233,7 @@ class CoTReasoning(Reasoning):
         return cot_plan
 
 class ReWOOReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, max_tokens, step, ttl):
+    def plan(self, prompt, obs, memory, llm, tool_schema, step, ttl):
         long_term_memory = memory.long_term_memory()
         short_term_memory = _format_short_term_memory(memory.short_term_memory())
         obs_str = _format_observation(obs)
@@ -286,7 +282,6 @@ class ReWOOReasoning(Reasoning):
         The plan should be comprehensive enough to execute for multiple simulation steps 
         without requiring new environmental observations.
         Refer to available tools when planning actions.
-        Keep the entire response under {max_tokens} tokens.
 
         ---
 
@@ -396,7 +391,7 @@ class ReWOOReasoning(Reasoning):
             observation=self.generate_observation()
             prompt="Look around you and see if there are any police officers, keep distance from them and spread your propoganda."
             reasoning_llm=ModuleLLM(api_key="---", model="---")
-            plan=ReActReasoning().plan(prompt, observation, self.memory, reasoning_llm, tool_schema, max_tokens=100)
+            plan=ReActReasoning().plan(prompt, observation, self.memory, reasoning_llm, tool_schema)
 '''
 
 
