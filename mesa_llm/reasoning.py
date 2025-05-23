@@ -150,12 +150,7 @@ class ReActReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        if tool_schema is None:
-            rsp=llm.generate(prompt=prompt)
-        else:
-            rsp=llm.generate_with_tools(
-                prompt=prompt, 
-                tool_schema=tool_schema)
+        rsp=llm.genereate(prompt=prompt, tool_schema=tool_schema)
         
         response_message = rsp.choices[0].message
         react_plan=Plan(step=step, llm_plan=response_message, ttl=1)
@@ -218,13 +213,7 @@ class CoTReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        if tool_schema is None:
-            rsp = llm.generate(prompt=prompt)
-        else:
-            rsp = llm.generate_with_tools(
-                prompt=prompt,
-                tool_schema=tool_schema
-            )
+        rsp=llm.genereate(prompt=prompt, tool_schema=tool_schema)
 
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
@@ -295,13 +284,8 @@ class ReWOOReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        if tool_schema is None:
-            rsp = llm.generate(prompt=prompt)
-        else:
-            rsp = llm.generate_with_tools(
-                prompt=prompt,
-                tool_schema=tool_schema
-            )
+        rsp=llm.genereate(prompt=prompt, tool_schema=tool_schema)
+
 
         response_message = rsp.choices[0].message
         
