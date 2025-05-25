@@ -1,8 +1,11 @@
+from mesa.agent import Agent
+from mesa.model import Model
+
 from mesa_llm.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
 
 
-class LLMAgent:
+class LLMAgent(Agent):
     """
     LLMAgent manages an LLM backend and optionally connects to a memory module.
 
@@ -20,23 +23,20 @@ class LLMAgent:
 
     def __init__(
         self,
+        model: Model,
         api_key: str,
-        model: str = "openai/gpt-4o",
+        llm_model: str = "openai/gpt-4o",
         system_prompt: str | None = None,
     ):
-        self.llm = ModuleLLM(api_key=api_key, model=model, system_prompt=system_prompt)
+        super().__init__(model=model)
+
+        self.llm = ModuleLLM(
+            api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
+        )
         self._memory = Memory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,
             api_key=api_key,
-            llm_model=model,
+            llm_model=llm_model,
         )
-
-    def set_model(self, api_key: str, model: str = "openai/gpt-4o") -> None:
-        """Set the model of the Agent."""
-        self.llm.set_model(api_key=api_key, model=model)
-
-    def set_system_prompt(self, system_prompt: str) -> None:
-        """Set the system prompt for the Agent."""
-        self.llm.set_system_prompt(system_prompt=system_prompt)

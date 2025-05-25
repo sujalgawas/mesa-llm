@@ -1,6 +1,6 @@
 import os
 
-from litellm import completion
+from litellm import completion, litellm
 
 
 class ModuleLLM:
@@ -25,18 +25,16 @@ class ModuleLLM:
         provider = self.model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
+        if not litellm.supports_function_calling(model=self.model):
+            print(
+                f"Warning: {self.model} does not support function calling. This model may not be able to use tools."
+            )
+
     def set_system_prompt(self, system_prompt: str):
         """Set or update the system prompt."""
         self.system_prompt = system_prompt
 
-    def set_model(self, api_key: str, model: str):
-        """Set or update the model and API key."""
-        self.api_key = api_key
-        self.model = model
-        provider = self.model.split("/")[0].upper()
-        os.environ[f"{provider}_API_KEY"] = self.api_key
-
-    def generate(self, prompt:str, tool_schema:list[dict] | None=None)-> str:
+    def generate(self, prompt: str, tool_schema: list[dict] | None = None) -> str:
         if self.system_prompt:
             messages = [
                 {"role": "system", "content": self.system_prompt},
@@ -46,16 +44,14 @@ class ModuleLLM:
             messages = [{"role": "user", "content": prompt}]
         if tool_schema:
             response = completion(
-            model=self.model,
-            messages=messages,
-            tools=tool_schema,
-            tool_choice="auto",  
-        )
+                model=self.model,
+                messages=messages,
+                tools=tool_schema,
+                tool_choice="auto",
+            )
         else:
             response = completion(model=self.model, messages=messages)
         return response
-
-
 
 
 # test the module
@@ -68,5 +64,5 @@ if __name__ == "__main__":
     api_key = os.getenv("GEMINI_API_KEY")  # Or simply your API key
     llm = ModuleLLM(api_key, "gemini/gemini-2.0-flash")
 
-    response = llm.generate("Hello, how are you?")
+    response = llm.generate("Say 'hi'.")
     print(response.choices[0].message.content)
