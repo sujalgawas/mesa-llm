@@ -35,7 +35,8 @@ class LLMAgent(Agent):
         self.llm = ModuleLLM(
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
-        self.memory = Memory(
+
+        self._memory = Memory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,

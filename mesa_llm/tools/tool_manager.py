@@ -3,17 +3,25 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-"""
-    The user can use insntaces of ToolManager to register functions as tools through the decorator.
-    The user can also use the ToolManager instance to get the schema of the tools, call a tool with validated arguments, and check if a tool is registered.
-    Moreover, the user can group like tools together by creating a new ToolManager instance and registering the tools to it.
-    So if agent A requires tools A1, A2, and A3, and agent B requires tools B1, B2, and B3, the user can create two ToolManager instances: tool_manager_A and tool_manager_B.
-"""
+from mesa_llm.tools.inbuilt_tools_mock import inbuilt_tools
 
 
 class ToolManager:
+    """
+    The user can use instances of ToolManager to register functions as tools through the decorator.
+    The user can also use the ToolManager instance to get the schema of the tools, call a tool with validated arguments, and check if a tool is registered.
+    Moreover, the user can group like tools together by creating a new ToolManager instance and registering the tools to it.
+    So if agent A requires tools A1, A2, and A3, and agent B requires tools B1, B2, and B3, the user can create two ToolManager instances: tool_manager_A and tool_manager_B.
+
+    Attributes:
+        tools: A dictionary of tools of the form {name: function}. E.g. {"get_current_weather": get_current_weather}.
+    """
+
     def __init__(self):
         self.tools: dict[str, Callable] = {}
+
+        for tool in inbuilt_tools:
+            self.register(tool)
 
     def register(self, fn: Callable):
         """Register a tool function by name"""
@@ -222,3 +230,8 @@ class ToolManager:
         except Exception as e:
             print(f"Unexpected error in call_tools: {e}")
             return []
+
+
+if __name__ == "__main__":
+    tool_manager = ToolManager()
+    print(json.dumps(tool_manager.get_schema(), indent=4))
