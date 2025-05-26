@@ -4,6 +4,7 @@ from mesa.model import Model
 from mesa_llm import Plan
 from mesa_llm.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
+from mesa_llm.reasoning import Reasoning
 from mesa_llm.tools.tool_manager import ToolManager
 
 
@@ -16,6 +17,7 @@ class LLMAgent(Agent):
         model (str): The model to use for the LLM in the format 'provider/model'. Defaults to 'openai/gpt-4o'.
         system_prompt (str | None): Optional system prompt to be used in LLM completions.
         memory (Memory | None): Optional memory instance to attach to this agent. Can only be set once.
+        reasoning (str): Optional reasoning method to be used in LLM completions.
 
     Attributes:
         llm (ModuleLLM): The internal LLM interface used by the agent.
@@ -27,6 +29,7 @@ class LLMAgent(Agent):
         self,
         model: Model,
         api_key: str,
+        reasoning: type[Reasoning],
         llm_model: str = "openai/gpt-4o",
         system_prompt: str | None = None,
     ):
@@ -36,7 +39,7 @@ class LLMAgent(Agent):
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
 
-        self._memory = Memory(
+        self.memory = Memory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,
@@ -45,8 +48,12 @@ class LLMAgent(Agent):
         )
 
         self.tool_manager = ToolManager(
-            api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
+            api_key=api_key,
+            llm_model=llm_model,
+            system_prompt=system_prompt,  # This will be changed
         )
+
+        self.reasoning = reasoning(agent=self)
 
     def apply_plan(self, plan: Plan):
         tool_call_resp = self.tool_manager.call_tools(plan.llm_plan)

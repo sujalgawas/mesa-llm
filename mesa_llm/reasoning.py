@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass
 
-from mesa_llm.memory import Memory, MemoryEntry
-from mesa_llm.module_llm import ModuleLLM
+from mesa_llm.llm_agent import LLMAgent
+from mesa_llm.memory import MemoryEntry
 
 
 @dataclass
@@ -92,28 +92,33 @@ def _format_short_term_memory(memory: deque[MemoryEntry]) -> str:
 
 
 class Reasoning(ABC):
+    def __init__(self, agent):
+        self.agent = agent
+
     @abstractmethod
     def plan(
         self,
         prompt: str,
         obs: Observation,
-        memory: Memory,
-        llm: ModuleLLM,
-        tool_schema: list[dict] | None,
-        step: int,
         ttl: int = 1,
     ) -> Plan:
         pass
 
 
 class ReActReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, step):
+    def __init__(self, agent: LLMAgent):
+        super().__init__(agent=agent)
+
+    def plan(self, prompt, obs):
+        step = obs.step + 1
+        llm = self.agent.llm
+        memory = self.agent.memory
         long_term_memory = memory.long_term_memory()
         short_term_memory = memory.short_term_memory()
         short_term_memory = _format_short_term_memory(short_term_memory)
         obs_str = _format_observation(
             obs
-        )  # I am going to pass the latest obs separately from memory so that the llm can pay more attention to it.
+        )  # passing the latest obs separately from memory so that the llm can pay more attention to it.
         short_term_memory = _format_short_term_memory(memory)
         memory.add_to_memory(type="Observation", content=obs_str, step=step)
 
@@ -158,7 +163,9 @@ class ReActReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(prompt=prompt, tool_schema=tool_schema)
+        rsp = llm.generate(
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+        )
 
         response_message = rsp.choices[0].message
         react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
@@ -168,7 +175,10 @@ class ReActReasoning(Reasoning):
 
 
 class CoTReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, step):
+    def plan(self, prompt, obs):
+        step = obs.step + 1
+        llm = self.agent.llm
+        memory = self.agent.memory
         long_term_memory = memory.long_term_memory()
         short_term_memory = _format_short_term_memory(memory.short_term_memory())
         obs_str = _format_observation(obs)
@@ -222,7 +232,9 @@ class CoTReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(prompt=prompt, tool_schema=tool_schema)
+        rsp = llm.generate(
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+        )
 
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
@@ -232,7 +244,10 @@ class CoTReasoning(Reasoning):
 
 
 class ReWOOReasoning(Reasoning):
-    def plan(self, prompt, obs, memory, llm, tool_schema, step, ttl):
+    def plan(self, prompt, obs, ttl):
+        step = obs.step + 1
+        llm = self.agent.llm
+        memory = self.agent.memory
         long_term_memory = memory.long_term_memory()
         short_term_memory = _format_short_term_memory(memory.short_term_memory())
         obs_str = _format_observation(obs)
@@ -294,7 +309,7 @@ class ReWOOReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(prompt=prompt, tool_schema=tool_schema)
+        rsp = llm.generate(prompt=prompt, tool_schema=self.tool_manager.get_schema())
 
         response_message = rsp.choices[0].message
 
@@ -377,14 +392,15 @@ class ReWOOReasoning(Reasoning):
         my_tools.register(throw_stone)
         my_tools.register(spread_propoganda)#part of conversation
         my_tools.register(shout_slogan)
-        tool_shema=my_tools.get_schema()
 
         #step function for a ReAct
         def step(self):
             observation=self.generate_observation()
             prompt="Look around you and see if there are any police officers, keep distance from them and spread your propaganda."
-            reasoning_llm=ModuleLLM(api_key="---", model="---")
-            plan=ReActReasoning().plan(prompt, observation, self.memory, reasoning_llm, tool_schema)
+            plan=self.reasoning.plan(
+                prompt=prompt,
+                obs=observation
+            )
             self.apply_plan(plan)
 """
 
