@@ -129,8 +129,7 @@ class ToolManager:
 
         try:
             # Extract response message and tool calls
-            response_message = llm_response.choices[0].message
-            tool_calls = response_message.tool_calls
+            tool_calls = llm_response.tool_calls
 
             # Check if tool_calls exists and is not None
             if not tool_calls:

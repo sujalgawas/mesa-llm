@@ -1,8 +1,10 @@
 from mesa.agent import Agent
 from mesa.model import Model
 
+from mesa_llm import Plan
 from mesa_llm.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
+from mesa_llm.tools.tool_manager import ToolManager
 
 
 class LLMAgent(Agent):
@@ -33,10 +35,21 @@ class LLMAgent(Agent):
         self.llm = ModuleLLM(
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
-        self._memory = Memory(
+        self.memory = Memory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,
             api_key=api_key,
             llm_model=llm_model,
         )
+
+        self.tool_manager = ToolManager(
+            api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
+        )
+
+    def apply_plan(self, plan: Plan):
+        tool_call_resp = self.tool_manager.call_tools(plan.llm_plan)
+        self.memory.add_to_memory(
+            type="Tool_Call_Responses", content=tool_call_resp, step=plan.step
+        )
+        return tool_call_resp

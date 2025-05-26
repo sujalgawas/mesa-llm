@@ -385,6 +385,7 @@ class ReWOOReasoning(Reasoning):
             prompt="Look around you and see if there are any police officers, keep distance from them and spread your propaganda."
             reasoning_llm=ModuleLLM(api_key="---", model="---")
             plan=ReActReasoning().plan(prompt, observation, self.memory, reasoning_llm, tool_schema)
+            self.apply_plan(plan)
 """
 
 
