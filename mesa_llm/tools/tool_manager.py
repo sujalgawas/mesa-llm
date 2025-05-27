@@ -123,16 +123,7 @@ class ToolManager:
             llm_response: The response from the LLM.
 
         Returns:
-            A list of tool results of the form:
-            [
-                {
-                    "tool_call_id": str,
-                    "role": str,
-                    "name": str,
-                    "response": str
-                },
-                ...
-            ]
+            A list of tool results
         """
 
         try:

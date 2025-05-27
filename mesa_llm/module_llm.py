@@ -10,24 +10,24 @@ class ModuleLLM:
     Note : Currently supports OpenAI, Anthropic, xAI, Huggingface, Ollama, OpenRouter, NovitaAI
     """
 
-    def __init__(self, api_key: str, model: str, system_prompt: str | None = None):
+    def __init__(self, api_key: str, llm_model: str, system_prompt: str | None = None):
         """
         Initialize the LLM module
 
         Args:
             api_key: The API key for the LLM provider
-            model: The model to use for the LLM in the format of {provider}/{model}
+            llm_model: The model to use for the LLM in the format of {provider}/{LLM}
             system_prompt: The system prompt to use for the LLM
         """
         self.api_key = api_key
-        self.model = model
+        self.llm_model = llm_model
         self.system_prompt = system_prompt
-        provider = self.model.split("/")[0].upper()
+        provider = self.llm_model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
-        if not litellm.supports_function_calling(model=self.model):
+        if not litellm.supports_function_calling(model=self.llm_model):
             print(
-                f"Warning: {self.model} does not support function calling. This model may not be able to use tools."
+                f"Warning: {self.llm_model} does not support function calling. This model may not be able to use tools."
             )
 
     def set_system_prompt(self, system_prompt: str):
@@ -44,13 +44,13 @@ class ModuleLLM:
             messages = [{"role": "user", "content": prompt}]
         if tool_schema:
             response = completion(
-                model=self.model,
+                model=self.llm_model,
                 messages=messages,
                 tools=tool_schema,
                 tool_choice="auto",
             )
         else:
-            response = completion(model=self.model, messages=messages)
+            response = completion(model=self.llm_model, messages=messages)
         return response
 
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     print("ready to go ------------------------------")
 
     api_key = os.getenv("GEMINI_API_KEY")  # Or simply your API key
-    llm = ModuleLLM(api_key, "gemini/gemini-2.0-flash")
+    llm = ModuleLLM(api_key=api_key, llm_model="gemini/gemini-2.0-flash")
 
     response = llm.generate("Say 'hi'.")
     print(response.choices[0].message.content)

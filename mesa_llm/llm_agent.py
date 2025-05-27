@@ -47,17 +47,16 @@ class LLMAgent(Agent):
             llm_model=llm_model,
         )
 
-        self.tool_manager = ToolManager(
-            api_key=api_key,
-            llm_model=llm_model,
-            system_prompt=system_prompt,  # This will be changed
-        )
+        self.tool_manager = ToolManager()
 
         self.reasoning = reasoning(agent=self)
 
-    def apply_plan(self, plan: Plan):
+    def apply_plan(self, plan: Plan) -> list[dict]:
+        """
+        Execute the plan in the simulation.
+        """
         tool_call_resp = self.tool_manager.call_tools(plan.llm_plan)
         self.memory.add_to_memory(
-            type="Tool_Call_Responses", content=tool_call_resp, step=plan.step
+            type="Tool_Call_Responses", content=str(tool_call_resp), step=plan.step
         )
         return tool_call_resp

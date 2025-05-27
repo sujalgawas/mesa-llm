@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from collections import deque
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from mesa_llm.llm_agent import LLMAgent
-from mesa_llm.memory import MemoryEntry
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
 
 
 @dataclass
@@ -32,6 +32,22 @@ class Observation:
     self_state: dict
     local_state: dict
 
+    def __str__(self) -> str:
+        lines = [
+            f"Step: {self.step}",
+            "\n[Self State]",
+        ]
+        for k, v in self.self_state.items():
+            lines.append(f"- {k}: {v}")
+
+        lines.append("\n[Local State of Nearby Agents]")
+        for agent_id, agent_info in self.local_state.items():
+            lines.append(f"- {agent_id}:")
+            for k, v in agent_info.items():
+                lines.append(f"    - {k}: {v}")
+
+        return "\n".join(lines)
+
 
 @dataclass
 class Plan:
@@ -40,6 +56,12 @@ class Plan:
     step: int  # step when the plan was generated
     llm_plan: str  # thoughts and action in sequence
     ttl: int = 1  # steps until planning again (ReWOO sets >1)
+
+    def __str__(self) -> str:
+        return (
+            f"Plan generated at step {self.step} (valid for {self.ttl} step(s)):\n"
+            f"[Executed Plan]\n{self.llm_plan.strip()}\n"
+        )
 
 
 # subject to change
@@ -51,48 +73,13 @@ class Discussion:
     other_agent_id: int
     discussion: str  # content of the discussion
 
-
-def _format_observation(observation: Observation) -> str:
-    lines = [
-        f"Step: {observation.step}",
-        "\n[Self State]",
-    ]
-    for k, v in observation.self_state.items():
-        lines.append(f"- {k}: {v}")
-
-    lines.append("\n[Local State of Nearby Agents]")
-    for agent_id, agent_info in observation.local_state.items():
-        lines.append(f"- {agent_id}:")
-        for k, v in agent_info.items():
-            lines.append(f"    - {k}: {v}")
-
-    return "\n".join(lines)
-
-
-def _format_plan(plan: Plan) -> str:
-    return (
-        f"Plan generated at step {plan.step} (valid for {plan.ttl} step(s)):\n"
-        f"[Executed Plan]\n{plan.llm_plan.strip()}\n"
-    )
-
-
-def _format_discussion(discussion: Discussion) -> str:
-    """Format the discussion once the structure of the datacalss is finalized."""
-
-
-def _format_short_term_memory(memory: deque[MemoryEntry]) -> str:
-    if not memory:
-        return "No recent memory."
-
-    lines = ["[Short-Term Memory]"]
-    for entry in memory:
-        lines.append(f"\n[{entry.type.title()} @ Step {entry.step}]")
-        lines.append(entry.content.strip())
-    return "\n".join(lines)
+    def __str__(self) -> str:
+        """Format the discussion once the structure of the dataclass is finalized."""
+        return f"Discussion between agent {self.other_agent_id} at step {self.step}:\n{self.discussion}"
 
 
 class Reasoning(ABC):
-    def __init__(self, agent):
+    def __init__(self, agent: "LLMAgent"):
         self.agent = agent
 
     @abstractmethod
@@ -106,20 +93,21 @@ class Reasoning(ABC):
 
 
 class ReActReasoning(Reasoning):
-    def __init__(self, agent: LLMAgent):
+    def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
 
-    def plan(self, prompt, obs):
+    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+        """
+        Plan the next (ReAct) action based on the current observation and the agent's memory.
+        """
         step = obs.step + 1
         llm = self.agent.llm
         memory = self.agent.memory
-        long_term_memory = memory.long_term_memory()
-        short_term_memory = memory.short_term_memory()
-        short_term_memory = _format_short_term_memory(short_term_memory)
-        obs_str = _format_observation(
+        long_term_memory = memory.format_long_term()
+        short_term_memory = memory.format_short_term()
+        obs_str = str(
             obs
         )  # passing the latest obs separately from memory so that the llm can pay more attention to it.
-        short_term_memory = _format_short_term_memory(memory)
         memory.add_to_memory(type="Observation", content=obs_str, step=step)
 
         system_prompt = f"""
@@ -169,19 +157,29 @@ class ReActReasoning(Reasoning):
 
         response_message = rsp.choices[0].message
         react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
-        memory.add_to_memory(type="Plan", content=_format_plan(react_plan), step=step)
+        memory.add_to_memory(type="Plan", content=str(react_plan), step=step)
 
         return react_plan
 
 
 class CoTReasoning(Reasoning):
-    def plan(self, prompt, obs):
+    """
+    Use a chain of thought approach to decide the next action.
+    """
+
+    def __init__(self, agent: "LLMAgent"):
+        super().__init__(agent=agent)
+
+    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+        """
+        Plan the next (CoT) action based on the current observation and the agent's memory.
+        """
         step = obs.step + 1
         llm = self.agent.llm
         memory = self.agent.memory
-        long_term_memory = memory.long_term_memory()
-        short_term_memory = _format_short_term_memory(memory.short_term_memory())
-        obs_str = _format_observation(obs)
+        long_term_memory = memory.format_long_term()
+        short_term_memory = memory.format_short_term()
+        obs_str = str(obs)
 
         # Add current observation to memory (for record)
         memory.add_to_memory(type="Observation", content=obs_str, step=step)
@@ -238,19 +236,29 @@ class CoTReasoning(Reasoning):
 
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
-        memory.add_to_memory(type="Plan", content=_format_plan(cot_plan), step=step)
+        memory.add_to_memory(type="Plan", content=str(cot_plan), step=step)
 
         return cot_plan
 
 
 class ReWOOReasoning(Reasoning):
-    def plan(self, prompt, obs, ttl):
+    """
+    ReWOO is a reasoning approach that creates a plan that can be executed without needing new observations.
+    """
+
+    def __init__(self, agent: "LLMAgent"):
+        super().__init__(agent=agent)
+
+    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+        """
+        Plan the next (ReWOO) action based on the current observation and the agent's memory.
+        """
         step = obs.step + 1
         llm = self.agent.llm
         memory = self.agent.memory
-        long_term_memory = memory.long_term_memory()
-        short_term_memory = _format_short_term_memory(memory.short_term_memory())
-        obs_str = _format_observation(obs)
+        long_term_memory = memory.format_long_term()
+        short_term_memory = memory.format_short_term()
+        obs_str = str(obs)
 
         # Add current observation to memory
         memory.add_to_memory(type="Observation", content=obs_str, step=step)
@@ -309,12 +317,14 @@ class ReWOOReasoning(Reasoning):
         """
 
         llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(prompt=prompt, tool_schema=self.tool_manager.get_schema())
+        rsp = llm.generate(
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+        )
 
         response_message = rsp.choices[0].message
 
         rewoo_plan = Plan(step=step, llm_plan=response_message, ttl=ttl)
-
+        memory.add_to_memory(type="Plan", content=str(rewoo_plan), step=step)
         return rewoo_plan
 
 

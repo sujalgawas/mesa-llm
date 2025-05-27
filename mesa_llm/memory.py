@@ -49,7 +49,7 @@ class Memory:
             agent : the agent that the memory belongs to
         """
         self.agent = agent
-        self.llm = ModuleLLM(api_key=api_key, model=llm_model)
+        self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
         self.capacity = short_term_capacity
         self.consolidation_capacity = consolidation_capacity
         self.short_term_memory = deque()
@@ -82,17 +82,21 @@ class Memory:
             ]
             self.update_long_term_memory(memories_to_consolidate)
 
-    def get_short_term_memory(self) -> list[MemoryEntry]:
-        """
-        Get the short term memory
-        """
-        return list(self.short_term_memory)
+    def format_short_term(self) -> str:
+        if not self.short_term_memory:
+            return "No recent memory."
 
-    def get_long_term_memory(self) -> str:
+        lines = ["[Short-Term Memory]"]
+        for entry in self.short_term_memory:
+            lines.append(f"\n[{entry.type.title()} @ Step {entry.step}]")
+            lines.append(entry.content.strip())
+        return str("\n".join(lines))
+
+    def format_long_term(self) -> str:
         """
         Get the long term memory
         """
-        return self.long_term_memory
+        return str(self.long_term_memory)
 
     def update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
         """
@@ -107,7 +111,7 @@ class Memory:
                 {self.long_term_memory}
             """
 
-        self.long_term_memory = self.llm.generate(prompt, self.system_prompt)
+        self.long_term_memory = self.llm.generate(prompt)
 
     def convert_entry_to_dict(self, entry: MemoryEntry) -> dict:
         """
