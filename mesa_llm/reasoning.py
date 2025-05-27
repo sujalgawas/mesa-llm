@@ -58,9 +58,10 @@ class Plan:
     ttl: int = 1  # steps until planning again (ReWOO sets >1)
 
     def __str__(self) -> str:
+        llm_plan_str = str(self.llm_plan).strip()
         return (
             f"Plan generated at step {self.step} (valid for {self.ttl} step(s)):\n"
-            f"[Executed Plan]\n{self.llm_plan.strip()}\n"
+            f"[Plan]\n{llm_plan_str}\n"
         )
 
 
@@ -314,6 +315,7 @@ class ReWOOReasoning(Reasoning):
         Step 3:
         Step 4:
         Step 5:
+        Contingency:
         """
 
         llm.set_system_prompt(system_prompt)
