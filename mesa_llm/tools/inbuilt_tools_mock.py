@@ -1,15 +1,38 @@
 import inspect
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
 
 
-def get_current_weather(location: str, unit: str = "celsius") -> str:
-    """Get the current weather in a given location"""
-    return f"The current weather in {location} is {unit}."
+def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float]) -> str:
+    """Move to a given location in a discrete grid
+    Args:
+        agent: The agent to move
+        target_coordinates: The target coordinates to move to
+    Returns:
+        A string indicating the agent's new position
+    """
+
+    agent.position = target_coordinates
+
+    return f"This agent moved to {target_coordinates}."
 
 
-def throw_stone(target: str, distance: float) -> str:
-    """Make an agent throw a stone at a target"""
-    return f"The agent threw a stone at {target} at a distance of {distance} meters."
+def speak_to(
+    speaker_agent: "LLMAgent", listener_agent: "LLMAgent", message: str
+) -> str:
+    """Speak to a given agent by updating the discussion object shared by both agents
+    Args:
+        speaker_agent: The agent speaking
+        listener_agent: The agent listening
+        message: The message to speak
+    Returns:
+        A string indicating the message spoken
+    """
+
+    return f"{speaker_agent.id} → {listener_agent.id} : {message}"
 
 
 # Get all the functions in the module that are not private into a list

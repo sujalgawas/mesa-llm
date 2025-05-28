@@ -74,7 +74,9 @@ class LLMAgent(Agent):
         """
         Execute the plan in the simulation.
         """
-        tool_call_resp = self.tool_manager.call_tools(plan.llm_plan)
+        tool_call_resp = self.tool_manager.call_tools(
+            agent=self, llm_response=plan.llm_plan
+        )
         self.memory.add_to_memory(
             type="Tool_Call_Responses", content=str(tool_call_resp), step=plan.step
         )
