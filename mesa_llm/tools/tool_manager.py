@@ -32,7 +32,17 @@ class ToolManager:
         name = fn.__name__
         self.tools[name] = fn  # storing the name & function pair as a dictionary
 
-    def get_tool_schema(self, fn, schema_name):
+    def get_tool_schema(self, fn: Callable, schema_name: str) -> dict:
+        """
+        Get the schema of a tool function in the liteLLM format.
+
+        Args:
+            fn: The tool function to get the schema of.
+            schema_name: The name of the tool function.
+
+        Returns:
+            A dictionary containing the schema of the tool function.
+        """
         doc = inspect.getdoc(fn) or ""  # get the docstring of the function
         lines = doc.splitlines()
         args_start = next(
@@ -71,15 +81,15 @@ class ToolManager:
         props = {
             name: {
                 "type": "array"
-                if str(prm.annotation).startswith(("tuple", "list"))
+                if str(param.annotation).startswith(("tuple", "list"))
                 else "Any"
-                if prm.annotation is inspect._empty
-                else prm.annotation
-                if isinstance(prm.annotation, str)
-                else getattr(prm.annotation, "__name__", str(prm.annotation)),
+                if param.annotation is inspect._empty
+                else param.annotation
+                if isinstance(param.annotation, str)
+                else getattr(param.annotation, "__name__", str(param.annotation)),
                 "description": arg_docs.get(name, ""),
             }
-            for name, prm in sig.parameters.items()
+            for name, param in sig.parameters.items()
         }
 
         # Warn for missing descriptions

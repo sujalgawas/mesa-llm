@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from mesa.agent import Agent
 from mesa.discrete_space import (
     OrthogonalMooreGrid,
@@ -13,7 +16,12 @@ from mesa.space import (
 from mesa_llm import Plan
 from mesa_llm.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
-from mesa_llm.reasoning import Observation, Reasoning
+from mesa_llm.reasoning import (
+    Observation,
+    ReActReasoning,
+    Reasoning,
+    ReWOOReasoning,
+)
 from mesa_llm.tools.tool_manager import ToolManager
 
 
@@ -46,6 +54,8 @@ class LLMAgent(Agent):
     ):
         super().__init__(model=model)
 
+        self.model = model
+
         self.llm = ModuleLLM(
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
@@ -69,6 +79,9 @@ class LLMAgent(Agent):
             internal_state = []
 
         self.internal_state = internal_state
+
+    def __str__(self):
+        return f"LLMAgent {self.unique_id}"
 
     def apply_plan(self, plan: Plan) -> list[dict]:
         """
@@ -125,3 +138,48 @@ class LLMAgent(Agent):
         gen_obs.local_state = local_state
 
         return gen_obs
+
+    def send_message(self, message: str, recipients: list[Agent]) -> str:
+        """
+        Send a message to the recipients.
+        """
+        for recipient in [*recipients, self]:
+            recipient.memory.add_to_memory(
+                type="Message",
+                content=message,
+                step=self.model.steps,
+                metadata={
+                    "sender": self,
+                    "recipients": recipients,
+                },
+            )
+        return f"{self} → {recipients} : {message}"
+
+
+if __name__ == "__main__":
+    model = Model()
+    load_dotenv()
+
+    llm_agent_colin = LLMAgent(
+        model=model,
+        api_key=os.getenv("GEMINI_API_KEY"),
+        reasoning=ReActReasoning,
+        llm_model="gemini/gemini-2.0-flash",
+        system_prompt="You are an agent that is a part of a simulation. You are able to use tools to interact with the environment.",
+    )
+
+    llm_agent_sanika = LLMAgent(
+        model=model,
+        api_key=os.getenv("GEMINI_API_KEY"),
+        reasoning=ReWOOReasoning,
+        llm_model="gemini/gemini-2.0-flash",
+        system_prompt="You are an agent that is a part of a simulation. You are able to use tools to interact with the environment.",
+    )
+
+    print(
+        llm_agent_colin.send_message(
+            "Isn't this working like a charm ?", [llm_agent_sanika]
+        )
+    )
+    print(llm_agent_sanika.memory.format_short_term(), "\n\n")
+    print(llm_agent_colin.memory.format_short_term(), "\n\n")

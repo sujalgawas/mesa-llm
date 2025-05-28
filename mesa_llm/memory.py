@@ -85,11 +85,13 @@ class Memory:
             ]
             self.update_long_term_memory(memories_to_consolidate)
 
+        print(f"Added {new_entry} to memory")
+
     def format_short_term(self) -> str:
         if not self.short_term_memory:
             return "No recent memory."
 
-        lines = ["[Short-Term Memory]"]
+        lines = [f"[{self.agent} Short-Term Memory]"]
         for entry in self.short_term_memory:
             lines.append(f"\n[{entry.type.title()} @ Step {entry.step}]")
             lines.append(entry.content.strip())
