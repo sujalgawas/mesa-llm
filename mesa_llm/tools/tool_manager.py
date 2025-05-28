@@ -32,59 +32,80 @@ class ToolManager:
         name = fn.__name__
         self.tools[name] = fn  # storing the name & function pair as a dictionary
 
-    def get_schema(self) -> list[dict]:
-        """Return schema in the liteLLM format"""
+    def get_tool_schema(self, fn, schema_name):
+        doc = inspect.getdoc(fn) or ""  # get the docstring of the function
+        lines = doc.splitlines()
+        args_start = next(
+            (i for i, line in enumerate(lines) if line.strip().lower() == "args:"), None
+        )  # find the line that contains "Args:"
+        desc = (
+            " ".join(lines[:args_start]).strip()
+            if args_start is not None
+            else doc.strip()
+        )  # get the description of the function
 
-        def _extract_schema(fn, schema_name):
-            doc = inspect.getdoc(fn) or ""
-            head, _, tail = doc.partition("Args:")
-            desc = " ".join(head.split()) or warnings.warn(
-                "No description", stacklevel=2
-            )
-            arg_lines = [line.strip() for line in tail.splitlines()]
-
-            arg_docs = {}
-            for line in arg_lines:
-                if not line or line.lower().startswith("return"):
+        # Parse Args
+        arg_docs = {}
+        if args_start is not None:
+            current = None
+            for line in lines[
+                args_start + 1 :
+            ]:  # iterate over the lines after the args section (stop at "Returns:")
+                stripped_line = line.strip()
+                if not stripped_line or stripped_line.lower().startswith("returns"):
                     break
-                if ":" in line:
-                    k, v = line.split(":", 1)
-                    arg_docs[k.strip()] = v.strip()
+                if ":" in stripped_line:
+                    if current:
+                        arg_docs[current[0]] = " ".join(current[1]).strip()
+                    current = [
+                        stripped_line.split(":", 1)[0].strip(),
+                        [stripped_line.split(":", 1)[1].strip()],
+                    ]  # split the line into a key and a value
+                elif current:
+                    current[1].append(stripped_line)
+            if current:
+                arg_docs[current[0]] = " ".join(current[1]).strip()
 
-            sig = inspect.signature(fn)
-            props, required = {}, []
-
-            for name, prm in sig.parameters.items():
-                if name not in arg_docs:
-                    warnings.warn(f'Missing description for "{name}"', stacklevel=2)
-                ann = prm.annotation
-                typ = (
-                    "Any"
-                    if ann is inspect._empty
-                    else ann
-                    if isinstance(ann, str)
-                    else getattr(ann, "__name__", str(ann))
-                )
-                js_type = "array" if str(typ).startswith(("tuple", "list")) else typ
-                props[name] = {"type": js_type, "description": arg_docs.get(name, "")}
-                required.append(name)
-
-            return {
-                "type": "function",
-                "function": {
-                    "name": schema_name,
-                    "description": desc,
-                    "parameters": {
-                        "type": "object",
-                        "properties": props,
-                        "required": required,
-                    },
-                },
+        # Build schema
+        sig = inspect.signature(fn)
+        props = {
+            name: {
+                "type": "array"
+                if str(prm.annotation).startswith(("tuple", "list"))
+                else "Any"
+                if prm.annotation is inspect._empty
+                else prm.annotation
+                if isinstance(prm.annotation, str)
+                else getattr(prm.annotation, "__name__", str(prm.annotation)),
+                "description": arg_docs.get(name, ""),
             }
+            for name, prm in sig.parameters.items()
+        }
+
+        # Warn for missing descriptions
+        for name in sig.parameters:
+            if name not in arg_docs:
+                warnings.warn(f'Missing description for "{name}"', stacklevel=2)
+
+        return {
+            "type": "function",
+            "function": {
+                "name": schema_name,
+                "description": desc,
+                "parameters": {
+                    "type": "object",
+                    "properties": props,
+                    "required": list(sig.parameters),
+                },
+            },
+        }
+
+    def get_all_tools_schema(self) -> list[dict]:
+        """Return schema in the liteLLM format"""
 
         schema = []
         for name, fn in self.tools.items():
-            schema.append(_extract_schema(fn, name))
+            schema.append(self.get_tool_schema(fn, name))
 
         return schema
 
@@ -210,4 +231,4 @@ class ToolManager:
 
 if __name__ == "__main__":
     tool_manager = ToolManager()
-    print(json.dumps(tool_manager.get_schema(), indent=4))
+    print(json.dumps(tool_manager.get_all_tools_schema(), indent=4))
