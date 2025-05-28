@@ -1,9 +1,13 @@
 import inspect
 import json
+import warnings
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from mesa_llm.tools.inbuilt_tools_mock import inbuilt_tools
+
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
 
 
 class ToolManager:
@@ -30,80 +34,59 @@ class ToolManager:
 
     def get_schema(self) -> list[dict]:
         """Return schema in the liteLLM format"""
-        # we need to convert the function signature from python to a JSON schema
-        py_to_json_type = {
-            str: "string",
-            int: "integer",
-            float: "number",
-            bool: "boolean",
-            list: "array",
-            dict: "object",
-        }
+
+        def _extract_schema(fn, schema_name):
+            doc = inspect.getdoc(fn) or ""
+            head, _, tail = doc.partition("Args:")
+            desc = " ".join(head.split()) or warnings.warn(
+                "No description", stacklevel=2
+            )
+            arg_lines = [line.strip() for line in tail.splitlines()]
+
+            arg_docs = {}
+            for line in arg_lines:
+                if not line or line.lower().startswith("return"):
+                    break
+                if ":" in line:
+                    k, v = line.split(":", 1)
+                    arg_docs[k.strip()] = v.strip()
+
+            sig = inspect.signature(fn)
+            props, required = {}, []
+
+            for name, prm in sig.parameters.items():
+                if name not in arg_docs:
+                    warnings.warn(f'Missing description for "{name}"', stacklevel=2)
+                ann = prm.annotation
+                typ = (
+                    "Any"
+                    if ann is inspect._empty
+                    else ann
+                    if isinstance(ann, str)
+                    else getattr(ann, "__name__", str(ann))
+                )
+                js_type = "array" if str(typ).startswith(("tuple", "list")) else typ
+                props[name] = {"type": js_type, "description": arg_docs.get(name, "")}
+                required.append(name)
+
+            return {
+                "type": "function",
+                "function": {
+                    "name": schema_name,
+                    "description": desc,
+                    "parameters": {
+                        "type": "object",
+                        "properties": props,
+                        "required": required,
+                    },
+                },
+            }
 
         schema = []
         for name, fn in self.tools.items():
-            sig = inspect.signature(fn)
-            properties = {}
-            required = []
+            schema.append(_extract_schema(fn, name))
 
-            for param in sig.parameters.values():
-                if param.kind in (
-                    inspect.Parameter.VAR_POSITIONAL,
-                    inspect.Parameter.VAR_KEYWORD,
-                ):
-                    # skip *args and **kwargs
-                    continue
-                param_schema = {"description": f"{param.name} parameter"}
-
-                # If type annotation is available
-                if param.annotation != inspect.Parameter.empty:
-                    annotation = param.annotation
-
-                    json_type = py_to_json_type.get(annotation)
-
-                    if json_type:
-                        param_schema["type"] = json_type
-                    else:
-                        # fallback: allow any type
-                        param_schema["type"] = [
-                            "string",
-                            "number",
-                            "boolean",
-                            "object",
-                            "array",
-                            "null",
-                        ]
-                else:
-                    # No annotation so fallback
-                    param_schema["type"] = [
-                        "string",
-                        "number",
-                        "boolean",
-                        "object",
-                        "array",
-                        "null",
-                    ]
-
-                properties[param.name] = param_schema
-
-                if param.default == inspect.Parameter.empty:
-                    required.append(param.name)
-
-            schema.append(
-                {
-                    "type": "function",
-                    "function": {
-                        "name": name,
-                        "description": fn.__doc__ or "",
-                        "parameters": {
-                            "type": "object",
-                            "properties": properties,
-                            "required": required,
-                        },
-                    },
-                }
-            )
-        return schema  # in case the user wants to change the something like say the parameter description, they will have to get the schema and edit it manually
+        return schema
 
     def call(self, name: str, arguments: dict) -> str:
         """Call a registered tool with validated args"""
@@ -114,7 +97,7 @@ class ToolManager:
     def has_tool(self, name: str) -> bool:
         return name in self.tools
 
-    def call_tools(self, llm_response: Any) -> list[dict]:
+    def call_tools(self, agent: "LLMAgent", llm_response: Any) -> list[dict]:
         """
         Calls the tools, recommended by the LLM. If the tool has an output it returns the name of the tool and the output else, it returns the name
         and output as successfully executed.
@@ -168,7 +151,9 @@ class ToolManager:
 
                     # Call the function with unpacked arguments
                     try:
-                        function_response = function_to_call(**function_args)
+                        function_response = function_to_call(
+                            agent=agent, **function_args
+                        )
                     except TypeError as e:
                         # Handle case where function arguments don't match function signature
                         print(f"Warning: Function call failed with TypeError: {e}")
