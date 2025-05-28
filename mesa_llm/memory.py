@@ -16,6 +16,9 @@ class MemoryEntry:
     step: int
     metadata: dict
 
+    def __str__(self) -> str:
+        return f"[{self.type.title()} @ Step {self.step}] : {self.content}"
+
 
 class Memory:
     """
