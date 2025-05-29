@@ -11,6 +11,7 @@ from mesa.space import (
     ContinuousSpace,
     MultiGrid,
     SingleGrid,
+    Space,
 )
 
 from mesa_llm import Plan
@@ -45,6 +46,7 @@ class LLMAgent(Agent):
     def __init__(
         self,
         model: Model,
+        space: Space,
         api_key: str,
         reasoning: type[Reasoning],
         llm_model: str = "openai/gpt-4o",
@@ -52,7 +54,7 @@ class LLMAgent(Agent):
         vision: float | None = None,
         internal_state: list[str] | str | None = None,
     ):
-        super().__init__(model=model)
+        super().__init__(model=model, space=space)
 
         self.model = model
 
