@@ -4,7 +4,7 @@ import warnings
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from mesa_llm.tools.inbuilt_tools_mock import inbuilt_tools
+from mesa_llm.tools.inbuilt_tools import inbuilt_tools
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
