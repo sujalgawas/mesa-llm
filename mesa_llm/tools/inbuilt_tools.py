@@ -29,6 +29,8 @@ def speak_to(
         speaker_agent: The agent sending the message
         listener_agents: The agents receiving the message
         message: The message to send
+    Returns:
+        A string indicating the message sent, the sender and the recipients
     """
     for recipient in [*listener_agents, speaker_agent]:
         recipient.memory.add_to_memory(
