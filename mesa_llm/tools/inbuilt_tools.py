@@ -21,7 +21,7 @@ def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float])
 
 
 def speak_to(
-    speaker_agent: LLMAgent, listener_agents: list[LLMAgent], message: str
+    speaker_agent: "LLMAgent", listener_agents: list["LLMAgent"], message: str
 ) -> str:
     """
     Send a message to the recipients and commits it to their memory.
