@@ -1,8 +1,7 @@
 import math
-import random
 
+from mesa.discrete_space import OrthogonalVonNeumannGrid
 from mesa.model import Model
-from mesa.space import OrthogonalVonNeumannGrid
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from mesa_llm.reasoning import Reasoning
@@ -29,7 +28,9 @@ class NegotiationModel(Model):
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
+        seed=None,
     ):
+        super().__init__(seed=seed)
         self.width = width
         self.height = height
 
@@ -41,43 +42,38 @@ class NegotiationModel(Model):
         )
 
         # ---------------------Create the buyer agents---------------------
-        self.model.grid.place_agent(
-            self, (random.randint(0, width), random.randint(0, height))
-        )
-        self.buyer_placement_cell = self.pos
+        # buyer_placement_cell=[(random.randint(0, width-1), random.randint(0, height-1)) for _ in range(initial_buyers)]
         buyer_system_prompt = "You are a buyer in a negotiation game."
         buyer_internal_state = ""
 
         BuyerAgent.create_agents(
             self,
-            initial_buyers,
+            n=initial_buyers,
+            cell=self.random.choices(self.grid.all_cells.cells, k=initial_buyers),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=buyer_system_prompt,
             vision=vision,
             internal_state=buyer_internal_state,
-            cell=self.buyer_placement_cell,
         )
 
         # ---------------------Create the seller agents---------------------
-        self.model.grid.place_agent(
-            self, (random.randint(0, width), random.randint(0, height))
-        )
-        self.seller_placement_cell = self.pos
+        # seller_placement_cell = [(random.randint(0, width-1), random.randint(0, height-1)) for _ in range(initial_sellers)]
+        buyer_system_prompt = "You are a buyer in a negotiation game."
         seller_system_prompt = "You are a seller in a negotiation game."
         seller_internal_state = ""
 
         SellerAgent.create_agents(
             self,
-            initial_sellers,
+            n=initial_sellers,
+            cell=self.random.choices(self.grid.all_cells.cells, k=initial_sellers),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=seller_system_prompt,
             vision=vision,
             internal_state=seller_internal_state,
-            cell=self.seller_placement_cell,
         )
 
     def step(self):

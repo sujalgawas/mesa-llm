@@ -1,11 +1,13 @@
+from mesa.discrete_space import CellAgent
+
 from mesa_llm.llm_agent import LLMAgent
 
 
-class SellerAgent(LLMAgent):
+class SellerAgent(LLMAgent, CellAgent):
     def __init__(
         self,
-        space,
         model,
+        cell,
         api_key,
         reasoning,
         llm_model,
@@ -15,7 +17,6 @@ class SellerAgent(LLMAgent):
     ):
         super().__init__(
             model=model,
-            space=space,
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
@@ -23,25 +24,17 @@ class SellerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
+        self.cell = cell
 
     def step(self):
-        neighbors = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        # Optionally, filter only empty cells
-        empty_neighbors = [
-            pos for pos in neighbors if self.model.grid.is_cell_empty(pos)
-        ]
-        if empty_neighbors:
-            new_position = self.random.choice(empty_neighbors)
-            self.model.grid.move_agent(self, new_position)
+        self.cell = self.cell.neighborhood.select_random_cell()
 
 
-class BuyerAgent(LLMAgent):
+class BuyerAgent(LLMAgent, CellAgent):
     def __init__(
         self,
-        space,
         model,
+        cell,
         api_key,
         reasoning,
         llm_model,
@@ -51,7 +44,6 @@ class BuyerAgent(LLMAgent):
     ):
         super().__init__(
             model=model,
-            space=space,
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
@@ -59,15 +51,7 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
+        self.cell = cell
 
     def step(self):
-        neighbors = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        # Optionally, filter only empty cells
-        empty_neighbors = [
-            pos for pos in neighbors if self.model.grid.is_cell_empty(pos)
-        ]
-        if empty_neighbors:
-            new_position = self.random.choice(empty_neighbors)
-            self.model.grid.move_agent(self, new_position)
+        self.cell = self.cell.neighborhood.select_random_cell()
