@@ -21,7 +21,6 @@ class NegotiationModel(Model):
     def __init__(
         self,
         initial_buyers: int,
-        initial_sellers: int,
         width: int,
         height: int,
         api_key: str,
@@ -42,7 +41,6 @@ class NegotiationModel(Model):
         )
 
         # ---------------------Create the buyer agents---------------------
-        # buyer_placement_cell=[(random.randint(0, width-1), random.randint(0, height-1)) for _ in range(initial_buyers)]
         buyer_system_prompt = "You are a buyer in a negotiation game."
         buyer_internal_state = ""
 
@@ -59,21 +57,26 @@ class NegotiationModel(Model):
         )
 
         # ---------------------Create the seller agents---------------------
-        # seller_placement_cell = [(random.randint(0, width-1), random.randint(0, height-1)) for _ in range(initial_sellers)]
-        buyer_system_prompt = "You are a buyer in a negotiation game."
-        seller_system_prompt = "You are a seller in a negotiation game."
-        seller_internal_state = ""
-
-        SellerAgent.create_agents(
-            self,
-            n=initial_sellers,
-            cell=self.random.choices(self.grid.all_cells.cells, k=initial_sellers),
+        SellerAgent(
+            model=self,
+            cell=self.random.choice(self.grid.all_cells.cells),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt=seller_system_prompt,
+            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work.",
             vision=vision,
-            internal_state=seller_internal_state,
+            internal_state=["hardworking", "dedicated", "persuasive"],
+        )
+
+        SellerAgent(
+            model=self,
+            cell=self.random.choice(self.grid.all_cells.cells),
+            api_key=api_key,
+            reasoning=reasoning,
+            llm_model=llm_model,
+            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing.",
+            vision=vision,
+            internal_state=["lazy", "unmotivated"],
         )
 
     def step(self):
