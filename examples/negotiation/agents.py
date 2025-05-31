@@ -1,13 +1,10 @@
-from mesa.discrete_space import CellAgent
-
 from mesa_llm.llm_agent import LLMAgent
 
 
-class SellerAgent(LLMAgent, CellAgent):
+class SellerAgent(LLMAgent):
     def __init__(
         self,
         model,
-        cell,
         api_key,
         reasoning,
         llm_model,
@@ -24,21 +21,19 @@ class SellerAgent(LLMAgent, CellAgent):
             vision=vision,
             internal_state=internal_state,
         )
-        self.cell = cell
 
     def step(self):
-        self.cell = self.cell.neighborhood.select_random_cell()
-        observation = self.generate_observation()
-        prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells(at one cell distance), pitch them your product. Don't pitch to the same buyer agents again. "
-        plan = self.reasoning.plan(prompt=prompt, obs=observation)
-        self.apply_plan(plan)
+        # observation = self.generate_observation()
+        # prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells(at one cell distance), pitch them your product. Don't pitch to the same buyer agents again. "
+        # plan = self.reasoning.plan(prompt=prompt, obs=observation)
+        # self.apply_plan(plan)
+        pass
 
 
-class BuyerAgent(LLMAgent, CellAgent):
+class BuyerAgent(LLMAgent):
     def __init__(
         self,
         model,
-        cell,
         api_key,
         reasoning,
         llm_model,
@@ -56,8 +51,13 @@ class BuyerAgent(LLMAgent, CellAgent):
             vision=vision,
             internal_state=internal_state,
         )
-        self.cell = cell
         self.chosen_brand = chosen_brand
 
     def step(self):
-        self.cell = self.cell.neighborhood.select_random_cell()
+        neighbor_cells = self.model.grid.get_neighborhood(
+            pos=self.pos,
+            moore=True,  # Set to False for only N/S/E/W neighbors
+            include_center=False,
+        )
+        new_pos = self.random.choice(neighbor_cells)
+        self.model.grid.move_agent(self, new_pos)

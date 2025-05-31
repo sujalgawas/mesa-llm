@@ -1,7 +1,7 @@
 import math
 
-from mesa.discrete_space import OrthogonalVonNeumannGrid
 from mesa.model import Model
+from mesa.space import MultiGrid
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from mesa_llm.reasoning import Reasoning
@@ -33,21 +33,15 @@ class NegotiationModel(Model):
         self.width = width
         self.height = height
 
-        self.grid = OrthogonalVonNeumannGrid(
-            [self.height, self.width],
-            torus=False,
-            capacity=math.inf,
-            random=self.random,
-        )
+        self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the buyer agents---------------------
         buyer_system_prompt = "You are a buyer in a negotiation game."
         buyer_internal_state = ""
 
-        BuyerAgent.create_agents(
+        agents = BuyerAgent.create_agents(
             self,
             n=initial_buyers,
-            cell=self.random.choices(self.grid.all_cells.cells, k=initial_buyers),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
@@ -56,10 +50,14 @@ class NegotiationModel(Model):
             internal_state=buyer_internal_state,
         )
 
+        x = self.rng.integers(0, self.grid.width, size=(initial_buyers,))
+        y = self.rng.integers(0, self.grid.height, size=(initial_buyers,))
+        for a, i, j in zip(agents, x, y):
+            self.grid.place_agent(a, (i, j))
+
         # ---------------------Create the seller agents---------------------
-        SellerAgent(
+        seller_a = SellerAgent(
             model=self,
-            cell=self.random.choice(self.grid.all_cells.cells),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
@@ -67,16 +65,23 @@ class NegotiationModel(Model):
             vision=vision,
             internal_state=["hardworking", "dedicated", "persuasive"],
         )
+        self.grid.place_agent(
+            seller_a,
+            (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2)),
+        )
 
-        SellerAgent(
+        seller_b = SellerAgent(
             model=self,
-            cell=self.random.choice(self.grid.all_cells.cells),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing.",
             vision=vision,
             internal_state=["lazy", "unmotivated"],
+        )
+        self.grid.place_agent(
+            seller_b,
+            (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2) + 1),
         )
 
     def step(self):
