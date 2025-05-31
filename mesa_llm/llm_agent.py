@@ -103,23 +103,22 @@ class LLMAgent(Agent):
         If it is set to 0 or None, then no information is returned to the agent.
 
         """
-        gen_obs = Observation()
-        gen_obs.step = self.model.steps
-        gen_obs.self_state = {
+        step = self.model.steps
+        self_state = {
             "system_prompt": self.system_prompt,
             "location": self.pos,
             "internal_state": self.internal_state,
         }
         if self.vision is not None and self.vision > 0:
-            if isinstance(
-                self.model.grid,
-                SingleGrid | MultiGrid | OrthogonalMooreGrid | OrthogonalVonNeumannGrid,
-            ):
-                neighbor_coords = self.model.grid.get_neighborhood(
-                    self.pos, moore=True, include_center=False, radius=self.vision
+            if isinstance(self.model.grid, SingleGrid | MultiGrid):
+                neighbors = self.model.grid.get_neighbors(
+                    self.pos, moore=True, include_center=False, radius=1
                 )
-                # To get agents at those coordinates:
-                neighbors = [self.model.grid[x, y] for x, y in neighbor_coords]
+            elif isinstance(
+                self.model.grid, OrthogonalMooreGrid | OrthogonalVonNeumannGrid
+            ):
+                pass  ############TODO
+
             elif isinstance(self.model.space, ContinuousSpace):
                 neighbors, _ = self.get_neighbors_in_radius(radius=self.vision)
         elif self.vision == -1:
@@ -134,9 +133,8 @@ class LLMAgent(Agent):
                 "position": i.pos,
                 "internal_state": i.internal_state,
             }
-        gen_obs.local_state = local_state
 
-        return gen_obs
+        return Observation(step=step, self_state=self_state, local_state=local_state)
 
     def send_message(self, message: str, recipients: list[Agent]) -> str:
         """
