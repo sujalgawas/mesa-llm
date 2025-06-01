@@ -1,13 +1,6 @@
-import inspect
-import sys
 from typing import TYPE_CHECKING
 
-from mesa.space import (
-    MultiGrid,
-    SingleGrid,
-)
-
-from .tool_decorator import tool
+from mesa_llm.tools.tool_decorator import tool
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -26,8 +19,7 @@ def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float])
         A string indicating the agent's new position.
     """
 
-    if isinstance(agent.model.grid, SingleGrid | MultiGrid):
-        agent.model.grid.move_agent(agent, target_coordinates)
+    agent.position = target_coordinates
 
     return f"This agent moved to {target_coordinates}."
 
@@ -54,11 +46,3 @@ def speak_to(
             },
         )
     return f"{speaker_agent} → {listener_agents} : {message}"
-
-
-# Get all the functions in the module that are not private into a list
-inbuilt_tools = [
-    obj
-    for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isfunction)
-    if not name.startswith("_")
-]
