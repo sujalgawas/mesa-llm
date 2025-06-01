@@ -39,7 +39,7 @@ model_params = {
         "value": 42,
         "label": "Random Seed",
     },
-    "initial_buyers": 5,
+    "initial_buyers": 1,
     "width": 10,
     "height": 10,
     "api_key": os.getenv("GEMINI_API_KEY"),
@@ -48,8 +48,7 @@ model_params = {
     "vision": 1,
 }
 
-# simulator = ABMSimulator()  #am not too sure how this works, it wasn't working when I tried to run it, so I just coded a simple version, maybe you can include it?
-# model = NegotiationModel(simulator=simulator)
+
 model = NegotiationModel(
     initial_buyers=5,
     width=10,
@@ -66,7 +65,6 @@ page = SolaraViz(
     components=[make_space_component(model_portrayal)],
     model_params=model_params,
     name="Negotiation",
-    # simulator=simulator,
 )
 
 page  # noqa
