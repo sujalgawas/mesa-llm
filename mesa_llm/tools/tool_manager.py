@@ -38,6 +38,7 @@ class ToolManager:
         }
 
     def get_all_tools_schema(self) -> list[dict]:
+        print(self.tools.values())
         return [fn.__tool_schema__ for fn in self.tools.values()]
 
     def call(self, name: str, arguments: dict) -> str:

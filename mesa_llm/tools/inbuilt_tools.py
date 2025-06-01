@@ -2,6 +2,11 @@ import inspect
 import sys
 from typing import TYPE_CHECKING
 
+from mesa.space import (
+    MultiGrid,
+    SingleGrid,
+)
+
 from .tool_decorator import tool
 
 if TYPE_CHECKING:
@@ -21,7 +26,8 @@ def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float])
         A string indicating the agent's new position.
     """
 
-    agent.position = target_coordinates
+    if isinstance(agent.model.grid, SingleGrid | MultiGrid):
+        agent.model.grid.move_agent(agent, target_coordinates)
 
     return f"This agent moved to {target_coordinates}."
 

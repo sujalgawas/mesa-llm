@@ -153,7 +153,7 @@ class ReActReasoning(Reasoning):
 
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
         )
 
         response_message = rsp.choices[0].message
