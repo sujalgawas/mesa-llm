@@ -40,7 +40,6 @@ class BuyerAgent(LLMAgent):
         system_prompt,
         vision,
         internal_state,
-        chosen_brand=None,
     ):
         super().__init__(
             model=model,
@@ -51,13 +50,9 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
-        self.chosen_brand = chosen_brand
 
     def step(self):
-        neighbor_cells = self.model.grid.get_neighborhood(
-            pos=self.pos,
-            moore=True,  # Set to False for only N/S/E/W neighbors
-            include_center=False,
-        )
-        new_pos = self.random.choice(neighbor_cells)
-        self.model.grid.move_agent(self, new_pos)
+        observation = self.generate_observation()
+        prompt = "Wait for a seller to pitch to you. If a seller pitches to you, respond to them with a message."
+        plan = self.reasoning.plan(prompt=prompt, obs=observation)
+        self.apply_plan(plan)
