@@ -38,13 +38,13 @@ class Observation:
             "\n[Self State]",
         ]
         for k, v in self.self_state.items():
-            lines.append(f"- {k}: {v}")
+            lines.append(f"   - {k}: {v}")
 
         lines.append("\n[Local State of Nearby Agents]")
         for agent_id, agent_info in self.local_state.items():
             lines.append(f"- {agent_id}:")
             for k, v in agent_info.items():
-                lines.append(f"    - {k}: {v}")
+                lines.append(f"   - {k}: {v}")
 
         return "\n".join(lines)
 

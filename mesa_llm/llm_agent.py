@@ -32,7 +32,7 @@ class LLMAgent(Agent):
     Parameters:
         model (Model): The mesa model the agent in linked to.
         api_key (str): The API key for the LLM provider.
-        llm_model (str): The model to use for the LLM in the format 'provider/model'. Defaults to 'openai/gpt-4o'.
+        llm_model (str): The model to use for the LLM in the format 'provider/model'. Defaults to 'gemini/gemini-2.0-flash'.
         system_prompt (str | None): Optional system prompt to be used in LLM completions.
         reasoning (str): Optional reasoning method to be used in LLM completions.
 
@@ -47,7 +47,7 @@ class LLMAgent(Agent):
         model: Model,
         api_key: str,
         reasoning: type[Reasoning],
-        llm_model: str = "openai/gpt-4o",
+        llm_model: str = "gemini/gemini-2.0-flash",
         system_prompt: str | None = None,
         vision: float | None = None,
         internal_state: list[str] | str | None = None,
@@ -55,6 +55,7 @@ class LLMAgent(Agent):
         super().__init__(model=model)
 
         self.model = model
+
         self.llm = ModuleLLM(
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
@@ -68,9 +69,11 @@ class LLMAgent(Agent):
         )
 
         self.tool_manager = ToolManager()
+
         self.vision = vision
         self.reasoning = reasoning(agent=self)
         self.system_prompt = system_prompt
+        self.is_speaking = False
 
         if isinstance(internal_state, str):
             internal_state = [internal_state]

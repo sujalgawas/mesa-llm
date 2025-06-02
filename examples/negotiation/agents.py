@@ -78,6 +78,6 @@ class BuyerAgent(LLMAgent):
         # new_pos = self.random.choice(neighbor_cells)
         # self.model.grid.move_agent(self, new_pos)
         observation = self.generate_obs()
-        prompt = "You are allowed to move around or stay in the same place. Seller agents around you might try to pitch their product by sending you messages, read them and decide what to set yout chosen brand attribute as"
+        prompt = "You are allowed to move around or stay in the same place. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)
