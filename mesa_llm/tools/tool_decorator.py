@@ -6,12 +6,29 @@ import re
 import textwrap
 import warnings
 from collections.abc import Callable
-from typing import Any, get_type_hints
+from typing import TYPE_CHECKING, Any, get_type_hints
+
+if TYPE_CHECKING:
+    from mesa_llm.tools.tool_manager import ToolManager
+
 
 _GLOBAL_TOOL_REGISTRY: dict[str, Callable] = {}
+_TOOL_CALLBACKS: list[Callable[[Callable], None]] = []
+
+
+def add_tool_callback(callback: Callable[[Callable], None]):
+    """Add a callback to be called when a new tool is registered"""
+    _TOOL_CALLBACKS.append(callback)
 
 
 # ---------- helper functions ----------------------------------------------------
+class DocstringParsingError(Exception):
+    """Raised when a Google-style docstring cannot be parsed."""
+
+
+_ARG_HEADER_RE = re.compile(r"^\s*Args?:\s*$", re.IGNORECASE)
+_RET_HEADER_RE = re.compile(r"^\s*Returns?:\s*$", re.IGNORECASE)
+_PARAM_LINE_RE = re.compile(r"^\s*(\w+)\s*:\s*(.+)$")
 
 
 def _python_to_json_type(py_type: Any) -> str:
@@ -23,16 +40,6 @@ def _python_to_json_type(py_type: Any) -> str:
         bytes: "string",
     }
     return json_type_map.get(py_type, "array" if py_type in (list, tuple) else "object")
-
-
-class DocstringParsingError(Exception):
-    """Raised when a Google-style docstring cannot be parsed."""
-
-
-_ARG_HEADER_RE = re.compile(r"^\s*Args?:\s*$", re.IGNORECASE)
-_RET_HEADER_RE = re.compile(r"^\s*Returns?:\s*$", re.IGNORECASE)
-_PARAM_LINE_RE = re.compile(r"^\s*(\w+)\s*:\s*(.+)$")
-
 
 def _parse_docstring(
     func: callable,
@@ -134,10 +141,17 @@ def _parse_docstring(
 # ---------- decorator ----------------------------------------------------
 
 
-def tool(fn: Callable):
+
+def tool(fn: Callable, tool_manager: ToolManager | None = None):
     """
     Decorate a function so it becomes an LLM-callable tool and is auto-registered.
-    Return (description, {arg: description}, returns).
+
+    Args:
+        fn: The function to decorate.
+        tool_manager : the optional tool manager to add the function to
+
+    Returns:
+        The decorated function.
     """
     name = fn.__name__
     description, arg_docs, return_docs = _parse_docstring(fn)
@@ -175,22 +189,31 @@ def tool(fn: Callable):
         },
     }
 
-    fn.__tool_schema__ = schema  #  <-- expose to ToolManager
-    _GLOBAL_TOOL_REGISTRY[name] = fn  #  <-- auto-register
+    fn.__tool_schema__ = schema
+
+    if tool_manager:
+        tool_manager.register(fn)
+    else:
+        _GLOBAL_TOOL_REGISTRY[name] = fn
+        for callback in _TOOL_CALLBACKS:
+            callback(fn)
     return fn
 
 
 if __name__ == "__main__":
     # CL to execute this file: python -m mesa_llm.tools.tool_decorator
+    
     @tool
-    def dummy_function(location: str):
+    def dummy_function(location: str, priority: int = 0):
         """
         Move to a location.
         Args:
             location: The location to move to.
+            priority: The priority of the location.
+
         Returns:
-            The location moved to.
+            The location moved to with priority.
         """
-        return f"Moved to {location}"
+        return f"Moved to {location} with priority {priority}"
 
     print(json.dumps(dummy_function.__tool_schema__, indent=2))

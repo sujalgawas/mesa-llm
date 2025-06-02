@@ -36,7 +36,7 @@ class NegotiationModel(Model):
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the buyer agents---------------------
-        buyer_system_prompt = "You are a buyer in a negotiation game."
+        buyer_system_prompt = "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller."
         buyer_internal_state = ""
 
         agents = BuyerAgent.create_agents(

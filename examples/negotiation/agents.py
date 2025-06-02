@@ -56,7 +56,6 @@ class BuyerAgent(LLMAgent):
         system_prompt,
         vision,
         internal_state,
-        chosen_brand=None,
     ):
         super().__init__(
             model=model,
@@ -67,17 +66,9 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
-        self.chosen_brand = chosen_brand
 
     def step(self):
-        # neighbor_cells = self.model.grid.get_neighborhood(
-        #     pos=self.pos,
-        #     moore=True,
-        #     include_center=False,
-        # )
-        # new_pos = self.random.choice(neighbor_cells)
-        # self.model.grid.move_agent(self, new_pos)
         observation = self.generate_obs()
-        prompt = "You are allowed to move around or stay in the same place. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
+        prompt = "You are allowed to move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)
