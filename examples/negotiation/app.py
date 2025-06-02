@@ -42,22 +42,22 @@ model_params = {
     "initial_buyers": 1,
     "width": 10,
     "height": 10,
-    "api_key": os.getenv("GEMINI_API_KEY"),
+    "api_key": os.getenv("OPENAI_API_KEY"),
     "reasoning": ReActReasoning,
-    "llm_model": "gemini/gemini-2.0-flash",
+    "llm_model": "openai/gpt-4o",
     "vision": 1,
 }
 
 
 model = NegotiationModel(
-    initial_buyers=5,
-    width=10,
-    height=10,
-    api_key=os.getenv("GEMINI_API_KEY"),
-    reasoning=ReActReasoning,
-    llm_model="gemini/gemini-2.0-flash",
-    vision=1,
-    seed=50,
+    initial_buyers=model_params["initial_buyers"],
+    width=model_params["width"],
+    height=model_params["height"],
+    api_key=model_params["api_key"],
+    reasoning=model_params["reasoning"],
+    llm_model=model_params["llm_model"],
+    vision=model_params["vision"],
+    seed=model_params["seed"]["value"],
 )
 
 page = SolaraViz(

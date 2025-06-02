@@ -1,21 +1,8 @@
 from mesa_llm.llm_agent import LLMAgent
-from mesa_llm.tools.tool_decorator import tool
+from mesa_llm.tools.tool_manager import ToolManager
 
-
-@tool
-def set_chosen_brand(agent: LLMAgent, chosen_brand: str) -> str:
-    """
-    A tool to set the brand of choice of the buyer agent, It can either be brand A or brand B.
-
-    Args:
-        agent : The agent to set the brand of choice for.
-        chosen_brand : The brand of choice of the buyer agent, either "A" or "B".
-
-    Returns:
-        str: The brand of choice of the buyer agent, either "A" or "B".
-    """
-    agent.chosen_brand = chosen_brand
-    return f"Chosen brand of {agent} set to {chosen_brand}"
+seller_tool_manager = ToolManager()
+buyer_tool_manager = ToolManager()
 
 
 class SellerAgent(LLMAgent):
@@ -38,6 +25,8 @@ class SellerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
+
+        self.tool_manager = seller_tool_manager
 
     def step(self):
         observation = self.generate_obs()
@@ -66,6 +55,8 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
+        self.chosen_brand = None
+        self.tool_manager = buyer_tool_manager
 
     def step(self):
         observation = self.generate_obs()
