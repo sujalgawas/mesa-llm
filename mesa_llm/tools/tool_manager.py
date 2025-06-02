@@ -1,10 +1,8 @@
-import inspect
 import json
-import warnings
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from mesa_llm.tools.inbuilt_tools import inbuilt_tools
+from mesa_llm.tools.tool_decorator import _GLOBAL_TOOL_REGISTRY, add_tool_callback
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -21,103 +19,35 @@ class ToolManager:
         tools: A dictionary of tools of the form {name: function}. E.g. {"get_current_weather": get_current_weather}.
     """
 
-    def __init__(self):
-        self.tools: dict[str, Callable] = {}
+    instances: list["ToolManager"] = []
 
-        for tool in inbuilt_tools:
-            self.register(tool)
+    def __init__(self, extra_tools: dict[str, Callable] | None = None):
+        # start from everything that was decorated
+        ToolManager.instances.append(self)
+        self.tools = dict(_GLOBAL_TOOL_REGISTRY)
+
+        # allow per-agent overrides / reductions
+        if extra_tools:
+            self.tools.update(extra_tools)
 
     def register(self, fn: Callable):
         """Register a tool function by name"""
         name = fn.__name__
         self.tools[name] = fn  # storing the name & function pair as a dictionary
 
+    @classmethod
+    def add_tool_to_all(cls, fn: Callable):
+        """Add a tool to all instances"""
+        for instance in cls.instances:
+            instance.register(fn)
+
     def get_tool_schema(self, fn: Callable, schema_name: str) -> dict:
-        """
-        Get the schema of a tool function in the liteLLM format.
-
-        Args:
-            fn: The tool function to get the schema of.
-            schema_name: The name of the tool function.
-
-        Returns:
-            A dictionary containing the schema of the tool function.
-        """
-        doc = inspect.getdoc(fn) or ""  # get the docstring of the function
-        lines = doc.splitlines()
-        args_start = next(
-            (i for i, line in enumerate(lines) if line.strip().lower() == "args:"), None
-        )  # find the line that contains "Args:"
-        desc = (
-            " ".join(lines[:args_start]).strip()
-            if args_start is not None
-            else doc.strip()
-        )  # get the description of the function
-
-        # Parse Args
-        arg_docs = {}
-        if args_start is not None:
-            current = None
-            for line in lines[
-                args_start + 1 :
-            ]:  # iterate over the lines after the args section (stop at "Returns:")
-                stripped_line = line.strip()
-                if not stripped_line or stripped_line.lower().startswith("returns"):
-                    break
-                if ":" in stripped_line:
-                    if current:
-                        arg_docs[current[0]] = " ".join(current[1]).strip()
-                    current = [
-                        stripped_line.split(":", 1)[0].strip(),
-                        [stripped_line.split(":", 1)[1].strip()],
-                    ]  # split the line into a key and a value
-                elif current:
-                    current[1].append(stripped_line)
-            if current:
-                arg_docs[current[0]] = " ".join(current[1]).strip()
-
-        # Build schema
-        sig = inspect.signature(fn)
-        props = {
-            name: {
-                "type": "array"
-                if str(param.annotation).startswith(("tuple", "list"))
-                else "Any"
-                if param.annotation is inspect._empty
-                else param.annotation
-                if isinstance(param.annotation, str)
-                else getattr(param.annotation, "__name__", str(param.annotation)),
-                "description": arg_docs.get(name, ""),
-            }
-            for name, param in sig.parameters.items()
-        }
-
-        # Warn for missing descriptions
-        for name in sig.parameters:
-            if name not in arg_docs:
-                warnings.warn(f'Missing description for "{name}"', stacklevel=2)
-
-        return {
-            "type": "function",
-            "function": {
-                "name": schema_name,
-                "description": desc,
-                "parameters": {
-                    "type": "object",
-                    "properties": props,
-                    "required": list(sig.parameters),
-                },
-            },
+        return getattr(fn, "__tool_schema__", None) or {
+            "error": f"Tool {schema_name} missing __tool_schema__"
         }
 
     def get_all_tools_schema(self) -> list[dict]:
-        """Return schema in the liteLLM format"""
-
-        schema = []
-        for name, fn in self.tools.items():
-            schema.append(self.get_tool_schema(fn, name))
-
-        return schema
+        return [fn.__tool_schema__ for fn in self.tools.values()]
 
     def call(self, name: str, arguments: dict) -> str:
         """Call a registered tool with validated args"""
@@ -239,6 +169,5 @@ class ToolManager:
             return []
 
 
-if __name__ == "__main__":
-    tool_manager = ToolManager()
-    print(json.dumps(tool_manager.get_all_tools_schema(), indent=4))
+# Register callback to automatically add new tools to all ToolManager instances
+add_tool_callback(ToolManager.add_tool_to_all)
