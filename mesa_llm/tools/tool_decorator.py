@@ -41,7 +41,6 @@ def _python_to_json_type(py_type: Any) -> str:
     }
     return json_type_map.get(py_type, "array" if py_type in (list, tuple) else "object")
 
-
 def _parse_docstring(
     func: callable,
 ) -> tuple[str, dict[str, str], str | None]:
@@ -142,12 +141,14 @@ def _parse_docstring(
 # ---------- decorator ----------------------------------------------------
 
 
+
 def tool(fn: Callable, tool_manager: ToolManager | None = None):
     """
     Decorate a function so it becomes an LLM-callable tool and is auto-registered.
 
     Args:
         fn: The function to decorate.
+        tool_manager : the optional tool manager to add the function to
 
     Returns:
         The decorated function.
@@ -196,12 +197,12 @@ def tool(fn: Callable, tool_manager: ToolManager | None = None):
         _GLOBAL_TOOL_REGISTRY[name] = fn
         for callback in _TOOL_CALLBACKS:
             callback(fn)
-
     return fn
 
 
 if __name__ == "__main__":
     # CL to execute this file: python -m mesa_llm.tools.tool_decorator
+    
     @tool
     def dummy_function(location: str, priority: int = 0):
         """

@@ -1,4 +1,8 @@
 from mesa_llm.llm_agent import LLMAgent
+from mesa_llm.tools.tool_manager import ToolManager
+
+seller_tool_manager = ToolManager()
+buyer_tool_manager = ToolManager()
 
 
 class SellerAgent(LLMAgent):
@@ -22,12 +26,13 @@ class SellerAgent(LLMAgent):
             internal_state=internal_state,
         )
 
+        self.tool_manager = seller_tool_manager
+
     def step(self):
-        # observation = self.generate_observation()
-        # prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells(at one cell distance), pitch them your product. Don't pitch to the same buyer agents again. "
-        # plan = self.reasoning.plan(prompt=prompt, obs=observation)
-        # self.apply_plan(plan)
-        pass
+        observation = self.generate_obs()
+        prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells, pitch them your product. Don't pitch to the same buyer agents again. "
+        plan = self.reasoning.plan(prompt=prompt, obs=observation)
+        self.apply_plan(plan)
 
 
 class BuyerAgent(LLMAgent):
@@ -50,9 +55,11 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
+        self.chosen_brand = None
+        self.tool_manager = buyer_tool_manager
 
     def step(self):
-        observation = self.generate_observation()
-        prompt = "Wait for a seller to pitch to you. If a seller pitches to you, respond to them with a message."
+        observation = self.generate_obs()
+        prompt = "You are allowed to move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)

@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from mesa_llm.terminal_style import style_txt
+
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
@@ -34,17 +36,19 @@ class Observation:
 
     def __str__(self) -> str:
         lines = [
-            f"Step: {self.step}",
-            "\n[Self State]",
+            # f"Step: {self.step}",
+            f"\n {style_txt('└──', color='green')} {style_txt('[Self State]', color='cyan', bold=True)}",
         ]
         for k, v in self.self_state.items():
-            lines.append(f"- {k}: {v}")
+            lines.append(f"   • {style_txt(k, color='bold')}: {v}")
 
-        lines.append("\n[Local State of Nearby Agents]")
+        lines.append(
+            f"\n  {style_txt('└──', color='green')} {style_txt('[Local State of Nearby Agents]', color='cyan', bold=True)}"
+        )
         for agent_id, agent_info in self.local_state.items():
-            lines.append(f"- {agent_id}:")
+            lines.append(f"   • {style_txt(agent_id, color='bold')}:")
             for k, v in agent_info.items():
-                lines.append(f"    - {k}: {v}")
+                lines.append(f"    • {style_txt(k, color='bold')}: {v}")
 
         return "\n".join(lines)
 
@@ -59,24 +63,7 @@ class Plan:
 
     def __str__(self) -> str:
         llm_plan_str = str(self.llm_plan).strip()
-        return (
-            f"Plan generated at step {self.step} (valid for {self.ttl} step(s)):\n"
-            f"[Plan]\n{llm_plan_str}\n"
-        )
-
-
-# subject to change
-@dataclass
-class Discussion:
-    """Discussion between agents."""
-
-    step: int  # step when the discussion was generated
-    other_agent_id: int
-    discussion: str  # content of the discussion
-
-    def __str__(self) -> str:
-        """Format the discussion once the structure of the dataclass is finalized."""
-        return f"Discussion between agent {self.other_agent_id} at step {self.step}:\n{self.discussion}"
+        return f"{llm_plan_str}\n"
 
 
 class Reasoning(ABC):
@@ -153,7 +140,7 @@ class ReActReasoning(Reasoning):
 
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
         )
 
         response_message = rsp.choices[0].message

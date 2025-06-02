@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from mesa_llm.module_llm import ModuleLLM
+from mesa_llm.terminal_style import style_txt
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -17,7 +18,12 @@ class MemoryEntry:
     metadata: dict
 
     def __str__(self) -> str:
-        return f"[{self.type.title()} @ Step {self.step}] : {self.content}"
+        return (
+            style_txt(
+                f"[{self.type.title()} @ Step {self.step}] : ", color="green", bold=True
+            )
+            + self.content
+        )
 
 
 class Memory:
@@ -85,7 +91,7 @@ class Memory:
             ]
             self.update_long_term_memory(memories_to_consolidate)
 
-        print(f"Added {new_entry} to memory")
+        print(style_txt("Added to memory ", color="green"), new_entry)
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:
