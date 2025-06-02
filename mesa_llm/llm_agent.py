@@ -109,7 +109,7 @@ class LLMAgent(Agent):
         step = self.model.steps
         self_state = {
             "system_prompt": self.system_prompt,
-            "location": self.pos,
+            "location": self.pos if self.pos is not None else self.cell.coordinate,
             "internal_state": self.internal_state,
         }
         if self.vision is not None and self.vision > 0:
@@ -120,7 +120,9 @@ class LLMAgent(Agent):
             elif isinstance(
                 self.model.grid, OrthogonalMooreGrid | OrthogonalVonNeumannGrid
             ):
-                pass  ############TODO
+                neighbors = []
+                for neighbor in self.cell.connections.values():
+                    neighbors.extend(neighbor.agents)
 
             elif isinstance(self.model.space, ContinuousSpace):
                 neighbors, _ = self.get_neighbors_in_radius(radius=self.vision)
@@ -133,7 +135,7 @@ class LLMAgent(Agent):
         local_state = {}
         for i in neighbors:
             local_state[i.__class__.__name__ + " " + str(i.unique_id)] = {
-                "position": i.pos,
+                "position": i.pos if i.pos is not None else i.cell.coordinate,
                 "internal_state": i.internal_state,
             }
 
