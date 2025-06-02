@@ -5,6 +5,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
+# ANSI color codes
+CYAN = "\033[36m"
+GREEN = "\033[32m"
+RESET = "\033[0m"
+
 
 @dataclass
 class Observation:
@@ -34,17 +39,17 @@ class Observation:
 
     def __str__(self) -> str:
         lines = [
-            f"Step: {self.step}",
-            "\n[Self State]",
+            # f"Step: {self.step}",
+            f"\n{CYAN}[Self State]{RESET}",
         ]
         for k, v in self.self_state.items():
-            lines.append(f"   - {k}: {v}")
+            lines.append(f"• {k}: {v}")
 
-        lines.append("\n[Local State of Nearby Agents]")
+        lines.append(f"\n  {CYAN}[Local State of Nearby Agents]{RESET}")
         for agent_id, agent_info in self.local_state.items():
-            lines.append(f"- {agent_id}:")
+            lines.append(f"• {agent_id}:")
             for k, v in agent_info.items():
-                lines.append(f"   - {k}: {v}")
+                lines.append(f"  • {k}: {v}")
 
         return "\n".join(lines)
 
@@ -61,7 +66,7 @@ class Plan:
         llm_plan_str = str(self.llm_plan).strip()
         return (
             f"Plan generated at step {self.step} (valid for {self.ttl} step(s)):\n"
-            f"[Plan]\n{llm_plan_str}\n"
+            f"{CYAN}[Plan]{RESET}\n{llm_plan_str}\n"
         )
 
 

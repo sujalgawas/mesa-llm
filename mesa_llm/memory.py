@@ -8,6 +8,11 @@ from mesa_llm.module_llm import ModuleLLM
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
+# ANSI color codes
+CYAN = "\033[36m"
+GREEN = "\033[32m"
+RESET = "\033[0m"
+
 
 @dataclass
 class MemoryEntry:
@@ -85,7 +90,7 @@ class Memory:
             ]
             self.update_long_term_memory(memories_to_consolidate)
 
-        print(f"Added {new_entry} to memory")
+        print(f"{GREEN}Added to memory: {RESET}{new_entry}")
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:

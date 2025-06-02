@@ -93,7 +93,7 @@ class LLMAgent(Agent):
             agent=self, llm_response=plan.llm_plan
         )
         self.memory.add_to_memory(
-            type="Tool_Call_Responses", content=str(tool_call_resp), step=plan.step
+            type="[Tool_Call_Responses] : ", content=str(tool_call_resp), step=plan.step
         )
         return tool_call_resp
 
