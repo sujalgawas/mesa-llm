@@ -142,64 +142,6 @@ def _parse_docstring(
 # ---------- decorator ----------------------------------------------------
 
 
-# def tool(fn: Callable, tool_manager: ToolManager | None = None):
-#     """
-#     Decorate a function so it becomes an LLM-callable tool and is auto-registered.
-
-#     Args:
-#         fn: The function to decorate.
-#         tool_manager : the optional tool manager to add the function to
-
-#     Returns:
-#         The decorated function.
-#     """
-#     name = fn.__name__
-#     description, arg_docs, return_docs = _parse_docstring(fn)
-
-#     sig = inspect.signature(fn)
-#     try:
-#         type_hints = get_type_hints(fn)
-#     except NameError:
-#         # Fallback to using annotations directly if type_hints evaluation fails
-#         type_hints = getattr(fn, "__annotations__", {})
-
-#     properties = {}
-#     for param_name, _param in sig.parameters.items():
-#         raw_type = type_hints.get(param_name, Any)
-#         properties[param_name] = {
-#             "type": _python_to_json_type(raw_type),
-#             "description": arg_docs.get(param_name, ""),
-#         }
-#         if not arg_docs.get(param_name):
-#             warnings.warn(
-#                 f'Missing docstring for argument "{param_name}" in tool "{name}"',
-#                 stacklevel=2,
-#             )
-
-#     schema = {
-#         "type": "function",
-#         "function": {
-#             "name": name,
-#             "description": description + " returns: " + (return_docs or ""),
-#             "parameters": {
-#                 "type": "object",
-#                 "properties": properties,
-#                 "required": list(sig.parameters),
-#             },
-#         },
-#     }
-
-#     fn.__tool_schema__ = schema
-
-#     if tool_manager:
-#         tool_manager.register(fn)
-#     else:
-#         _GLOBAL_TOOL_REGISTRY[name] = fn
-#         for callback in _TOOL_CALLBACKS:
-#             callback(fn)
-#     return fn
-
-
 def tool(fn: Callable | None = None, *, tool_manager: ToolManager | None = None):
     """
     Decorate a function so it becomes an LLM-callable tool and is auto-registered.

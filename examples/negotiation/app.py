@@ -6,8 +6,6 @@ from mesa.visualization import (
     make_space_component,
 )
 
-import examples.negotiation.tools  # noqa: F401, to register tools
-import mesa_llm.tools.inbuilt_tools  # noqa: F401, to register inbuilt tools
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from examples.negotiation.model import NegotiationModel
 from mesa_llm.reasoning import ReActReasoning

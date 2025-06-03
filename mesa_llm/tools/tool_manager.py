@@ -2,7 +2,8 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from mesa_llm.terminal_style import sprint
+from terminal_style import sprint
+
 from mesa_llm.tools.tool_decorator import _GLOBAL_TOOL_REGISTRY, add_tool_callback
 
 if TYPE_CHECKING:

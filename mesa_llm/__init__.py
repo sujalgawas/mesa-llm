@@ -1,5 +1,7 @@
 import datetime
 
+import mesa_llm.tools.inbuilt_tools  # noqa: F401, to register inbuilt tools
+
 from .reasoning import Observation, Plan
 from .tools import ToolManager
 
