@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 @tool(tool_manager=buyer_tool_manager)
-def set_chosen_brand(agent: LLMAgent, chosen_brand: str) -> str:
+def set_chosen_brand(agent: "LLMAgent", chosen_brand: str) -> str:
     """
     A tool to set the brand of choice of the buyer agent, It can either be brand A or brand B.
 
