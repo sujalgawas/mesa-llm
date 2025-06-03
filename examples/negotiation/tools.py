@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from mesa_llm.examples.negotiation.agents import buyer_tool_manager
+from examples.negotiation.agents import buyer_tool_manager
 from mesa_llm.tools.tool_decorator import tool
 
 if TYPE_CHECKING:

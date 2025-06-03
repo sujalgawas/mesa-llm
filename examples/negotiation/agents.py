@@ -60,6 +60,6 @@ class BuyerAgent(LLMAgent):
 
     def step(self):
         observation = self.generate_obs()
-        prompt = "You are allowed to move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
+        prompt = "Move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)
