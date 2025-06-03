@@ -1,5 +1,15 @@
 from typing import TYPE_CHECKING
 
+from mesa.discrete_space import (
+    OrthogonalMooreGrid,
+    OrthogonalVonNeumannGrid,
+)
+from mesa.space import (
+    ContinuousSpace,
+    MultiGrid,
+    SingleGrid,
+)
+
 from mesa_llm.tools.tool_decorator import tool
 
 if TYPE_CHECKING:
@@ -7,9 +17,11 @@ if TYPE_CHECKING:
 
 
 @tool
-def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float]) -> str:
+def teleport_to_location(
+    agent: "LLMAgent", target_coordinates: tuple[float, float]
+) -> str:
     """
-    Move to a given location in a discrete grid.
+    Teleport to a given location in a grid or continuous space.
 
     Args:
         agent: The agent to move.
@@ -19,7 +31,15 @@ def move_to_location(agent: "LLMAgent", target_coordinates: tuple[float, float])
         A string indicating the agent's new position.
     """
 
-    agent.position = target_coordinates
+    if isinstance(agent.model.grid, SingleGrid | MultiGrid):
+        agent.model.grid.move_agent(agent, target_coordinates)
+
+    elif isinstance(agent.model.grid, OrthogonalMooreGrid | OrthogonalVonNeumannGrid):
+        cell = agent.model.grid._cells[target_coordinates]
+        agent.cell = cell
+
+    elif isinstance(agent.model.space, ContinuousSpace):
+        agent.model.space.move_agent(agent.model.space, agent, target_coordinates)
 
     return f"This agent moved to {target_coordinates}."
 
