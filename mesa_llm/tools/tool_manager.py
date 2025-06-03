@@ -2,7 +2,7 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from mesa_llm.terminal_style import print_styled
+from mesa_llm.terminal_style import sprint
 from mesa_llm.tools.tool_decorator import _GLOBAL_TOOL_REGISTRY, add_tool_callback
 
 if TYPE_CHECKING:
@@ -76,7 +76,7 @@ class ToolManager:
 
             # Check if tool_calls exists and is not None
             if not tool_calls:
-                print_styled("No tool calls in LLM response", color="red")
+                sprint("No tool calls in LLM response", color="red")
                 return []
 
             print(f"Found {len(tool_calls)} tool call(s)")
