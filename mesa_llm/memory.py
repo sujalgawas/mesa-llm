@@ -3,8 +3,9 @@ from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from terminal_style import style
+
 from mesa_llm.module_llm import ModuleLLM
-from mesa_llm.terminal_style import style_txt
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -19,7 +20,7 @@ class MemoryEntry:
 
     def __str__(self) -> str:
         return (
-            style_txt(
+            style(
                 f"[{self.type.title()} @ Step {self.step}] : ", color="green", bold=True
             )
             + self.content
@@ -94,8 +95,8 @@ class Memory:
             self.agent.__class__.__name__ + " " + str(self.agent.unique_id) + " "
         )
         print(
-            style_txt("Added to the memory of ", color="green"),
-            style_txt(agent_display_name, color="cyan"),
+            style("Added to the memory of ", color="green"),
+            style(agent_display_name, color="cyan"),
             new_entry,
         )
 

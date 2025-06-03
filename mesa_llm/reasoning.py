@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from mesa_llm.terminal_style import style_txt
+from terminal_style import style
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -37,18 +37,18 @@ class Observation:
     def __str__(self) -> str:
         lines = [
             # f"Step: {self.step}",
-            f"\n {style_txt('└──', color='green')} {style_txt('[Self State]', color='cyan', bold=True)}",
+            f"\n {style('└──', color='green')} {style('[Self State]', color='cyan', bold=True)}",
         ]
         for k, v in self.self_state.items():
-            lines.append(f"   • {style_txt(k, color='bold')}: {v}")
+            lines.append(f"   • {style(k, color='bold')}: {v}")
 
         lines.append(
-            f"\n  {style_txt('└──', color='green')} {style_txt('[Local State of Nearby Agents]', color='cyan', bold=True)}"
+            f"\n  {style('└──', color='green')} {style('[Local State of Nearby Agents]', color='cyan', bold=True)}"
         )
         for agent_id, agent_info in self.local_state.items():
-            lines.append(f"   • {style_txt(agent_id, color='bold')}:")
+            lines.append(f"   • {style(agent_id, color='bold')}:")
             for k, v in agent_info.items():
-                lines.append(f"    • {style_txt(k, color='bold')}: {v}")
+                lines.append(f"    • {style(k, color='bold')}: {v}")
 
         return "\n".join(lines)
 
