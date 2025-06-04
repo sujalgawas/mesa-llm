@@ -95,7 +95,7 @@ class Memory:
             self.agent.__class__.__name__ + " " + str(self.agent.unique_id) + " "
         )
         print(
-            style("Added to the memory of ", color="green"),
+            style("\nAdded to the memory of ", color="green"),
             style(agent_display_name, color="cyan"),
             new_entry,
         )

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from terminal_style import style
 
@@ -58,11 +58,15 @@ class Plan:
     """LLM-generated plan that can span ≥1 steps."""
 
     step: int  # step when the plan was generated
-    llm_plan: str  # thoughts and action in sequence
+    llm_plan: Any  # complete LLM response message object (contains both content and tool_calls)
     ttl: int = 1  # steps until planning again (ReWOO sets >1)
 
     def __str__(self) -> str:
-        llm_plan_str = str(self.llm_plan).strip()
+        # Extract content from the message object for display
+        if hasattr(self.llm_plan, "content") and self.llm_plan.content:
+            llm_plan_str = str(self.llm_plan.content).strip()
+        else:
+            llm_plan_str = str(self.llm_plan).strip()
         return f"{llm_plan_str}\n"
 
 
@@ -124,13 +128,19 @@ class ReActReasoning(Reasoning):
         Based on your memory and current situation:
         1. Think through what is happening.
         2. Decide what you should do next.
-        3. Respond in the format below:
+        3. **IMPORTANT**: When you decide on an action, you MUST use the available function calls to execute it. Do not just describe what you want to do - actually call the appropriate functions.
 
-        Thought: [Explain your reasoning based on memory and current state]
-        Action: [Choose a single action to take]
+        Available functions include:
+        - teleport_to_location: to move to a specific coordinate
+        - speak_to: to send messages to other agents
+        - set_chosen_brand: to set your brand preference (buyers only)
 
-        Even if multiple actions need to be taken, come up with the first action that needs to be taken at this moment.
-        Refer the tools available to you while deciding the action.
+        Response:
+        Thought explanation: [Explain your reasoning based on memory and current state]
+        Action explanation: [describe the action you want to take]
+        Call the function: [call the function to execute the action]
+
+        Even if multiple actions need to be taken, come up with the first action that needs to be taken at this moment and execute it using function calls.
         ---
 
         # Response:
@@ -196,16 +206,22 @@ class CoTReasoning(Reasoning):
 
         # Instructions
         Think in multiple reasoning steps before you act.
+        **IMPORTANT**: When you decide on an action, you MUST use the available function calls to execute it. Do not just describe what you want to do - actually call the appropriate functions.
+
+        Available functions include:
+        - teleport_to_location: to move to a specific coordinate
+        - speak_to: to send messages to other agents
+        - set_chosen_brand: to set your brand preference (buyers only)
+
         Use the format below to respond:
 
         Thought 1: [Initial reasoning based on the observation]
         Thought 2: [How memory informs the situation]
         Thought 3: [Possible alternatives or risks]
         Thought 4: [Final decision and justification]
-        Action: [The single best action to take now]
+        Action: [Use function calls to execute your chosen action - do not just describe it]
 
         Keep the reasoning grounded in the current context and relevant history.
-        Refer the tools available to you while deciding the action.
 
         ---
 
@@ -219,7 +235,7 @@ class CoTReasoning(Reasoning):
 
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
         )
 
         response_message = rsp.choices[0].message
@@ -307,7 +323,7 @@ class ReWOOReasoning(Reasoning):
 
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=prompt, tool_schema=self.agent.tool_manager.get_schema()
+            prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
         )
 
         response_message = rsp.choices[0].message

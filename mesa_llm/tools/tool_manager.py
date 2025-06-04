@@ -2,7 +2,7 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from terminal_style import sprint
+from terminal_style import sprint, style
 
 from mesa_llm.tools.tool_decorator import _GLOBAL_TOOL_REGISTRY, add_tool_callback
 
@@ -44,7 +44,7 @@ class ToolManager:
 
     def get_tool_schema(self, fn: Callable, schema_name: str) -> dict:
         return getattr(fn, "__tool_schema__", None) or {
-            "error": f"Tool {schema_name} missing __tool_schema__"
+            "error": style(f"Tool {schema_name} missing __tool_schema__", color="red")
         }
 
     def get_all_tools_schema(self) -> list[dict]:
@@ -53,7 +53,7 @@ class ToolManager:
     def call(self, name: str, arguments: dict) -> str:
         """Call a registered tool with validated args"""
         if name not in self.tools:
-            raise ValueError(f"Tool '{name}' not found")
+            raise ValueError(style(f"Tool '{name}' not found", color="red"))
         return self.tools[name](**arguments)
 
     def has_tool(self, name: str) -> bool:
@@ -70,6 +70,7 @@ class ToolManager:
         Returns:
             A list of tool results
         """
+        sprint("tool_calls :", llm_response.tool_calls, color="teal")
 
         try:
             # Extract response message and tool calls
@@ -80,7 +81,7 @@ class ToolManager:
                 sprint("No tool calls in LLM response", color="red")
                 return []
 
-            print(f"Found {len(tool_calls)} tool call(s)")
+            # print(f"Found {len(tool_calls)} tool call(s)")
 
             tool_results = []
 
@@ -97,7 +98,10 @@ class ToolManager:
                     # Validate function exists in tool_manager
                     if function_name not in self.tools:
                         raise ValueError(
-                            f"Function '{function_name}' not found in ToolManager"
+                            style(
+                                f"Function '{function_name}' not found in ToolManager",
+                                color="red",
+                            )
                         )
 
                     # Parse function arguments
@@ -105,7 +109,9 @@ class ToolManager:
                         function_args = json.loads(function_args_str)
                     except json.JSONDecodeError as e:
                         raise json.JSONDecodeError(
-                            f"Invalid JSON in function arguments: {e}"
+                            style(
+                                f"Invalid JSON in function arguments: {e}", color="red"
+                            )
                         ) from e
 
                     # Get the actual function to call from tool_manager
@@ -118,8 +124,18 @@ class ToolManager:
                         )
                     except TypeError as e:
                         # Handle case where function arguments don't match function signature
-                        print(f"Warning: Function call failed with TypeError: {e}")
-                        print("Attempting to call with filtered arguments...")
+                        print(
+                            style(
+                                f"Warning: Function call failed with TypeError: {e}",
+                                color="yellow",
+                            )
+                        )
+                        print(
+                            style(
+                                "Attempting to call with filtered arguments...",
+                                color="yellow",
+                            )
+                        )
 
                         # Try to filter arguments to match function signature
                         import inspect
@@ -130,7 +146,9 @@ class ToolManager:
                             for k, v in function_args.items()
                             if k in sig.parameters
                         }
-                        function_response = function_to_call(**filtered_args)
+                        function_response = function_to_call(
+                            agent=agent, **filtered_args
+                        )
                     if not function_response:
                         function_response = f"{function_name} executed successfully"
 
@@ -146,8 +164,9 @@ class ToolManager:
 
                 except Exception as e:
                     # Handle individual tool call errors
-                    error_message = (
-                        f"Error executing tool call {i + 1} ({function_name}): {e!s}"
+                    error_message = style(
+                        f"Error executing tool call {i + 1} ({function_name}): {e!s}",
+                        color="red",
                     )
                     print(error_message)
 
@@ -156,17 +175,17 @@ class ToolManager:
                         "tool_call_id": tool_call.id,
                         "role": "tool",
                         "name": function_name,
-                        "response": f"Error: {e!s}",
+                        "response": style(f"Error: {e!s}", color="red"),
                     }
 
                     tool_results.append(error_result)
             return tool_results
 
         except AttributeError as e:
-            print(f"Error accessing LLM response structure: {e}")
+            print(style(f"Error accessing LLM response structure: {e}", color="red"))
             return []
         except Exception as e:
-            print(f"Unexpected error in call_tools: {e}")
+            print(style(f"Unexpected error in call_tools: {e}", color="red"))
             return []
 
 

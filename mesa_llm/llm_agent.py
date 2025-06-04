@@ -1,6 +1,3 @@
-import os
-
-from dotenv import load_dotenv
 from mesa.agent import Agent
 from mesa.discrete_space import (
     OrthogonalMooreGrid,
@@ -18,9 +15,7 @@ from mesa_llm.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
 from mesa_llm.reasoning import (
     Observation,
-    ReActReasoning,
     Reasoning,
-    ReWOOReasoning,
 )
 from mesa_llm.tools.tool_manager import ToolManager
 
@@ -108,6 +103,7 @@ class LLMAgent(Agent):
         """
         step = self.model.steps
         self_state = {
+            "agent_unique_id": self.unique_id,
             "system_prompt": self.system_prompt,
             "location": self.pos if self.pos is not None else self.cell.coordinate,
             "internal_state": self.internal_state,
@@ -156,32 +152,3 @@ class LLMAgent(Agent):
                 },
             )
         return f"{self} → {recipients} : {message}"
-
-
-if __name__ == "__main__":
-    model = Model()
-    load_dotenv()
-
-    llm_agent_colin = LLMAgent(
-        model=model,
-        api_key=os.getenv("GEMINI_API_KEY"),
-        reasoning=ReActReasoning,
-        llm_model="gemini/gemini-2.0-flash",
-        system_prompt="You are an agent that is a part of a simulation. You are able to use tools to interact with the environment.",
-    )
-
-    llm_agent_sanika = LLMAgent(
-        model=model,
-        api_key=os.getenv("GEMINI_API_KEY"),
-        reasoning=ReWOOReasoning,
-        llm_model="gemini/gemini-2.0-flash",
-        system_prompt="You are an agent that is a part of a simulation. You are able to use tools to interact with the environment.",
-    )
-
-    print(
-        llm_agent_colin.send_message(
-            "Isn't this working like a charm ?", [llm_agent_sanika]
-        )
-    )
-    print(llm_agent_sanika.memory.format_short_term(), "\n\n")
-    print(llm_agent_colin.memory.format_short_term(), "\n\n")

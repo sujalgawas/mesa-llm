@@ -39,12 +39,12 @@ model_params = {
         "value": 42,
         "label": "Random Seed",
     },
-    "initial_buyers": 25,
+    "initial_buyers": 5,
     "width": 10,
     "height": 10,
     "api_key": os.getenv("OPENAI_API_KEY"),
     "reasoning": ReActReasoning,
-    "llm_model": "openai/gpt-4o",
+    "llm_model": "openai/gpt-4o-mini",
     "vision": 5,
 }
 
@@ -68,3 +68,5 @@ page = SolaraViz(
 )
 
 page  # noqa
+
+# run with : solara run examples/negotiation/app.py

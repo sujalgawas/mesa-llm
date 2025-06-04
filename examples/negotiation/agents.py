@@ -32,9 +32,11 @@ class SellerAgent(LLMAgent):
 
     def step(self):
         print(
+            style("----------------------------------------", color="purple"),
             style("Seller agent ", color="purple"),
             style(self.unique_id, color="cyan"),
-            style(" is stepping ----------------", color="purple"),
+            style(" is stepping", color="purple"),
+            style("----------------------------------------", color="purple"),
         )
         observation = self.generate_obs()
         prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells, pitch them your product. Don't pitch to the same buyer agents again. "
@@ -67,10 +69,16 @@ class BuyerAgent(LLMAgent):
 
     def step(self):
         print(
+            style("----------------------------------------", color="purple"),
             style("Buyer agent ", color="purple"),
             style(self.unique_id, color="cyan"),
-            style(" is stepping ----------------", color="purple"),
+            style(" is stepping", color="purple"),
+            style("----------------------------------------", color="purple"),
         )
+
+        import json
+
+        print(json.dumps(self.tool_manager.get_all_tools_schema(), indent=2))
 
         observation = self.generate_obs()
         prompt = "Move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"

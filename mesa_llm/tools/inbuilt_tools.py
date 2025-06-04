@@ -17,14 +17,12 @@ if TYPE_CHECKING:
 
 
 @tool
-def teleport_to_location(
-    agent: "LLMAgent", target_coordinates: tuple[float, float]
-) -> str:
+def teleport_to_location(agent: "LLMAgent", target_coordinates: tuple[int, int]) -> str:
     """
     Teleport to a given location in a grid or continuous space.
 
     Args:
-        agent: The agent to move.
+        agent: The agent to move (as a LLM, ignore this argument in function calling).
         target_coordinates: The target coordinates to move to, specified as a tuple of (x, y) floats.
 
     Returns:
@@ -41,28 +39,41 @@ def teleport_to_location(
     elif isinstance(agent.model.space, ContinuousSpace):
         agent.model.space.move_agent(agent.model.space, agent, target_coordinates)
 
-    return f"This agent moved to {target_coordinates}."
+    return f"agent {agent.unique_id} moved to {target_coordinates}."
 
 
 @tool
 def speak_to(
-    speaker_agent: "LLMAgent", listener_agents: list["LLMAgent"], message: str
+    agent: "LLMAgent", listener_agents_unique_ids: list[int], message: str
 ) -> str:
     """
     Send a message to the recipients and commits it to their memory.
     Args:
-        speaker_agent: The agent sending the message
-        listener_agents: The agents receiving the message
+        agent: The agent sending the message (as a LLM, ignore this argument in function calling).
+        listener_agents_unique_ids: The unique ids of the agents receiving the message
         message: The message to send
     """
-    for recipient in [*listener_agents, speaker_agent]:
+    listener_agents = [
+        agent.model.get_agent(listener_agent_unique_id)
+        for listener_agent_unique_id in listener_agents_unique_ids
+    ]
+
+    for recipient in [*listener_agents, agent]:
         recipient.memory.add_to_memory(
             type="Message",
             content=message,
-            step=speaker_agent.model.steps,
+            step=agent.model.steps,
             metadata={
-                "sender": speaker_agent,
+                "sender": agent,
                 "recipients": listener_agents,
             },
         )
-    return f"{speaker_agent} → {listener_agents} : {message}"
+    return f"{agent.unique_id} → {listener_agents} : {message}"
+
+
+if __name__ == "__main__":
+    # CL to execute this file: python -m mesa_llm.tools.inbuilt_tools
+    import json
+
+    print(json.dumps(teleport_to_location.__tool_schema__, indent=2))
+    print(json.dumps(speak_to.__tool_schema__, indent=2))

@@ -6,9 +6,10 @@ import re
 import textwrap
 import warnings
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, get_type_hints
+from typing import TYPE_CHECKING, Any, get_args, get_origin, get_type_hints
 
 if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
     from mesa_llm.tools.tool_manager import ToolManager
 
 
@@ -31,19 +32,51 @@ _RET_HEADER_RE = re.compile(r"^\s*Returns?:\s*$", re.IGNORECASE)
 _PARAM_LINE_RE = re.compile(r"^\s*(\w+)\s*:\s*(.+)$")
 
 
-def _python_to_json_type(py_type: Any) -> str:
-    json_type_map = {
-        int: "integer",
-        float: "number",
-        str: "string",
-        bool: "boolean",
-        bytes: "string",
+def _python_to_json_type(py_type: Any) -> dict[str, Any]:
+    # Handle string annotations by converting to actual types
+    if isinstance(py_type, str):
+        base_type = py_type.split("[")[
+            0
+        ]  # Extract base type from generics like "tuple[int, int]"
+        py_type = (
+            getattr(__builtins__, base_type, py_type)
+            if hasattr(__builtins__, base_type)
+            else py_type
+        )
+
+    # Get args before getting origin for better type inference
+    args = get_args(py_type)
+
+    # Extract origin type from generics (e.g., tuple from tuple[int, int])
+    py_type = get_origin(py_type) or py_type
+
+    # Direct mapping to JSON schema types
+    if py_type in (list, tuple):
+        # For arrays, we need to specify the items type
+        item_type = "integer"  # Default to integer for coordinates
+        if args:
+            # Try to infer item type from generic args (e.g., tuple[int, int] -> int)
+            if args[0] is int:
+                item_type = "integer"
+            elif args[0] is float:
+                item_type = "number"
+            elif args[0] is str:
+                item_type = "string"
+        return {"type": "array", "items": {"type": item_type}}
+
+    type_map = {
+        int: {"type": "integer"},
+        float: {"type": "number"},
+        str: {"type": "string"},
+        bool: {"type": "boolean"},
+        bytes: {"type": "string"},
     }
-    return json_type_map.get(py_type, "array" if py_type in (list, tuple) else "object")
+    return type_map.get(py_type, {"type": "object"})
 
 
 def _parse_docstring(
     func: callable,
+    ignore_agent: bool = True,
 ) -> tuple[str, dict[str, str], str | None]:
     """
     Parse a function's Google-style docstring.
@@ -142,7 +175,12 @@ def _parse_docstring(
 # ---------- decorator ----------------------------------------------------
 
 
-def tool(fn: Callable | None = None, *, tool_manager: ToolManager | None = None):
+def tool(
+    fn: Callable | None = None,
+    *,
+    tool_manager: ToolManager | None = None,
+    ignore_agent: bool = True,
+):
     """
     Decorate a function so it becomes an LLM-callable tool and is auto-registered.
 
@@ -166,10 +204,22 @@ def tool(fn: Callable | None = None, *, tool_manager: ToolManager | None = None)
             type_hints = getattr(func, "__annotations__", {})
 
         properties = {}
-        for param_name, _param in sig.parameters.items():
+
+        # filter out  agent argument if ignore_agent is True
+        if ignore_agent:
+            required_params = {
+                param_name: _param
+                for param_name, _param in sig.parameters.items()
+                if param_name.lower() != "agent"
+            }
+        else:
+            required_params = sig.parameters
+
+        for param_name, _param in required_params.items():
             raw_type = type_hints.get(param_name, Any)
+            type_schema = _python_to_json_type(raw_type)
             properties[param_name] = {
-                "type": _python_to_json_type(raw_type),
+                **type_schema,
                 "description": arg_docs.get(param_name, ""),
             }
             if not arg_docs.get(param_name):
@@ -186,7 +236,7 @@ def tool(fn: Callable | None = None, *, tool_manager: ToolManager | None = None)
                 "parameters": {
                     "type": "object",
                     "properties": properties,
-                    "required": list(sig.parameters),
+                    "required": list(required_params),
                 },
             },
         }
@@ -214,16 +264,17 @@ if __name__ == "__main__":
     # CL to execute this file: python -m mesa_llm.tools.tool_decorator
 
     @tool
-    def dummy_function(location: str, priority: int = 0):
+    def dummy_function(agent: LLMAgent, location: tuple[int, int], priority: int = 0):
         """
         Move to a location.
         Args:
+            agent: The agent to move
             location: The location to move to.
             priority: The priority of the location.
 
         Returns:
             The location moved to with priority.
         """
-        return f"Moved to {location} with priority {priority}"
+        return f"Moved {agent.unique_id} to {location} with priority {priority}"
 
     print(json.dumps(dummy_function.__tool_schema__, indent=2))
