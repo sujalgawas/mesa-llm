@@ -6,7 +6,7 @@ import re
 import textwrap
 import warnings
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, get_args, get_origin, get_type_hints
+from typing import TYPE_CHECKING, Any, Union, get_args, get_origin, get_type_hints
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -33,45 +33,174 @@ _PARAM_LINE_RE = re.compile(r"^\s*(\w+)\s*:\s*(.+)$")
 
 
 def _python_to_json_type(py_type: Any) -> dict[str, Any]:
-    # Handle string annotations by converting to actual types
-    if isinstance(py_type, str):
-        base_type = py_type.split("[")[
-            0
-        ]  # Extract base type from generics like "tuple[int, int]"
-        py_type = (
-            getattr(__builtins__, base_type, py_type)
-            if hasattr(__builtins__, base_type)
-            else py_type
-        )
+    """
+    Convert Python type hints to JSON Schema type definitions.
 
-    # Get args before getting origin for better type inference
+    Handles:
+    - Basic types: int, str, float, bool
+    - Collections: list, tuple, set
+    - Generics: list[int], tuple[int, int], etc.
+    - Union types: Union[int, str], int | str
+    - Optional types: Optional[int], int | None
+    - Nested types: list[tuple[int, str]]
+    """
+
+    # Handle None type
+    if py_type is type(None):
+        return {"type": "null"}
+
+    # Handle string annotations by trying to evaluate them
+    if isinstance(py_type, str):
+        # Try to handle common string representations
+        try:
+            # Handle basic generic patterns like "list[int]", "tuple[int, int]"
+            if "[" in py_type and "]" in py_type:
+                base_type = py_type.split("[")[0].strip()
+                # Extract the content inside brackets
+                inner_content = py_type[py_type.find("[") + 1 : py_type.rfind("]")]
+
+                # Map string type names to actual types
+                type_mapping = {
+                    "int": int,
+                    "str": str,
+                    "float": float,
+                    "bool": bool,
+                    "list": list,
+                    "tuple": tuple,
+                    "dict": dict,
+                    "set": set,
+                }
+
+                if base_type in type_mapping:
+                    base = type_mapping[base_type]
+                    if base in (list, tuple, set):
+                        # Handle array-like types
+                        if "," in inner_content:
+                            # Multiple types like tuple[int, str]
+                            return {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            }  # Fallback for mixed types
+                        else:
+                            # Single type like list[int]
+                            item_type = type_mapping.get(inner_content.strip(), str)
+                            return {
+                                "type": "array",
+                                "items": _python_to_json_type(item_type),
+                            }
+
+            # Try to get the base type for simple cases
+            base_type = py_type.split("[")[0].strip()
+            type_mapping = {
+                "int": int,
+                "str": str,
+                "float": float,
+                "bool": bool,
+                "list": list,
+                "tuple": tuple,
+                "dict": dict,
+            }
+            if base_type in type_mapping:
+                py_type = type_mapping[base_type]
+
+        except Exception:
+            # If parsing fails, default to string
+            return {"type": "string"}
+
+    # Get the origin and args for generic types
+    origin = get_origin(py_type)
     args = get_args(py_type)
 
-    # Extract origin type from generics (e.g., tuple from tuple[int, int])
-    py_type = get_origin(py_type) or py_type
+    # Handle Union types (including Optional which is Union[T, None])
+    if origin is Union:
+        # Check if it's Optional (Union with None)
+        non_none_args = [arg for arg in args if arg is not type(None)]
 
-    # Direct mapping to JSON schema types
-    if py_type in (list, tuple):
-        # For arrays, we need to specify the items type
-        item_type = "integer"  # Default to integer for coordinates
-        if args:
-            # Try to infer item type from generic args (e.g., tuple[int, int] -> int)
-            if args[0] is int:
-                item_type = "integer"
-            elif args[0] is float:
-                item_type = "number"
-            elif args[0] is str:
-                item_type = "string"
-        return {"type": "array", "items": {"type": item_type}}
+        if len(non_none_args) == 1 and type(None) in args:
+            # This is Optional[T] - handle the non-None type but allow null
+            base_schema = _python_to_json_type(non_none_args[0])
+            # Add null as an allowed type
+            if "type" in base_schema:
+                if isinstance(base_schema["type"], list):
+                    base_schema["type"].append("null")
+                else:
+                    base_schema["type"] = [base_schema["type"], "null"]
+            else:
+                base_schema = {"anyOf": [base_schema, {"type": "null"}]}
+            return base_schema
 
-    type_map = {
+        elif len(non_none_args) > 1:
+            # Multiple non-None types - create anyOf schema
+            return {
+                "anyOf": [
+                    _python_to_json_type(arg)
+                    for arg in non_none_args
+                    if arg is not type(None)
+                ]
+            }
+        else:
+            # Only None type
+            return {"type": "null"}
+
+    # Handle generic types
+    if origin is not None:
+        # Handle list, tuple, set as arrays
+        if origin in (list, tuple, set):
+            if args:
+                # Handle tuple with specific types like tuple[int, str]
+                if origin is tuple and len(args) > 1:
+                    # For tuples with multiple specific types, we'll use array with mixed items
+                    # JSON Schema doesn't handle tuples with different types perfectly
+                    item_schemas = [_python_to_json_type(arg) for arg in args]
+                    # If all items have the same type, use that type
+                    if (
+                        len(
+                            {
+                                item.get("type")
+                                for item in item_schemas
+                                if "type" in item
+                            }
+                        )
+                        == 1
+                    ):
+                        return {"type": "array", "items": item_schemas[0]}
+                    else:
+                        # Mixed types - use anyOf for items
+                        return {"type": "array", "items": {"anyOf": item_schemas}}
+                else:
+                    # Single type parameter like list[int] or tuple[int, ...]
+                    item_type = args[0]
+                    return {"type": "array", "items": _python_to_json_type(item_type)}
+            else:
+                # No type parameters - generic array
+                return {"type": "array", "items": {"type": "string"}}
+
+        # Handle dict
+        elif origin is dict:
+            if len(args) >= 2:
+                # dict[str, int] -> object with string values of int type
+                value_type = _python_to_json_type(args[1])
+                return {"type": "object", "additionalProperties": value_type}
+            else:
+                return {"type": "object"}
+
+        # Use the origin type for other generics
+        py_type = origin
+
+    # Handle basic Python types
+    type_mapping = {
         int: {"type": "integer"},
         float: {"type": "number"},
         str: {"type": "string"},
         bool: {"type": "boolean"},
-        bytes: {"type": "string"},
+        bytes: {"type": "string", "format": "byte"},
+        list: {"type": "array", "items": {"type": "string"}},
+        tuple: {"type": "array", "items": {"type": "string"}},
+        set: {"type": "array", "items": {"type": "string"}},
+        dict: {"type": "object"},
     }
-    return type_map.get(py_type, {"type": "object"})
+
+    return type_mapping.get(py_type, {"type": "object"})
 
 
 def _parse_docstring(
@@ -199,7 +328,7 @@ def tool(
         sig = inspect.signature(func)
         try:
             type_hints = get_type_hints(func)
-        except NameError:
+        except (NameError, AttributeError, TypeError):
             # Fallback to using annotations directly if type_hints evaluation fails
             type_hints = getattr(func, "__annotations__", {})
 
@@ -261,20 +390,68 @@ def tool(
 
 
 if __name__ == "__main__":
-    # CL to execute this file: python -m mesa_llm.tools.tool_decorator
+    # Test different type hints
 
     @tool
-    def dummy_function(agent: LLMAgent, location: tuple[int, int], priority: int = 0):
-        """
-        Move to a location.
+    def test_basic_types(agent: LLMAgent, count: int, name: str, active: bool):
+        """Test basic types.
         Args:
-            agent: The agent to move
-            location: The location to move to.
-            priority: The priority of the location.
-
-        Returns:
-            The location moved to with priority.
+            agent: The agent
+            count: Number count
+            name: The name
+            active: Whether active
         """
-        return f"Moved {agent.unique_id} to {location} with priority {priority}"
 
-    print(json.dumps(dummy_function.__tool_schema__, indent=2))
+    @tool
+    def test_collections(
+        agent: LLMAgent, items: list[int], coords: tuple[int, int], tags: set[str]
+    ):
+        """Test collection types.
+        Args:
+            agent: The agent
+            items: List of integers
+            coords: Coordinate pair
+            tags: Set of tags
+        """
+
+    @tool
+    def test_optional(agent: LLMAgent, required: str, optional: int | None = None):
+        """Test optional types.
+        Args:
+            agent: The agent
+            required: Required string
+            optional: Optional integer
+        """
+
+    @tool
+    def test_union(agent: LLMAgent, value: int | str, data: int | float):
+        """Test union types.
+        Args:
+            agent: The agent
+            value: Either int or string
+            data: Either int or float
+        """
+
+    @tool
+    def test_nested(
+        agent: LLMAgent, matrix: list[list[int]], pairs: list[tuple[str, int]]
+    ):
+        """Test nested types.
+        Args:
+            agent: The agent
+            matrix: Matrix of integers
+            pairs: List of string-int pairs
+        """
+
+    # Print schemas for all test functions
+    test_functions = [
+        test_basic_types,
+        test_collections,
+        test_optional,
+        test_union,
+        test_nested,
+    ]
+
+    for func in test_functions:
+        print(f"\n=== {func.__name__} ===")
+        print(json.dumps(func.__tool_schema__, indent=2))

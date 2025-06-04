@@ -18,14 +18,15 @@ if TYPE_CHECKING:
 
 @tool
 def teleport_to_location(
-    agent: "LLMAgent", target_coordinates: tuple[float, float] | list[float]
+    agent: "LLMAgent",
+    target_coordinates: tuple[int, int] | tuple[float, float] | list[float] | list[int],
 ) -> str:
     """
     Teleport to a given location in a grid or continuous space.
 
     Args:
         agent: The agent to move (as a LLM, ignore this argument in function calling).
-        target_coordinates: The target coordinates to move to, specified as a tuple of (x, y) floats.
+        target_coordinates: The target coordinates to move to, specified as a tuple of (x, y) or a list [x, y].
 
     Returns:
         A string indicating the agent's new position.
