@@ -17,7 +17,9 @@ if TYPE_CHECKING:
 
 
 @tool
-def teleport_to_location(agent: "LLMAgent", target_coordinates: tuple[int, int]) -> str:
+def teleport_to_location(
+    agent: "LLMAgent", target_coordinates: tuple[float, float] | list[float]
+) -> str:
     """
     Teleport to a given location in a grid or continuous space.
 
@@ -28,7 +30,7 @@ def teleport_to_location(agent: "LLMAgent", target_coordinates: tuple[int, int])
     Returns:
         A string indicating the agent's new position.
     """
-
+    target_coordinates = tuple(target_coordinates)
     if isinstance(agent.model.grid, SingleGrid | MultiGrid):
         agent.model.grid.move_agent(agent, target_coordinates)
 
