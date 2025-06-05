@@ -128,24 +128,8 @@ class ReActReasoning(Reasoning):
         Based on your memory and current situation:
         1. Think through what is happening.
         2. Decide what you should do next.
-        3. **IMPORTANT**: When you decide on an action, you MUST use the available function calls to execute it. Do not just describe what you want to do - actually call the appropriate functions.
+        3. When you decide on an action, you use the available function calls to execute it. You must use the tools provided to you as a tool call.
 
-        Available functions include:
-        - teleport_to_location: to move to a specific coordinate
-        - speak_to: to send messages to other agents
-        - set_chosen_brand: to set your brand preference (buyers only)
-
-        Response:
-        Thought explanation: [Explain your reasoning based on memory and current state]
-        Action explanation: [describe the action you want to take]
-        Call the function: [call the function to execute the action]
-
-        Even if multiple actions need to be taken, come up with the first action that needs to be taken at this moment and execute it using function calls.
-        ---
-
-        # Response:
-        Thought:
-        Action:
         """
 
         llm.set_system_prompt(system_prompt)
