@@ -76,11 +76,7 @@ class BuyerAgent(LLMAgent):
             style("----------------------------------------", color="purple"),
         )
 
-        import json
-
-        print(json.dumps(self.tool_manager.get_all_tools_schema(), indent=2))
-
         observation = self.generate_obs()
-        prompt = "Move around if you are not engaged in a conversation. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
+        prompt = "Move around if you are not engaged in a conversation by using the teleport_to_location tool. Seller agents around you might try to pitch their product by sending you messages, take them into account and decide what to set yout chosen brand attribute as"
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)

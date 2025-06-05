@@ -61,7 +61,7 @@ class NegotiationModel(Model):
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work.",
+            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["hardworking", "dedicated", "persuasive"],
         )
@@ -75,7 +75,7 @@ class NegotiationModel(Model):
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing.",
+            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["lazy", "unmotivated"],
         )

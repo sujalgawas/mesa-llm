@@ -44,7 +44,7 @@ model_params = {
     "height": 10,
     "api_key": os.getenv("OPENAI_API_KEY"),
     "reasoning": ReActReasoning,
-    "llm_model": "openai/gpt-4o-mini",
+    "llm_model": "openai/gpt-4",
     "vision": 5,
 }
 
