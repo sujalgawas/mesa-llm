@@ -1,3 +1,8 @@
+import datetime
+import sys
+
+if sys.version_info < (3, 11):
+    datetime.UTC = datetime.timezone.utc
 from unittest.mock import Mock
 
 import pytest

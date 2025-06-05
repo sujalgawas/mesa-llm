@@ -146,9 +146,9 @@ class ToolManager:
                             for k, v in function_args.items()
                             if k in sig.parameters
                         }
-                        function_response = function_to_call(
-                            agent=agent, **filtered_args
-                        )
+
+                        function_response = function_to_call(**filtered_args)
+
                     if not function_response:
                         function_response = f"{function_name} executed successfully"
 
