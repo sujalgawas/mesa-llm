@@ -41,6 +41,19 @@ For more help on using Mesa-LLM, check out the following resources:
 - [Mesa-LLM Discussions](https://github.com/wang-boyu/mesa-llm/discussions)
 - [PyPI](https://pypi.org/project/mesa-llm/)
 
+## Using Mesa-LLM
+
+Mesa-LLM supports the following LLM models :
+
+- OpenAI
+- Anthropic
+- xAI
+- Huggingface
+- Ollama
+- OpenRouter
+- NovitaAI
+
+
 ## Contributing to Mesa-LLM
 
 Want to join the team or just curious about what is happening with Mesa & Mesa-LLM? You can...

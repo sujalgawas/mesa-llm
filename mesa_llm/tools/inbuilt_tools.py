@@ -19,17 +19,18 @@ if TYPE_CHECKING:
 @tool
 def teleport_to_location(
     agent: "LLMAgent",
-    target_coordinates: tuple[int, int] | tuple[float, float] | list[float] | list[int],
+    target_coordinates: list[int],
 ) -> str:
     """
-    Teleport to a given location in a grid or continuous space.
+    Teleport the agent to specific (x, y) coordinates. Example call: {"name": "teleport_to_location", "arguments": { "target_coordinates": [3, 7] }}
 
     Args:
-        agent: The agent to move (as a LLM, ignore this argument in function calling).
-        target_coordinates: The target coordinates to move to, specified as a tuple of (x, y) or a list [x, y].
+        target_coordinates: Exactly two integers in the form [x, y] that fall inside the current environment bounds. Example: [3, 7]
+        agent: Provided automatically
 
     Returns:
-        A string indicating the agent's new position.
+        a string confirming the agent's new position.
+
     """
     target_coordinates = tuple(target_coordinates)
     if isinstance(agent.model.grid, SingleGrid | MultiGrid):
@@ -57,8 +58,10 @@ def speak_to(
         message: The message to send
     """
     listener_agents = [
-        agent.model.get_agent(listener_agent_unique_id)
-        for listener_agent_unique_id in listener_agents_unique_ids
+        listener_agent
+        for listener_agent in agent.model.agents()
+        if listener_agent.unique_id in listener_agents_unique_ids
+        and listener_agent.unique_id != agent.unique_id
     ]
 
     for recipient in [*listener_agents, agent]:
