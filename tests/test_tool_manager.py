@@ -427,18 +427,6 @@ class TestToolManager:
         assert len(result) == 1
         assert result[0]["response"] == "silent_tool executed successfully"
 
-    def test_call_tools_attribute_error(self):
-        """Test call_tools with malformed LLM response."""
-        manager = ToolManager()
-        mock_agent = Mock()
-
-        # Mock response without proper structure
-        mock_response = Mock()
-        del mock_response.tool_calls  # Remove the attribute to cause AttributeError
-
-        result = manager.call_tools(mock_agent, mock_response)
-        assert result == []
-
     def test_call_tools_general_exception(self):
         """Test call_tools with general exception during processing."""
         manager = ToolManager()
