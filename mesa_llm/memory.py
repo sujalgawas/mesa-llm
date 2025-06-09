@@ -90,7 +90,7 @@ class Memory:
                 self.short_term_memory.popleft()
                 for _ in range(self.consolidation_capacity)
             ]
-            self.update_long_term_memory(memories_to_consolidate)
+            self._update_long_term_memory(memories_to_consolidate)
         agent_display_name = (
             self.agent.__class__.__name__ + " " + str(self.agent.unique_id) + " "
         )
@@ -116,7 +116,7 @@ class Memory:
         """
         return str(self.long_term_memory)
 
-    def update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
+    def _update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
         """
         Update the long term memory by summarizing the short term memory with a LLM
         """
