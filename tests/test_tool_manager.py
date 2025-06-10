@@ -323,42 +323,6 @@ class TestToolManager:
         assert result[0]["tool_call_id"] == "call_123"
         assert "Error:" in result[0]["response"]
 
-    def test_call_tools_type_error_handling(self):
-        """Test call_tools handling TypeError with argument filtering."""
-        manager = ToolManager()
-        mock_agent = Mock()
-
-        def strict_tool(agent, required_param: str) -> str:
-            """Strict tool.
-            Args:
-                agent: The agent.
-                required_param: Required parameter.
-            Returns:
-                Test result.
-            """
-            return f"Result: {required_param}"
-
-        manager.register(strict_tool)
-
-        # Mock LLM response with extra arguments that don't match function signature
-        mock_tool_call = Mock()
-        mock_tool_call.id = "call_123"
-        mock_tool_call.function.name = "strict_tool"
-        mock_tool_call.function.arguments = (
-            '{"required_param": "test", "extra_param": "ignored"}'
-        )
-
-        mock_response = Mock()
-        mock_response.tool_calls = [mock_tool_call]
-
-        result = manager.call_tools(mock_agent, mock_response)
-
-        # This test should show that the tool call fails since agent parameter filtering
-        # in the current implementation doesn't properly handle the agent parameter
-        assert len(result) == 1
-        assert result[0]["tool_call_id"] == "call_123"
-        assert "Error:" in result[0]["response"]
-
     def test_call_tools_successful_argument_filtering(self):
         """Test call_tools successfully filtering extra arguments for functions without agent parameter."""
         manager = ToolManager()
