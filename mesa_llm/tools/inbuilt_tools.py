@@ -59,7 +59,7 @@ def speak_to(
     """
     listener_agents = [
         listener_agent
-        for listener_agent in agent.model.agents()
+        for listener_agent in agent.model.agents
         if listener_agent.unique_id in listener_agents_unique_ids
         and listener_agent.unique_id != agent.unique_id
     ]

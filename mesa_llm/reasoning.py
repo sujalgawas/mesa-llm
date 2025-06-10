@@ -136,7 +136,6 @@ class ReActReasoning(Reasoning):
         rsp = llm.generate(
             prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
         )
-
         response_message = rsp.choices[0].message
         react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
         memory.add_to_memory(type="Plan", content=str(react_plan), step=step)
