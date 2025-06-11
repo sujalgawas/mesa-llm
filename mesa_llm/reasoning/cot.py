@@ -62,7 +62,6 @@ class CoTReasoning(Reasoning):
         **IMPORTANT**: When you decide on an action, use the available function calls to execute 1 action. You must use the tools provided to you as a tool call.
         **IMPORTANT**: There is no need to explicitly state the action in your reasoning in the message with your thoughts. The action will be inferred from the function call you make.
         ---
-
         """
 
         llm.set_system_prompt(system_prompt)
