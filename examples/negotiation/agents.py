@@ -39,7 +39,7 @@ class SellerAgent(LLMAgent):
             style("----------------------------------------", color="purple"),
         )
         observation = self.generate_obs()
-        prompt = "Look around you and go to grids where buyers are present, if there are any buyers in your cell or in the neighboring cells, pitch them your product. Don't pitch to the same buyer agents again. "
+        prompt = "Look around you and go to grids where buyers are present using the teleport_to_location tool, if there are any buyers in your cell or in the neighboring cells, pitch them your product using the speak_to tool. Don't pitch to the same buyer agents again. "
         plan = self.reasoning.plan(prompt=prompt, obs=observation)
         self.apply_plan(plan)
 
