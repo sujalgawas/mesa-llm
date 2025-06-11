@@ -1,0 +1,977 @@
+{
+  "metadata": {
+    "simulation_id": "717b0bf7",
+    "start_time": "2025-06-11T03:33:06.005650+00:00",
+    "model_class": "MockModel",
+    "recording_config": {
+      "observations": true,
+      "plans": true,
+      "actions": true,
+      "messages": true,
+      "state_changes": true
+    },
+    "end_time": "2025-06-11T03:33:06.005747+00:00",
+    "total_steps": 5,
+    "total_events": 33,
+    "total_agents": 3,
+    "duration_seconds": 9.9e-05
+  },
+  "events": [
+    {
+      "event_id": "717b0bf7_000000",
+      "timestamp": "2025-06-11 03:33:06.005668+00:00",
+      "step": 1,
+      "agent_id": 0,
+      "event_type": "observation",
+      "content": {
+        "step": 0,
+        "self_state": {
+          "agent_id": 0,
+          "position": [
+            0,
+            0
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000001",
+      "timestamp": "2025-06-11 03:33:06.005673+00:00",
+      "step": 1,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "step": 0,
+        "self_state": {
+          "agent_id": 1,
+          "position": [
+            1,
+            1
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000002",
+      "timestamp": "2025-06-11 03:33:06.005676+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "step": 0,
+        "self_state": {
+          "agent_id": 2,
+          "position": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000003",
+      "timestamp": "2025-06-11 03:33:06.005680+00:00",
+      "step": 1,
+      "agent_id": 0,
+      "event_type": "message",
+      "content": {
+        "message": "Hello from step 0!",
+        "recipient_ids": [
+          1,
+          2
+        ]
+      },
+      "metadata": {
+        "source": "agent_communication"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000004",
+      "timestamp": "2025-06-11 03:33:06.005681+00:00",
+      "step": 1,
+      "agent_id": 0,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000005",
+      "timestamp": "2025-06-11 03:33:06.005683+00:00",
+      "step": 1,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000006",
+      "timestamp": "2025-06-11 03:33:06.005684+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000007",
+      "timestamp": "2025-06-11 03:33:06.005690+00:00",
+      "step": 2,
+      "agent_id": 0,
+      "event_type": "observation",
+      "content": {
+        "step": 1,
+        "self_state": {
+          "agent_id": 0,
+          "position": [
+            0,
+            0
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000008",
+      "timestamp": "2025-06-11 03:33:06.005692+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "step": 1,
+        "self_state": {
+          "agent_id": 1,
+          "position": [
+            1,
+            1
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000009",
+      "timestamp": "2025-06-11 03:33:06.005693+00:00",
+      "step": 2,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "step": 1,
+        "self_state": {
+          "agent_id": 2,
+          "position": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000010",
+      "timestamp": "2025-06-11 03:33:06.005694+00:00",
+      "step": 2,
+      "agent_id": 0,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000011",
+      "timestamp": "2025-06-11 03:33:06.005695+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000012",
+      "timestamp": "2025-06-11 03:33:06.005696+00:00",
+      "step": 2,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000013",
+      "timestamp": "2025-06-11 03:33:06.005700+00:00",
+      "step": 3,
+      "agent_id": 0,
+      "event_type": "observation",
+      "content": {
+        "step": 2,
+        "self_state": {
+          "agent_id": 0,
+          "position": [
+            0,
+            0
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000014",
+      "timestamp": "2025-06-11 03:33:06.005702+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "step": 2,
+        "self_state": {
+          "agent_id": 1,
+          "position": [
+            1,
+            1
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000015",
+      "timestamp": "2025-06-11 03:33:06.005703+00:00",
+      "step": 3,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "step": 2,
+        "self_state": {
+          "agent_id": 2,
+          "position": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000016",
+      "timestamp": "2025-06-11 03:33:06.005704+00:00",
+      "step": 3,
+      "agent_id": 0,
+      "event_type": "message",
+      "content": {
+        "message": "Hello from step 2!",
+        "recipient_ids": [
+          1,
+          2
+        ]
+      },
+      "metadata": {
+        "source": "agent_communication"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000017",
+      "timestamp": "2025-06-11 03:33:06.005705+00:00",
+      "step": 3,
+      "agent_id": 0,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000018",
+      "timestamp": "2025-06-11 03:33:06.005706+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000019",
+      "timestamp": "2025-06-11 03:33:06.005707+00:00",
+      "step": 3,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000020",
+      "timestamp": "2025-06-11 03:33:06.005710+00:00",
+      "step": 4,
+      "agent_id": 0,
+      "event_type": "observation",
+      "content": {
+        "step": 3,
+        "self_state": {
+          "agent_id": 0,
+          "position": [
+            0,
+            0
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000021",
+      "timestamp": "2025-06-11 03:33:06.005712+00:00",
+      "step": 4,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "step": 3,
+        "self_state": {
+          "agent_id": 1,
+          "position": [
+            1,
+            1
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000022",
+      "timestamp": "2025-06-11 03:33:06.005713+00:00",
+      "step": 4,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "step": 3,
+        "self_state": {
+          "agent_id": 2,
+          "position": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000023",
+      "timestamp": "2025-06-11 03:33:06.005714+00:00",
+      "step": 4,
+      "agent_id": 0,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000024",
+      "timestamp": "2025-06-11 03:33:06.005716+00:00",
+      "step": 4,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000025",
+      "timestamp": "2025-06-11 03:33:06.005717+00:00",
+      "step": 4,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000026",
+      "timestamp": "2025-06-11 03:33:06.005720+00:00",
+      "step": 5,
+      "agent_id": 0,
+      "event_type": "observation",
+      "content": {
+        "step": 4,
+        "self_state": {
+          "agent_id": 0,
+          "position": [
+            0,
+            0
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000027",
+      "timestamp": "2025-06-11 03:33:06.005722+00:00",
+      "step": 5,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "step": 4,
+        "self_state": {
+          "agent_id": 1,
+          "position": [
+            1,
+            1
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_2": {
+            "position": [
+              2,
+              2
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000028",
+      "timestamp": "2025-06-11 03:33:06.005723+00:00",
+      "step": 5,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "step": 4,
+        "self_state": {
+          "agent_id": 2,
+          "position": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "active"
+          ]
+        },
+        "local_state": {
+          "neighbor_0": {
+            "position": [
+              0,
+              0
+            ],
+            "state": "active"
+          },
+          "neighbor_1": {
+            "position": [
+              1,
+              1
+            ],
+            "state": "active"
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000029",
+      "timestamp": "2025-06-11 03:33:06.005724+00:00",
+      "step": 5,
+      "agent_id": 0,
+      "event_type": "message",
+      "content": {
+        "message": "Hello from step 4!",
+        "recipient_ids": [
+          1,
+          2
+        ]
+      },
+      "metadata": {
+        "source": "agent_communication"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000030",
+      "timestamp": "2025-06-11 03:33:06.005725+00:00",
+      "step": 5,
+      "agent_id": 0,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000031",
+      "timestamp": "2025-06-11 03:33:06.005726+00:00",
+      "step": 5,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "717b0bf7_000032",
+      "timestamp": "2025-06-11 03:33:06.005727+00:00",
+      "step": 5,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "action_type": "move",
+        "action_details": {
+          "direction": "north",
+          "distance": 1
+        }
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    }
+  ],
+  "agent_summaries": {
+    "0": {
+      "total_events": 13,
+      "event_types": [
+        "message",
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event": "2025-06-11T03:33:06.005668+00:00",
+      "last_event": "2025-06-11T03:33:06.005725+00:00"
+    },
+    "1": {
+      "total_events": 10,
+      "event_types": [
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event": "2025-06-11T03:33:06.005673+00:00",
+      "last_event": "2025-06-11T03:33:06.005726+00:00"
+    },
+    "2": {
+      "total_events": 10,
+      "event_types": [
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event": "2025-06-11T03:33:06.005676+00:00",
+      "last_event": "2025-06-11T03:33:06.005727+00:00"
+    }
+  },
+  "communication_network": {
+    "total_messages": 3,
+    "communication_matrix": {
+      "0": {
+        "1": 3,
+        "2": 3
+      }
+    },
+    "agents_involved": [
+      0,
+      1,
+      2
+    ]
+  }
+}

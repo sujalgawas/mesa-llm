@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "analysis_timestamp": "2025-06-11T03:33:06.336509+00:00",
+    "source_recording": "demo_recordings/simulation_717b0bf7_20250611_033306.json",
+    "analyzer_capabilities": {
+      "pandas": true,
+      "networkx": true,
+      "matplotlib": true,
+      "seaborn": true
+    }
+  },
+  "basic_stats": {
+    "total_events": 33,
+    "unique_agents": 3,
+    "simulation_steps": 5,
+    "event_types": {
+      "observation": 15,
+      "message": 3,
+      "action": 15
+    },
+    "agents_list": [
+      0,
+      1,
+      2
+    ],
+    "start_time": "2025-06-11T03:33:06.005650+00:00",
+    "end_time": "2025-06-11T03:33:06.005747+00:00"
+  },
+  "agent_activity": {
+    "0": {
+      "total_events": 13,
+      "event_types": {
+        "observation": 5,
+        "message": 3,
+        "action": 5
+      },
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event_step": 1,
+      "last_event_step": 5
+    },
+    "1": {
+      "total_events": 10,
+      "event_types": {
+        "observation": 5,
+        "action": 5
+      },
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event_step": 1,
+      "last_event_step": 5
+    },
+    "2": {
+      "total_events": 10,
+      "event_types": {
+        "observation": 5,
+        "action": 5
+      },
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event_step": 1,
+      "last_event_step": 5
+    }
+  },
+  "communication_patterns": {
+    "total_messages": 3,
+    "communication_matrix": {
+      "0": {
+        "1": 3,
+        "2": 3
+      }
+    },
+    "most_active_senders": [
+      [
+        0,
+        6
+      ]
+    ],
+    "most_active_receivers": [
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "agents_involved": [
+      0,
+      1,
+      2
+    ]
+  },
+  "temporal_patterns": {
+    "activity_by_step": {
+      "1": 7,
+      "2": 6,
+      "3": 7,
+      "4": 6,
+      "5": 7
+    },
+    "event_types_by_step": {
+      "action": {
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+      },
+      "message": {
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 1
+      },
+      "observation": {
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+      }
+    },
+    "peak_activity_step": "1",
+    "average_events_per_step": 6.6
+  },
+  "decision_patterns": {
+    "0": {
+      "complete_decision_cycles": 0,
+      "incomplete_decision_cycles": 5,
+      "decision_patterns": {
