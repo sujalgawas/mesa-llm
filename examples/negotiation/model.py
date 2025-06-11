@@ -4,7 +4,7 @@ from mesa.model import Model
 from mesa.space import MultiGrid
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
-from mesa_llm.reasoning import Reasoning
+from mesa_llm.reasoning.reasoning import Reasoning
 
 
 class NegotiationModel(Model):

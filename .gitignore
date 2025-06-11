@@ -240,6 +240,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+test_ignore.ipynb
 
 # Translations
 *.mo

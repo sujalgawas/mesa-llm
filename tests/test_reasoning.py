@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from mesa_llm.reasoning import (
+from mesa_llm.reasoning.reasoning import (
     CoTReasoning,
     Observation,
     Plan,
