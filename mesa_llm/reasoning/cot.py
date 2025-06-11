@@ -51,32 +51,18 @@ class CoTReasoning(Reasoning):
         ---
 
         # Instructions
-        Think in multiple reasoning steps before you act.
-        **IMPORTANT**: When you decide on an action, you MUST use the available function calls to execute it. Do not just describe what you want to do - actually call the appropriate functions.
-
-        Available functions include:
-        - teleport_to_location: to move to a specific coordinate
-        - speak_to: to send messages to other agents
-        - set_chosen_brand: to set your brand preference (buyers only)
-
-        Use the format below to respond:
+        First think through the situation step-by-step, and explain it in the format given below.
 
         Thought 1: [Initial reasoning based on the observation]
         Thought 2: [How memory informs the situation]
         Thought 3: [Possible alternatives or risks]
         Thought 4: [Final decision and justification]
-        Action: [Use function calls to execute your chosen action - do not just describe it]
 
         Keep the reasoning grounded in the current context and relevant history.
-
+        **IMPORTANT**: When you decide on an action, use the available function calls to execute 1 action. You must use the tools provided to you as a tool call.
+        **IMPORTANT**: There is no need to explicitly state the action in your reasoning in the message with your thoughts. The action will be inferred from the function call you make.
         ---
 
-        # Response:
-        Thought 1:
-        Thought 2:
-        Thought 3:
-        Thought 4:
-        Action:
         """
 
         llm.set_system_prompt(system_prompt)
