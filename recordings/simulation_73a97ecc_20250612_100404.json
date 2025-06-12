@@ -1,0 +1,325 @@
+{
+  "metadata": {
+    "simulation_id": "73a97ecc",
+    "start_time": "2025-06-12T10:03:57.614935+00:00",
+    "model_class": "NegotiationModel",
+    "recording_config": {
+      "observations": true,
+      "plans": true,
+      "actions": true,
+      "messages": true,
+      "state_changes": true
+    },
+    "end_time": "2025-06-12T10:04:04.201807+00:00",
+    "total_steps": 1,
+    "total_events": 11,
+    "total_agents": 7,
+    "duration_seconds": 6.586965,
+    "completion_status": "unknown",
+    "final_step": 1
+  },
+  "events": [
+    {
+      "event_id": "73a97ecc_000000",
+      "timestamp": "2025-06-12 10:03:59.578826+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 1
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000001",
+      "timestamp": "2025-06-12 10:03:59.579494+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            "7",
+            "0"
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000002",
+      "timestamp": "2025-06-12 10:04:00.501525+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[8,0]}', name='teleport_to_location'), id='call_giadbqM4FGvdbIUNRvSuRG1Y', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000003",
+      "timestamp": "2025-06-12 10:04:00.501690+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_giadbqM4FGvdbIUNRvSuRG1Y",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 2 moved to (8, 0)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000004",
+      "timestamp": "2025-06-12 10:04:00.501825+00:00",
+      "step": 1,
+      "agent_id": 4,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 4,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            "4",
+            "2"
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000005",
+      "timestamp": "2025-06-12 10:04:02.040739+00:00",
+      "step": 1,
+      "agent_id": 4,
+      "event_type": "plan",
+      "content": {
+        "plan": "Since I am currently not engaged in a conversation and there are no nearby agents to interact with, I will teleport to a new location to explore the environment.\n\nI will move to coordinates (5, 3).\n\nExecuting the teleportation now.\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000006",
+      "timestamp": "2025-06-12 10:04:02.040963+00:00",
+      "step": 1,
+      "agent_id": 4,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_PSeChQa2YYxZhjRkhXHqCOPI",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 4 moved to (5, 3)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000007",
+      "timestamp": "2025-06-12 10:04:02.041100+00:00",
+      "step": 1,
+      "agent_id": 5,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 5,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            "4",
+            "0"
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000008",
+      "timestamp": "2025-06-12 10:04:03.566086+00:00",
+      "step": 1,
+      "agent_id": 5,
+      "event_type": "plan",
+      "content": {
+        "plan": "Currently, there are no messages from seller agents in my local state, and I am not engaged in a conversation. I will teleport to a new location to explore the environment further and potentially encounter seller agents who might pitch their products.\n\nI will move to location (3, 1).\n\nExecuting teleport now.\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000009",
+      "timestamp": "2025-06-12 10:04:03.566193+00:00",
+      "step": 1,
+      "agent_id": 5,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_ivVj8CMjM9Kr1ILu6GtQE2aJ",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 5 moved to (3, 1)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000010",
+      "timestamp": "2025-06-12 10:04:03.566299+00:00",
+      "step": 1,
+      "agent_id": 3,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 3,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            "6",
+            "6"
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {
+          "SellerAgent 6": {
+            "position": [
+              5,
+              5
+            ],
+            "internal_state": [
+              "hardworking",
+              "dedicated",
+              "persuasive"
+            ]
+          },
+          "SellerAgent 7": {
+            "position": [
+              5,
+              6
+            ],
+            "internal_state": [
+              "lazy",
+              "unmotivated"
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "73a97ecc_000011",
+      "timestamp": "2025-06-12 10:04:04.202014+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "simulation_end",
+      "content": {
+        "status": "unknown",
+        "final_step": 1,
+        "total_events": 11
+      },
+      "metadata": {
+        "source": "model"
+      }
+    }
+  ],
+  "agent_summaries": {
+    "2": {
+      "total_events": 3,
+      "event_types": [
+        "plan",
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1
+      ],
+      "first_event": "2025-06-12T10:03:59.579494+00:00",
+      "last_event": "2025-06-12T10:04:00.501690+00:00"
+    },
+    "3": {
+      "total_events": 1,
+      "event_types": [
+        "observation"
+      ],
+      "active_steps": [
+        1
+      ],
+      "first_event": "2025-06-12T10:04:03.566299+00:00",
+      "last_event": "2025-06-12T10:04:03.566299+00:00"
+    },
+    "4": {
+      "total_events": 3,
+      "event_types": [
+        "plan",
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1
+      ],
+      "first_event": "2025-06-12T10:04:00.501825+00:00",
+      "last_event": "2025-06-12T10:04:02.040963+00:00"
+    },
+    "5": {
+      "total_events": 3,
+      "event_types": [
+        "plan",
+        "observation",
+        "action"
+      ],
+      "active_steps": [
+        1
+      ],
+      "first_event": "2025-06-12T10:04:02.041100+00:00",
+      "last_event": "2025-06-12T10:04:03.566193+00:00"
+    }
+  },
+  "communication_network": {
+    "total_messages": 0,
+    "communication_matrix": {},
+    "agents_involved": []
+  }
+}

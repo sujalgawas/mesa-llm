@@ -100,11 +100,79 @@ class SimulationRecorder:
     def record_event(
         self,
         event_type: str,
-        content: dict[str, Any],
+        content: dict[str, Any] | str | None = None,
         agent_id: int | None = None,
         metadata: dict[str, Any] | None = None,
+        # Legacy parameters from record method for backwards compatibility
+        data: dict[str, Any] | str | None = None,
+        recipient_ids: list[int] | None = None,
     ):
-        """Record a simulation event."""
+        """Record a simulation event.
+
+        Args:
+            event_type: Type of event to record (observation, plan, action, message, state_change, etc.)
+            content: Event content as dict or string (preferred parameter)
+            agent_id: ID of the agent associated with this event
+            metadata: Additional metadata for the event
+            data: Event data (legacy parameter, use content instead)
+            recipient_ids: List of recipient IDs for message events
+        """
+        print(
+            f"Recording {event_type} for agent {agent_id} #########################################################"
+        )
+        # Check if recording is enabled for this event type
+        record_config = self.simulation_metadata["recording_config"]
+
+        # Map event types to config keys
+        config_key_map = {
+            "observation": "observations",
+            "plan": "plans",
+            "action": "actions",
+            "message": "messages",
+            "state_change": "state_changes",
+        }
+
+        config_key = config_key_map.get(event_type, event_type)
+        if not record_config.get(config_key, True):
+            return
+
+        # Handle backwards compatibility - if data is provided but content is not, use data
+        if content is None and data is not None:
+            content = data
+
+        # Handle different content formats based on event type
+        if event_type == "message":
+            if isinstance(content, str | dict):
+                formatted_content = {
+                    "message": content,
+                    "recipient_ids": recipient_ids or [],
+                }
+            else:
+                formatted_content = {
+                    "message": content,
+                    "recipient_ids": recipient_ids or [],
+                }
+        else:
+            if isinstance(content, dict):
+                formatted_content = content
+            else:
+                formatted_content = {"data": content}
+
+        # Set metadata source
+        source_map = {
+            "observation": "agent_observation",
+            "plan": "agent_planning",
+            "action": "agent_action",
+            "message": "agent_communication",
+            "state_change": "state_tracking",
+        }
+
+        # Merge provided metadata with source metadata
+        final_metadata = {"source": source_map.get(event_type, "unknown")}
+        if metadata:
+            final_metadata.update(metadata)
+
+        # Create the event
         event_id = f"{self.simulation_id}_{len(self.events):06d}"
 
         event = SimulationEvent(
@@ -113,8 +181,8 @@ class SimulationRecorder:
             step=self.model.steps,
             agent_id=agent_id,
             event_type=event_type,
-            content=content,
-            metadata=metadata or {},
+            content=formatted_content,
+            metadata=final_metadata,
         )
 
         self.events.append(event)
@@ -126,73 +194,6 @@ class SimulationRecorder:
             and self.events_since_save >= self.auto_save_interval
         ):
             self.auto_save()
-
-    def record_observation(self, agent_id: int, observation_data: dict[str, Any]):
-        """Record an agent observation."""
-        if not self.record_observations:
-            return
-
-        self.record_event(
-            event_type="observation",
-            content=observation_data,
-            agent_id=agent_id,
-            metadata={"source": "agent_observation"},
-        )
-
-    def record_plan(self, agent_id: int, plan_data: dict[str, Any]):
-        """Record an agent plan."""
-        if not self.record_plans:
-            return
-
-        self.record_event(
-            event_type="plan",
-            content=plan_data,
-            agent_id=agent_id,
-            metadata={"source": "agent_planning"},
-        )
-
-    def record_action(self, agent_id: int, action_data: dict[str, Any]):
-        """Record an agent action."""
-        if not self.record_actions:
-            return
-
-        self.record_event(
-            event_type="action",
-            content=action_data,
-            agent_id=agent_id,
-            metadata={"source": "agent_action"},
-        )
-
-    def record_message(
-        self, sender_id: int, message: str, recipient_ids: list[int] | None = None
-    ):
-        """Record an inter-agent message."""
-        if not self.record_messages:
-            return
-
-        content = {
-            "message": message,
-            "recipient_ids": recipient_ids or [],
-        }
-
-        self.record_event(
-            event_type="message",
-            content=content,
-            agent_id=sender_id,
-            metadata={"source": "agent_communication"},
-        )
-
-    def record_state_change(self, agent_id: int, state_changes: dict[str, dict]):
-        """Record agent state changes."""
-        if not self.record_state_changes:
-            return
-
-        self.record_event(
-            event_type="state_change",
-            content=state_changes,
-            agent_id=agent_id,
-            metadata={"source": "state_tracking"},
-        )
 
     def track_agent_state(self, agent_id: int, current_state: dict[str, Any]):
         """Track agent state and record changes."""
@@ -287,14 +288,23 @@ class SimulationRecorder:
         self.save(filename)
         self.events_since_save = 0
 
-    def save(self, filename: str | None = None):
-        """Save complete simulation recording."""
+    def save(self, filename: str | None = None, format: str = "json"):
+        """Save complete simulation recording.
+
+        Args:
+            filename: Optional filename. If None, auto-generates based on format.
+            format: Save format, either "json" or "pickle".
+        """
+        if format not in ["json", "pickle"]:
+            raise ValueError("Format must be 'json' or 'pickle'")
+
         if filename is None:
-            filename = f"simulation_{self.simulation_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+            extension = "json" if format == "json" else "pkl"
+            filename = f"simulation_{self.simulation_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.{extension}"
 
         filepath = self.output_dir / filename
 
-        # Update metadata
+        # Update metadata with final state
         self.simulation_metadata.update(
             {
                 "end_time": datetime.now(UTC).isoformat(),
@@ -304,7 +314,36 @@ class SimulationRecorder:
                 "duration_seconds": (
                     datetime.now(UTC) - self.start_time
                 ).total_seconds(),
+                # Determine completion status gracefully when `max_steps` is absent
+                "completion_status": (
+                    "unknown"
+                    if getattr(self.model, "max_steps", None) is None
+                    else (
+                        "interrupted"
+                        if self.model.steps < self.model.max_steps
+                        else "completed"
+                    )
+                ),
+                "final_step": self.model.steps,
             }
+        )
+
+        # Record final model state
+        self.record_model_event(
+            event_type="simulation_end",
+            content={
+                "status": (
+                    "unknown"
+                    if getattr(self.model, "max_steps", None) is None
+                    else (
+                        "interrupted"
+                        if self.model.steps < self.model.max_steps
+                        else "completed"
+                    )
+                ),
+                "final_step": self.model.steps,
+                "total_events": len(self.events),
+            },
         )
 
         # Prepare export data
@@ -322,50 +361,15 @@ class SimulationRecorder:
             "communication_network": self.get_communication_network(),
         }
 
-        # Save to JSON
-        with open(filepath, "w") as f:
-            json.dump(export_data, f, indent=2, default=str)
+        # Save based on format
+        if format == "json":
+            with open(filepath, "w") as f:
+                json.dump(export_data, f, indent=2, default=str)
+        elif format == "pickle":
+            with open(filepath, "wb") as f:
+                pickle.dump(export_data, f)
 
-        return filepath
-
-    def save_pickle(self, filename: str | None = None):
-        """Save recording in pickle format for faster loading."""
-        if filename is None:
-            filename = f"simulation_{self.simulation_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.pkl"
-
-        filepath = self.output_dir / filename
-
-        # Update metadata
-        self.simulation_metadata.update(
-            {
-                "end_time": datetime.now(UTC).isoformat(),
-                "total_steps": self.model.steps,
-                "total_events": len(self.events),
-                "total_agents": len(self.model.agents),
-                "duration_seconds": (
-                    datetime.now(UTC) - self.start_time
-                ).total_seconds(),
-            }
-        )
-
-        # Prepare export data
-        export_data = {
-            "metadata": self.simulation_metadata,
-            "events": [asdict(event) for event in self.events],
-            "agent_summaries": {
-                agent_id: self.export_agent_memory(agent_id)["summary"]
-                for agent_id in {
-                    event.agent_id
-                    for event in self.events
-                    if event.agent_id is not None
-                }
-            },
-            "communication_network": self.get_communication_network(),
-        }
-
-        with open(filepath, "wb") as f:
-            pickle.dump(export_data, f)
-
+        print(f"Simulation recording saved to: {filepath}")
         return filepath
 
     def get_stats(self) -> dict[str, Any]:
@@ -384,3 +388,25 @@ class SimulationRecorder:
                 agent_id: len(self.get_agent_events(agent_id)) for agent_id in agent_ids
             },
         }
+
+    def record_observation(self, agent_id: int, content: dict[str, Any]):
+        """Record an observation event."""
+        self.record_event("observation", content, agent_id)
+
+    def record_plan(self, agent_id: int, content: dict[str, Any]):
+        """Record a planning event."""
+        self.record_event("plan", content, agent_id)
+
+    def record_action(self, agent_id: int, content: dict[str, Any]):
+        """Record an action event."""
+        self.record_event("action", content, agent_id)
+
+    def record_message(
+        self, agent_id: int, message: str, recipient_ids: list[int] | None = None
+    ):
+        """Record a message event."""
+        self.record_event("message", message, agent_id, recipient_ids=recipient_ids)
+
+    def record_state_change(self, agent_id: int, changes: dict[str, Any]):
+        """Record a state change event."""
+        self.record_event("state_change", changes, agent_id)

@@ -17,6 +17,7 @@ from mesa_llm.reasoning.reasoning import (
     Observation,
     Reasoning,
 )
+from mesa_llm.recording.simulation_recorder import SimulationRecorder
 from mesa_llm.tools.tool_manager import ToolManager
 
 
@@ -46,6 +47,7 @@ class LLMAgent(Agent):
         system_prompt: str | None = None,
         vision: float | None = None,
         internal_state: list[str] | str | None = None,
+        recorder: SimulationRecorder | None = None,
     ):
         super().__init__(model=model)
 
@@ -64,6 +66,7 @@ class LLMAgent(Agent):
         )
 
         self.tool_manager = ToolManager()
+        self.recorder = recorder
 
         self.vision = vision
         self.reasoning = reasoning(agent=self)
@@ -88,8 +91,15 @@ class LLMAgent(Agent):
             agent=self, llm_response=plan.llm_plan
         )
         self.memory.add_to_memory(
-            type="[Tool_Call_Responses] : ", content=str(tool_call_resp), step=plan.step
+            type="Tool_Call_Action", content=str(tool_call_resp), step=plan.step
         )
+
+        if self.recorder is not None:
+            self.recorder.record_action(
+                agent_id=self.unique_id,
+                content={"tool_call_response": tool_call_resp},
+            )
+
         return tool_call_resp
 
     def generate_obs(self) -> Observation:
@@ -135,6 +145,30 @@ class LLMAgent(Agent):
                 "internal_state": i.internal_state,
             }
 
+        self.memory.add_to_memory(
+            type="Observation",
+            content=f"local_state: {local_state}, self_state: {self_state}",
+            step=step,
+        )
+
+        # --------------------------------------------------
+        # Recording hook
+        # --------------------------------------------------
+        if self.recorder is not None:
+            self.recorder.record_observation(
+                agent_id=self.unique_id,
+                content={"self_state": self_state, "local_state": local_state},
+            )
+
+            # Track state changes for the agent (location & internal state)
+            self.recorder.track_agent_state(
+                agent_id=self.unique_id,
+                current_state={
+                    "location": tuple(self.pos) if self.pos is not None else None,
+                    "internal_state": self.internal_state,
+                },
+            )
+
         return Observation(step=step, self_state=self_state, local_state=local_state)
 
     def send_message(self, message: str, recipients: list[Agent]) -> str:
@@ -151,4 +185,12 @@ class LLMAgent(Agent):
                     "recipients": recipients,
                 },
             )
+
+        if self.recorder:
+            self.recorder.record_message(
+                agent_id=self.unique_id,
+                message=message,
+                recipient_ids=[recipient.unique_id for recipient in recipients],
+            )
+
         return f"{self} → {recipients} : {message}"

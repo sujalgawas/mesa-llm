@@ -91,4 +91,11 @@ class ReWOOReasoning(Reasoning):
 
         rewoo_plan = Plan(step=step, llm_plan=response_message, ttl=ttl)
         memory.add_to_memory(type="Plan", content=str(rewoo_plan), step=step)
+
+        if self.agent.recorder is not None:
+            self.agent.recorder.record_plan(
+                agent_id=self.agent.unique_id,
+                content={"plan": str(rewoo_plan)},
+            )
+
         return rewoo_plan

@@ -7,22 +7,16 @@ conversations, state changes, and decision-making processes from recorded simula
 
 import json
 import pickle
-import re
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-try:
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.prompt import Prompt
-    from rich.table import Table
-
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Prompt
+from rich.table import Table
 
 
 @dataclass
@@ -47,7 +41,7 @@ class AgentViewer:
     - Conversation threads
     - Internal state evolution
     - Decision-making analysis
-    - Rich formatted output (if available) or plain text fallback
+    - Rich formatted output
     """
 
     def __init__(self, recording_path: str):
@@ -55,11 +49,7 @@ class AgentViewer:
         self.data = self._load_recording()
         self.events = self.data["events"]
         self.metadata = self.data["metadata"]
-
-        if RICH_AVAILABLE:
-            self.console = Console()
-        else:
-            self.console = None
+        self.console = Console()
 
         # Process events by agent
         self.agent_events = self._organize_events_by_agent()
@@ -75,7 +65,12 @@ class AgentViewer:
                 return json.load(f)
 
     def _organize_events_by_agent(self) -> dict[int, list[AgentEvent]]:
-        """Organize events by agent ID with formatted content."""
+        """Organize events by agent ID with formatted content.
+
+        Returns:
+            dict[int, list[AgentEvent]]: A dictionary mapping agent IDs to their events.
+            Each event is a processed AgentEvent object with formatted content.
+        """
         agent_events = defaultdict(list)
 
         for event in self.events:
@@ -187,62 +182,34 @@ class AgentViewer:
 
         return "\n".join(lines)
 
-    def _print(self, content, style=None):
-        """Print with rich formatting if available, otherwise plain text."""
-        if self.console:
-            self.console.print(content, style=style)
-        else:
-            # Strip rich markup for plain text
-            if hasattr(content, "__rich__"):
-                content = str(content)
-            # Basic cleanup of rich markup
-            content = re.sub(r"\[.*?\]", "", str(content))
-            print(content)
-
     def list_agents(self):
         """Display a list of all agents in the simulation."""
-        self._print("\nAvailable Agents", "bold blue")
+        self.console.print("\nAvailable Agents", style="bold blue")
 
-        if RICH_AVAILABLE and self.console:
-            table = Table(show_header=True, header_style="bold magenta")
-            table.add_column("Agent ID", style="dim", width=12)
-            table.add_column("Total Events", justify="right")
-            table.add_column("Event Types", style="green")
-            table.add_column("Active Steps", justify="right")
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Agent ID", style="dim", width=12)
+        table.add_column("Total Events", justify="right")
+        table.add_column("Event Types", style="green")
+        table.add_column("Active Steps", justify="right")
 
-            for agent_id in sorted(self.agent_ids):
-                events = self.agent_events[agent_id]
-                event_types = {event.event_type for event in events}
-                steps = [event.step for event in events]
+        for agent_id in sorted(self.agent_ids):
+            events = self.agent_events[agent_id]
+            event_types = {event.event_type for event in events}
+            steps = [event.step for event in events]
 
-                table.add_row(
-                    str(agent_id),
-                    str(len(events)),
-                    ", ".join(sorted(event_types)),
-                    f"{min(steps)}-{max(steps)}" if steps else "None",
-                )
+            table.add_row(
+                str(agent_id),
+                str(len(events)),
+                ", ".join(sorted(event_types)),
+                f"{min(steps)}-{max(steps)}" if steps else "None",
+            )
 
-            self.console.print(table)
-        else:
-            # Plain text fallback
-            print(f"{'Agent ID':<10} {'Events':<8} {'Event Types':<30} {'Steps'}")
-            print("-" * 60)
-            for agent_id in sorted(self.agent_ids):
-                events = self.agent_events[agent_id]
-                event_types = {event.event_type for event in events}
-                steps = [event.step for event in events]
-
-                print(
-                    f"{agent_id:<10} {len(events):<8} {', '.join(sorted(event_types)):<30} "
-                    f"{min(steps)}-{max(steps)}"
-                    if steps
-                    else "None"
-                )
+        self.console.print(table)
 
     def view_agent_timeline(self, agent_id: int, event_types: list[str] | None = None):
         """Display a complete timeline for a specific agent."""
         if agent_id not in self.agent_events:
-            self._print(f"Agent {agent_id} not found in recording.", "red")
+            self.console.print(f"Agent {agent_id} not found in recording.", style="red")
             return
 
         events = self.agent_events[agent_id]
@@ -251,32 +218,27 @@ class AgentViewer:
         if event_types:
             events = [e for e in events if e.event_type in event_types]
 
-        self._print(f"\nTimeline for Agent {agent_id}", "bold blue")
-        self._print(f"Showing {len(events)} events\n", "dim")
+        self.console.print(f"\nTimeline for Agent {agent_id}", style="bold blue")
+        self.console.print(f"Showing {len(events)} events\n", style="dim")
 
         for event in events:
             timestamp_str = event.timestamp.strftime("%H:%M:%S.%f")[:-3]
             title = f"Step {event.step} | {timestamp_str} | {event.event_type.title()}"
 
-            if RICH_AVAILABLE and self.console:
-                panel = Panel(
-                    event.formatted_content,
-                    title=title,
-                    title_align="left",
-                    border_style="bright_blue"
-                    if event.event_type == "message"
-                    else "white",
-                )
-                self.console.print(panel)
-            else:
-                print(f"\n=== {title} ===")
-                print(event.formatted_content)
-                print("-" * 50)
+            panel = Panel(
+                event.formatted_content,
+                title=title,
+                title_align="left",
+                border_style="bright_blue"
+                if event.event_type == "message"
+                else "white",
+            )
+            self.console.print(panel)
 
     def view_agent_conversations(self, agent_id: int):
         """Display all conversations involving a specific agent."""
         if agent_id not in self.agent_events:
-            self._print(f"Agent {agent_id} not found in recording.", "red")
+            self.console.print(f"Agent {agent_id} not found in recording.", style="red")
             return
 
         # Get all message events for this agent
@@ -297,10 +259,10 @@ class AgentViewer:
                 ):
                     received_messages.append((other_agent_id, event))
 
-        self._print(f"\nConversations for Agent {agent_id}", "bold blue")
+        self.console.print(f"\nConversations for Agent {agent_id}", style="bold blue")
 
         if not message_events and not received_messages:
-            self._print("No conversations found for this agent.", "yellow")
+            self.console.print("No conversations found for this agent.", style="yellow")
             return
 
         # Combine and sort all messages by timestamp
@@ -331,20 +293,13 @@ class AgentViewer:
                 content = f"From agent {sender_id}: {message}"
                 style = "blue"
 
-            if RICH_AVAILABLE and self.console:
-                panel = Panel(
-                    content, title=title, title_align="left", border_style=style
-                )
-                self.console.print(panel)
-            else:
-                print(f"\n=== {title} ===")
-                print(content)
-                print("-" * 40)
+            panel = Panel(content, title=title, title_align="left", border_style=style)
+            self.console.print(panel)
 
     def view_agent_decision_making(self, agent_id: int):
         """Display the decision-making process for a specific agent."""
         if agent_id not in self.agent_events:
-            self._print(f"Agent {agent_id} not found in recording.", "red")
+            self.console.print(f"Agent {agent_id} not found in recording.", style="red")
             return
 
         events = self.agent_events[agent_id]
@@ -355,7 +310,9 @@ class AgentViewer:
             if event.event_type in ["observation", "plan", "action"]:
                 steps[event.step].append(event)
 
-        self._print(f"\nDecision-Making Process for Agent {agent_id}", "bold blue")
+        self.console.print(
+            f"\nDecision-Making Process for Agent {agent_id}", style="bold blue"
+        )
 
         for step in sorted(steps.keys()):
             step_events = sorted(
@@ -363,24 +320,20 @@ class AgentViewer:
                 key=lambda x: ["observation", "plan", "action"].index(x.event_type),
             )
 
-            self._print(f"\nStep {step} Decision Cycle", "bold yellow")
+            self.console.print(f"\nStep {step} Decision Cycle", style="bold yellow")
 
             for event in step_events:
-                if RICH_AVAILABLE and self.console:
-                    panel = Panel(
-                        event.formatted_content,
-                        title=f"{event.event_type.title()}",
-                        border_style="cyan",
-                    )
-                    self.console.print(panel)
-                else:
-                    print(f"\n--- {event.event_type.title()} ---")
-                    print(event.formatted_content)
+                panel = Panel(
+                    event.formatted_content,
+                    title=f"{event.event_type.title()}",
+                    border_style="cyan",
+                )
+                self.console.print(panel)
 
     def view_agent_summary(self, agent_id: int):
         """Display a comprehensive summary for a specific agent."""
         if agent_id not in self.agent_events:
-            self._print(f"Agent {agent_id} not found in recording.", "red")
+            self.console.print(f"Agent {agent_id} not found in recording.", style="red")
             return
 
         events = self.agent_events[agent_id]
@@ -409,71 +362,48 @@ class AgentViewer:
                 ):
                     messages_received += 1
 
-        self._print(f"\nAgent {agent_id} Summary", "bold blue")
+        self.console.print(f"\nAgent {agent_id} Summary", style="bold blue")
 
-        if RICH_AVAILABLE and self.console:
-            # Statistics table
-            stats_table = Table(title="Activity Statistics")
-            stats_table.add_column("Metric", style="cyan")
-            stats_table.add_column("Value", style="green")
+        # Statistics table
+        stats_table = Table(title="Activity Statistics")
+        stats_table.add_column("Metric", style="cyan")
+        stats_table.add_column("Value", style="green")
 
-            stats_table.add_row("Total Events", str(len(events)))
-            stats_table.add_row(
-                "Active Steps",
-                f"{min(steps_active)}-{max(steps_active)}" if steps_active else "None",
-            )
-            stats_table.add_row("Messages Sent", str(messages_sent))
-            stats_table.add_row("Messages Received", str(messages_received))
-            stats_table.add_row("Observations Made", str(event_counts["observation"]))
-            stats_table.add_row("Plans Created", str(event_counts["plan"]))
-            stats_table.add_row("Actions Taken", str(event_counts["action"]))
+        stats_table.add_row("Total Events", str(len(events)))
+        stats_table.add_row(
+            "Active Steps",
+            f"{min(steps_active)}-{max(steps_active)}" if steps_active else "None",
+        )
+        stats_table.add_row("Messages Sent", str(messages_sent))
+        stats_table.add_row("Messages Received", str(messages_received))
+        stats_table.add_row("Observations Made", str(event_counts["observation"]))
+        stats_table.add_row("Plans Created", str(event_counts["plan"]))
+        stats_table.add_row("Actions Taken", str(event_counts["action"]))
 
-            self.console.print(stats_table)
+        self.console.print(stats_table)
 
-            # Activity breakdown
-            activity_table = Table(title="Event Type Breakdown")
-            activity_table.add_column("Event Type", style="cyan")
-            activity_table.add_column("Count", style="green", justify="right")
-            activity_table.add_column("Percentage", style="yellow", justify="right")
+        # Activity breakdown
+        activity_table = Table(title="Event Type Breakdown")
+        activity_table.add_column("Event Type", style="cyan")
+        activity_table.add_column("Count", style="green", justify="right")
+        activity_table.add_column("Percentage", style="yellow", justify="right")
 
-            total_events = len(events)
-            for event_type, count in sorted(event_counts.items()):
-                percentage = (count / total_events) * 100
-                activity_table.add_row(
-                    event_type.title(), str(count), f"{percentage:.1f}%"
-                )
+        total_events = len(events)
+        for event_type, count in sorted(event_counts.items()):
+            percentage = (count / total_events) * 100
+            activity_table.add_row(event_type.title(), str(count), f"{percentage:.1f}%")
 
-            self.console.print(activity_table)
-        else:
-            # Plain text summary
-            print("\nActivity Statistics:")
-            print(f"Total Events: {len(events)}")
-            print(
-                f"Active Steps: {min(steps_active)}-{max(steps_active)}"
-                if steps_active
-                else "None"
-            )
-            print(f"Messages Sent: {messages_sent}")
-            print(f"Messages Received: {messages_received}")
-            print(f"Observations Made: {event_counts['observation']}")
-            print(f"Plans Created: {event_counts['plan']}")
-            print(f"Actions Taken: {event_counts['action']}")
-
-            print("\nEvent Type Breakdown:")
-            total_events = len(events)
-            for event_type, count in sorted(event_counts.items()):
-                percentage = (count / total_events) * 100
-                print(f"{event_type.title()}: {count} ({percentage:.1f}%)")
+        self.console.print(activity_table)
 
     def interactive_mode(self):
         """Start interactive mode for exploring agents."""
-        self._print("Welcome to the Mesa-LLM Agent Viewer!", "bold green")
-        self._print(
+        self.console.print("Welcome to the Mesa-LLM Agent Viewer!", style="bold green")
+        self.console.print(
             "Explore individual agent behavior from your recorded simulation.\n"
         )
 
         while True:
-            self._print("\nAvailable Commands:", "bold blue")
+            self.console.print("\nAvailable Commands:", style="bold blue")
             print("1. list - Show all agents")
             print("2. timeline <agent_id> - View agent timeline")
             print("3. conversations <agent_id> - View agent conversations")
@@ -481,13 +411,10 @@ class AgentViewer:
             print("5. summary <agent_id> - View agent summary")
             print("6. quit - Exit viewer")
 
-            if RICH_AVAILABLE:
-                command = Prompt.ask("\nEnter command").strip().lower()
-            else:
-                command = input("\nEnter command: ").strip().lower()
+            command = Prompt.ask("\nEnter command").strip().lower()
 
             if command == "quit" or command == "q":
-                self._print("Goodbye!", "yellow")
+                self.console.print("Goodbye!", style="yellow")
                 break
 
             elif command == "list":
@@ -500,9 +427,11 @@ class AgentViewer:
                         agent_id = int(parts[1])
                         self.view_agent_timeline(agent_id)
                     except ValueError:
-                        self._print("Invalid agent ID. Please enter a number.", "red")
+                        self.console.print(
+                            "Invalid agent ID. Please enter a number.", style="red"
+                        )
                 else:
-                    self._print("Usage: timeline <agent_id>", "red")
+                    self.console.print("Usage: timeline <agent_id>", style="red")
 
             elif command.startswith("conversations"):
                 parts = command.split()
@@ -511,9 +440,11 @@ class AgentViewer:
                         agent_id = int(parts[1])
                         self.view_agent_conversations(agent_id)
                     except ValueError:
-                        self._print("Invalid agent ID. Please enter a number.", "red")
+                        self.console.print(
+                            "Invalid agent ID. Please enter a number.", style="red"
+                        )
                 else:
-                    self._print("Usage: conversations <agent_id>", "red")
+                    self.console.print("Usage: conversations <agent_id>", style="red")
 
             elif command.startswith("decisions"):
                 parts = command.split()
@@ -522,9 +453,11 @@ class AgentViewer:
                         agent_id = int(parts[1])
                         self.view_agent_decision_making(agent_id)
                     except ValueError:
-                        self._print("Invalid agent ID. Please enter a number.", "red")
+                        self.console.print(
+                            "Invalid agent ID. Please enter a number.", style="red"
+                        )
                 else:
-                    self._print("Usage: decisions <agent_id>", "red")
+                    self.console.print("Usage: decisions <agent_id>", style="red")
 
             elif command.startswith("summary"):
                 parts = command.split()
@@ -533,14 +466,16 @@ class AgentViewer:
                         agent_id = int(parts[1])
                         self.view_agent_summary(agent_id)
                     except ValueError:
-                        self._print("Invalid agent ID. Please enter a number.", "red")
+                        self.console.print(
+                            "Invalid agent ID. Please enter a number.", style="red"
+                        )
                 else:
-                    self._print("Usage: summary <agent_id>", "red")
+                    self.console.print("Usage: summary <agent_id>", style="red")
 
             else:
-                self._print(
+                self.console.print(
                     "Unknown command. Try 'list', 'timeline <id>', 'conversations <id>', 'decisions <id>', 'summary <id>', or 'quit'.",
-                    "red",
+                    style="red",
                 )
 
 

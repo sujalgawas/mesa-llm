@@ -62,4 +62,13 @@ class ReActReasoning(Reasoning):
         react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
         memory.add_to_memory(type="Plan", content=str(react_plan), step=step)
 
+        # --------------------------------------------------
+        # Recording hook for plan event
+        # --------------------------------------------------
+        if self.agent.recorder is not None:
+            self.agent.recorder.record_plan(
+                agent_id=self.agent.unique_id,
+                content={"plan": str(react_plan)},
+            )
+
         return react_plan
