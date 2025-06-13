@@ -34,7 +34,12 @@ class ModuleLLM:
         """Set or update the system prompt."""
         self.system_prompt = system_prompt
 
-    def generate(self, prompt: str, tool_schema: list[dict] | None = None) -> str:
+    def generate(
+        self,
+        prompt: str,
+        tool_schema: list[dict] | None = None,
+        tool_choice: str = "auto",
+    ) -> str:
         if self.system_prompt:
             messages = [
                 {"role": "system", "content": self.system_prompt},
@@ -47,7 +52,7 @@ class ModuleLLM:
                 model=self.llm_model,
                 messages=messages,
                 tools=tool_schema,
-                tool_choice="auto",
+                tool_choice=tool_choice,
             )
         else:
             response = completion(model=self.llm_model, messages=messages)

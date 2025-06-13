@@ -26,7 +26,7 @@ class ReActReasoning(Reasoning):
 
         system_prompt = f"""
         You are an autonomous agent in a simulation environment.
-        You can think about your situation and take actions.
+        You can think about your situation and describe your plan.
         Use your short-term and long-term memory to guide your behavior.
         You should also use the current observation you have made of the environrment to take suitable actions.
         ---
@@ -47,20 +47,32 @@ class ReActReasoning(Reasoning):
         ---
 
         # Instructions
-        Based on your memory and current situation:
-        1. Think through what is happening.
-        2. Decide what you should do next.
-        3. When you decide on an action, you use the available function calls to execute it. You must use the tools provided to you as a tool call.
+        Based on the information above, think about what you should do with proper reasoning, And then decide your plan of action. Respond in the
+        following format:
+        Reasoning: [Your reasoning about the situation, including how your memory informs your decision]
+        Action: [The action you decide to take]
 
         """
 
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=prompt, tool_schema=self.agent.tool_manager.get_all_tools_schema()
+            prompt=prompt,
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_choice="none",
+        )
+
+        chaining_message = rsp.choices[0].message.content
+        memory.add_to_memory(type="Plan", content=chaining_message, step=step)
+        system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
+        llm.set_system_prompt(system_prompt)
+        rsp = llm.generate(
+            prompt=chaining_message,
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
         )
         response_message = rsp.choices[0].message
         react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
-        memory.add_to_memory(type="Plan", content=str(react_plan), step=step)
+
+        memory.add_to_memory(type="Plan-Execution", content=str(react_plan), step=step)
 
         # --------------------------------------------------
         # Recording hook for plan event

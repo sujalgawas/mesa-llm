@@ -82,19 +82,3 @@ class Reasoning(ABC):
         ttl: int = 1,
     ) -> Plan:
         pass
-
-
-################################### Notes to self #######################################################################################
-# If the tool output is an action, then the action should be executed but if the tool fetches data for the agent, add the data to the memory somehow.
-# After a plan is generated, it should be added to memory.
-# While adding observation, plan, discussion, etc. to the memory, ensure the content in the memory entry is saved as the formatted version of the datacalss using the formatting functions
-# If the short term memory is formatted, then the llm used for generating the long term memory will have an easier time
-# Hence, maybe the dataclass and the formatting functions should be in a module that is accessible by any module that saves data to memory
-
-
-########################## To-Do (Tasks based on Mesa Integration & Miscellaneous) #######################################################
-# Make function that generates the observation for a particular agent at a given point of time
-# Make a helper function that collates the system prompt, internal state and location of the agent to create the self_state.(and any other information that might be useful)
-# Make a function that finds the neighbours, collates their position and internal state to create the local_state.
-# Make environmental data like propertyLayers accessible to the agent.
-# Once the data class for Discussion is created, make a format function for it.
