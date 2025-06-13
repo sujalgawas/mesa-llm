@@ -38,7 +38,7 @@ class ModuleLLM:
         self,
         prompt: str,
         tool_schema: list[dict] | None = None,
-        force_tool_use: bool = False,
+        tool_choice: str = "auto",
     ) -> str:
         if self.system_prompt:
             messages = [
@@ -48,7 +48,6 @@ class ModuleLLM:
         else:
             messages = [{"role": "user", "content": prompt}]
         if tool_schema:
-            tool_choice = "required" if force_tool_use else "auto"
             response = completion(
                 model=self.llm_model,
                 messages=messages,
