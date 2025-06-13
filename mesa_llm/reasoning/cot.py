@@ -89,9 +89,10 @@ class CoTReasoning(Reasoning):
         memory.add_to_memory(type="Plan", content=str(cot_plan), step=step)
 
         if self.agent.recorder is not None:
-            self.agent.recorder.record_plan(
-                agent_id=self.agent.unique_id,
+            self.agent.recorder.record_event(
+                event_type="plan",
                 content={"plan": str(cot_plan)},
+                agent_id=self.agent.unique_id,
             )
 
         return cot_plan

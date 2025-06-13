@@ -95,9 +95,10 @@ class LLMAgent(Agent):
         )
 
         if self.recorder is not None:
-            self.recorder.record_action(
-                agent_id=self.unique_id,
+            self.recorder.record_event(
+                event_type="action",
                 content={"tool_call_response": tool_call_resp},
+                agent_id=self.unique_id,
             )
 
         return tool_call_resp
@@ -155,9 +156,10 @@ class LLMAgent(Agent):
         # Recording hook
         # --------------------------------------------------
         if self.recorder is not None:
-            self.recorder.record_observation(
-                agent_id=self.unique_id,
+            self.recorder.record_event(
+                event_type="observation",
                 content={"self_state": self_state, "local_state": local_state},
+                agent_id=self.unique_id,
             )
 
             # Track state changes for the agent (location & internal state)
@@ -187,9 +189,10 @@ class LLMAgent(Agent):
             )
 
         if self.recorder:
-            self.recorder.record_message(
+            self.recorder.record_event(
+                event_type="message",
+                content=message,
                 agent_id=self.unique_id,
-                message=message,
                 recipient_ids=[recipient.unique_id for recipient in recipients],
             )
 

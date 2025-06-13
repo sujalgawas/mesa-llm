@@ -40,13 +40,6 @@ class SimulationRecorder:
     - Agent state changes over time
     - Model-level events and transitions
 
-    Features:
-    - Configurable recording options
-    - Automatic event timestamping
-    - Memory-efficient batch operations
-    - Multiple export formats (JSON, Pickle)
-    - Agent state change detection
-    - Auto-save functionality for large simulations
     """
 
     def __init__(
@@ -103,23 +96,18 @@ class SimulationRecorder:
         content: dict[str, Any] | str | None = None,
         agent_id: int | None = None,
         metadata: dict[str, Any] | None = None,
-        # Legacy parameters from record method for backwards compatibility
-        data: dict[str, Any] | str | None = None,
         recipient_ids: list[int] | None = None,
     ):
         """Record a simulation event.
 
         Args:
             event_type: Type of event to record (observation, plan, action, message, state_change, etc.)
-            content: Event content as dict or string (preferred parameter)
+            content: Event content as dict or string
             agent_id: ID of the agent associated with this event
             metadata: Additional metadata for the event
-            data: Event data (legacy parameter, use content instead)
             recipient_ids: List of recipient IDs for message events
         """
-        print(
-            f"Recording {event_type} for agent {agent_id} #########################################################"
-        )
+
         # Check if recording is enabled for this event type
         record_config = self.simulation_metadata["recording_config"]
 
@@ -135,10 +123,6 @@ class SimulationRecorder:
         config_key = config_key_map.get(event_type, event_type)
         if not record_config.get(config_key, True):
             return
-
-        # Handle backwards compatibility - if data is provided but content is not, use data
-        if content is None and data is not None:
-            content = data
 
         # Handle different content formats based on event type
         if event_type == "message":
@@ -210,7 +194,11 @@ class SimulationRecorder:
                     changes[key] = {"old": old_value, "new": new_value}
 
             if changes:
-                self.record_state_change(agent_id, changes)
+                self.record_event(
+                    event_type="state_change",
+                    content=changes,
+                    agent_id=agent_id,
+                )
 
         self.previous_agent_states[agent_id] = current_state.copy()
 
@@ -388,25 +376,3 @@ class SimulationRecorder:
                 agent_id: len(self.get_agent_events(agent_id)) for agent_id in agent_ids
             },
         }
-
-    def record_observation(self, agent_id: int, content: dict[str, Any]):
-        """Record an observation event."""
-        self.record_event("observation", content, agent_id)
-
-    def record_plan(self, agent_id: int, content: dict[str, Any]):
-        """Record a planning event."""
-        self.record_event("plan", content, agent_id)
-
-    def record_action(self, agent_id: int, content: dict[str, Any]):
-        """Record an action event."""
-        self.record_event("action", content, agent_id)
-
-    def record_message(
-        self, agent_id: int, message: str, recipient_ids: list[int] | None = None
-    ):
-        """Record a message event."""
-        self.record_event("message", message, agent_id, recipient_ids=recipient_ids)
-
-    def record_state_change(self, agent_id: int, changes: dict[str, Any]):
-        """Record a state change event."""
-        self.record_event("state_change", changes, agent_id)

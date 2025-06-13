@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "simulation_id": "73a97ecc",
-    "start_time": "2025-06-12T10:03:57.614935+00:00",
+    "simulation_id": "a22bf17c",
+    "start_time": "2025-06-13T11:54:31.977485+00:00",
     "model_class": "NegotiationModel",
     "recording_config": {
       "observations": true,
@@ -10,18 +10,18 @@
       "messages": true,
       "state_changes": true
     },
-    "end_time": "2025-06-12T10:04:04.201807+00:00",
+    "end_time": "2025-06-13T11:54:37.895143+00:00",
     "total_steps": 1,
     "total_events": 11,
     "total_agents": 7,
-    "duration_seconds": 6.586965,
+    "duration_seconds": 5.917706,
     "completion_status": "unknown",
     "final_step": 1
   },
   "events": [
     {
-      "event_id": "73a97ecc_000000",
-      "timestamp": "2025-06-12 10:03:59.578826+00:00",
+      "event_id": "a22bf17c_000000",
+      "timestamp": "2025-06-13 11:54:33.631663+00:00",
       "step": 1,
       "agent_id": null,
       "event_type": "step_start",
@@ -33,8 +33,8 @@
       }
     },
     {
-      "event_id": "73a97ecc_000001",
-      "timestamp": "2025-06-12 10:03:59.579494+00:00",
+      "event_id": "a22bf17c_000001",
+      "timestamp": "2025-06-13 11:54:33.632019+00:00",
       "step": 1,
       "agent_id": 2,
       "event_type": "observation",
@@ -57,31 +57,31 @@
       }
     },
     {
-      "event_id": "73a97ecc_000002",
-      "timestamp": "2025-06-12 10:04:00.501525+00:00",
+      "event_id": "a22bf17c_000002",
+      "timestamp": "2025-06-13 11:54:35.214035+00:00",
       "step": 1,
       "agent_id": 2,
       "event_type": "plan",
       "content": {
-        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[8,0]}', name='teleport_to_location'), id='call_giadbqM4FGvdbIUNRvSuRG1Y', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+        "plan": "Currently, there are no nearby agents, and I am not engaged in any conversation. I will teleport to a different location to explore the environment further and potentially encounter sellers. \n\nI'll choose a new location to teleport to. Let's teleport to coordinates (5, 5).\n\nExecuting the teleportation now.\n"
       },
       "metadata": {
         "source": "agent_planning"
       }
     },
     {
-      "event_id": "73a97ecc_000003",
-      "timestamp": "2025-06-12 10:04:00.501690+00:00",
+      "event_id": "a22bf17c_000003",
+      "timestamp": "2025-06-13 11:54:35.214242+00:00",
       "step": 1,
       "agent_id": 2,
       "event_type": "action",
       "content": {
         "tool_call_response": [
           {
-            "tool_call_id": "call_giadbqM4FGvdbIUNRvSuRG1Y",
+            "tool_call_id": "call_Ben3JvZqtLGyDa5p1qyd6g78",
             "role": "tool",
             "name": "teleport_to_location",
-            "response": "agent 2 moved to (8, 0)."
+            "response": "agent 2 moved to (5, 5)."
           }
         ]
       },
@@ -90,8 +90,8 @@
       }
     },
     {
-      "event_id": "73a97ecc_000004",
-      "timestamp": "2025-06-12 10:04:00.501825+00:00",
+      "event_id": "a22bf17c_000004",
+      "timestamp": "2025-06-13 11:54:35.214388+00:00",
       "step": 1,
       "agent_id": 4,
       "event_type": "observation",
@@ -114,31 +114,31 @@
       }
     },
     {
-      "event_id": "73a97ecc_000005",
-      "timestamp": "2025-06-12 10:04:02.040739+00:00",
+      "event_id": "a22bf17c_000005",
+      "timestamp": "2025-06-13 11:54:36.394374+00:00",
       "step": 1,
       "agent_id": 4,
       "event_type": "plan",
       "content": {
-        "plan": "Since I am currently not engaged in a conversation and there are no nearby agents to interact with, I will teleport to a new location to explore the environment.\n\nI will move to coordinates (5, 3).\n\nExecuting the teleportation now.\n"
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[3,3]}', name='teleport_to_location'), id='call_NFhLmUbXddfoECfOUZ6YMkEo', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
       },
       "metadata": {
         "source": "agent_planning"
       }
     },
     {
-      "event_id": "73a97ecc_000006",
-      "timestamp": "2025-06-12 10:04:02.040963+00:00",
+      "event_id": "a22bf17c_000006",
+      "timestamp": "2025-06-13 11:54:36.394562+00:00",
       "step": 1,
       "agent_id": 4,
       "event_type": "action",
       "content": {
         "tool_call_response": [
           {
-            "tool_call_id": "call_PSeChQa2YYxZhjRkhXHqCOPI",
+            "tool_call_id": "call_NFhLmUbXddfoECfOUZ6YMkEo",
             "role": "tool",
             "name": "teleport_to_location",
-            "response": "agent 4 moved to (5, 3)."
+            "response": "agent 4 moved to (3, 3)."
           }
         ]
       },
@@ -147,8 +147,8 @@
       }
     },
     {
-      "event_id": "73a97ecc_000007",
-      "timestamp": "2025-06-12 10:04:02.041100+00:00",
+      "event_id": "a22bf17c_000007",
+      "timestamp": "2025-06-13 11:54:36.394688+00:00",
       "step": 1,
       "agent_id": 5,
       "event_type": "observation",
@@ -171,31 +171,31 @@
       }
     },
     {
-      "event_id": "73a97ecc_000008",
-      "timestamp": "2025-06-12 10:04:03.566086+00:00",
+      "event_id": "a22bf17c_000008",
+      "timestamp": "2025-06-13 11:54:37.137238+00:00",
       "step": 1,
       "agent_id": 5,
       "event_type": "plan",
       "content": {
-        "plan": "Currently, there are no messages from seller agents in my local state, and I am not engaged in a conversation. I will teleport to a new location to explore the environment further and potentially encounter seller agents who might pitch their products.\n\nI will move to location (3, 1).\n\nExecuting teleport now.\n"
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[5,0]}', name='teleport_to_location'), id='call_kEpFazkSjs06fJxFPJeSLYj9', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
       },
       "metadata": {
         "source": "agent_planning"
       }
     },
     {
-      "event_id": "73a97ecc_000009",
-      "timestamp": "2025-06-12 10:04:03.566193+00:00",
+      "event_id": "a22bf17c_000009",
+      "timestamp": "2025-06-13 11:54:37.137393+00:00",
       "step": 1,
       "agent_id": 5,
       "event_type": "action",
       "content": {
         "tool_call_response": [
           {
-            "tool_call_id": "call_ivVj8CMjM9Kr1ILu6GtQE2aJ",
+            "tool_call_id": "call_kEpFazkSjs06fJxFPJeSLYj9",
             "role": "tool",
             "name": "teleport_to_location",
-            "response": "agent 5 moved to (3, 1)."
+            "response": "agent 5 moved to (5, 0)."
           }
         ]
       },
@@ -204,8 +204,8 @@
       }
     },
     {
-      "event_id": "73a97ecc_000010",
-      "timestamp": "2025-06-12 10:04:03.566299+00:00",
+      "event_id": "a22bf17c_000010",
+      "timestamp": "2025-06-13 11:54:37.137609+00:00",
       "step": 1,
       "agent_id": 3,
       "event_type": "observation",
@@ -233,6 +233,15 @@
               "persuasive"
             ]
           },
+          "BuyerAgent 2": {
+            "position": [
+              5,
+              5
+            ],
+            "internal_state": [
+              ""
+            ]
+          },
           "SellerAgent 7": {
             "position": [
               5,
@@ -250,8 +259,8 @@
       }
     },
     {
-      "event_id": "73a97ecc_000011",
-      "timestamp": "2025-06-12 10:04:04.202014+00:00",
+      "event_id": "a22bf17c_000011",
+      "timestamp": "2025-06-13 11:54:37.895218+00:00",
       "step": 1,
       "agent_id": null,
       "event_type": "simulation_end",
@@ -269,15 +278,15 @@
     "2": {
       "total_events": 3,
       "event_types": [
+        "action",
         "plan",
-        "observation",
-        "action"
+        "observation"
       ],
       "active_steps": [
         1
       ],
-      "first_event": "2025-06-12T10:03:59.579494+00:00",
-      "last_event": "2025-06-12T10:04:00.501690+00:00"
+      "first_event": "2025-06-13T11:54:33.632019+00:00",
+      "last_event": "2025-06-13T11:54:35.214242+00:00"
     },
     "3": {
       "total_events": 1,
@@ -287,34 +296,34 @@
       "active_steps": [
         1
       ],
-      "first_event": "2025-06-12T10:04:03.566299+00:00",
-      "last_event": "2025-06-12T10:04:03.566299+00:00"
+      "first_event": "2025-06-13T11:54:37.137609+00:00",
+      "last_event": "2025-06-13T11:54:37.137609+00:00"
     },
     "4": {
       "total_events": 3,
       "event_types": [
+        "action",
         "plan",
-        "observation",
-        "action"
+        "observation"
       ],
       "active_steps": [
         1
       ],
-      "first_event": "2025-06-12T10:04:00.501825+00:00",
-      "last_event": "2025-06-12T10:04:02.040963+00:00"
+      "first_event": "2025-06-13T11:54:35.214388+00:00",
+      "last_event": "2025-06-13T11:54:36.394562+00:00"
     },
     "5": {
       "total_events": 3,
       "event_types": [
+        "action",
         "plan",
-        "observation",
-        "action"
+        "observation"
       ],
       "active_steps": [
         1
       ],
-      "first_event": "2025-06-12T10:04:02.041100+00:00",
-      "last_event": "2025-06-12T10:04:03.566193+00:00"
+      "first_event": "2025-06-13T11:54:36.394688+00:00",
+      "last_event": "2025-06-13T11:54:37.137393+00:00"
     }
   },
   "communication_network": {

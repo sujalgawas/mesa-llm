@@ -1,6 +1,4 @@
 import atexit
-import signal
-import sys
 from collections.abc import Callable
 from functools import wraps
 from typing import TYPE_CHECKING, Any
@@ -78,36 +76,6 @@ def record_model(
                 print(f"[SimulationRecorder] Auto-save failed: {exc}")
 
         atexit.register(_auto_save)
-
-        # --------------------------------------------------
-        # Graceful interrupt handling (Ctrl-C)
-        # --------------------------------------------------
-        previous_sigint_handler = signal.getsignal(signal.SIGINT)
-
-        def _sigint_handler(signum, frame):
-            print("\n[SimulationRecorder] SIGINT received - saving recording …")
-            try:
-                if hasattr(self, "recorder") and self.recorder.events:
-                    self.save_recording()
-            except Exception as exc:  # pragma: no cover - defensive
-                print(f"[SimulationRecorder] Save on SIGINT failed: {exc}")
-
-            # If there was a previous handler, delegate to it so normal KeyboardInterrupt propagates
-            if callable(previous_sigint_handler):
-                previous_sigint_handler(signum, frame)
-            else:
-                sys.exit(0)
-
-        # Register only once per process (subsequent models skip)
-        try:
-            if (  # type: ignore[attr-defined]
-                not hasattr(self.__class__, "_sigint_handler_registered")
-            ):
-                signal.signal(signal.SIGINT, _sigint_handler)
-                self.__class__._sigint_handler_registered = True  # type: ignore[attr-defined]
-        except ValueError:
-            # signal.signal can raise if called from a non-main thread - ignore in that case
-            pass
 
     cls.__init__ = init_wrapper  # type: ignore[assignment]
 

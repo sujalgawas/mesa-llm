@@ -66,9 +66,10 @@ class ReActReasoning(Reasoning):
         # Recording hook for plan event
         # --------------------------------------------------
         if self.agent.recorder is not None:
-            self.agent.recorder.record_plan(
-                agent_id=self.agent.unique_id,
+            self.agent.recorder.record_event(
+                event_type="plan",
                 content={"plan": str(react_plan)},
+                agent_id=self.agent.unique_id,
             )
 
         return react_plan

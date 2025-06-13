@@ -93,9 +93,10 @@ class ReWOOReasoning(Reasoning):
         memory.add_to_memory(type="Plan", content=str(rewoo_plan), step=step)
 
         if self.agent.recorder is not None:
-            self.agent.recorder.record_plan(
-                agent_id=self.agent.unique_id,
+            self.agent.recorder.record_event(
+                event_type="plan",
                 content={"plan": str(rewoo_plan)},
+                agent_id=self.agent.unique_id,
             )
 
         return rewoo_plan
