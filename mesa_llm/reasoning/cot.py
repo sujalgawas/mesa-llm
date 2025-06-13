@@ -71,16 +71,17 @@ class CoTReasoning(Reasoning):
             tool_choice="none",
         )
 
-        response_message = rsp.choices[0].message.content
+        chaining_message = rsp.choices[0].message.content
+        memory.add_to_memory(type="Plan", content=chaining_message, step=step)
         system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
-            prompt=response_message,
+            prompt=chaining_message,
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
         )
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
 
-        memory.add_to_memory(type="Plan", content=str(cot_plan), step=step)
+        memory.add_to_memory(type="Plan-Execution", content=str(cot_plan), step=step)
 
         return cot_plan
