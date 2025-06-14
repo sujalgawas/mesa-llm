@@ -63,6 +63,10 @@ class ReActReasoning(Reasoning):
 
         chaining_message = rsp.choices[0].message.content
         memory.add_to_memory(type="Plan", content=chaining_message, step=step)
+
+        # Pass plan content to agent for rich display
+        if hasattr(self.agent, "_step_display_data"):
+            self.agent._step_display_data["plan_content"] = chaining_message
         system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(

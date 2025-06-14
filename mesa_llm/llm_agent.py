@@ -17,6 +17,7 @@ from mesa_llm.reasoning.reasoning import (
     Observation,
     Reasoning,
 )
+from mesa_llm.recording.agent_step_display import display_agent_step, extract_tool_calls
 from mesa_llm.recording.simulation_recorder import SimulationRecorder
 from mesa_llm.tools.tool_manager import ToolManager
 
@@ -72,6 +73,10 @@ class LLMAgent(Agent):
         self.reasoning = reasoning(agent=self)
         self.system_prompt = system_prompt
         self.is_speaking = False
+        self._current_plan = None  # Store current plan for formatting
+
+        # display coordination
+        self._step_display_data = {}
 
         if isinstance(internal_state, str):
             internal_state = [internal_state]
@@ -85,14 +90,35 @@ class LLMAgent(Agent):
 
     def apply_plan(self, plan: Plan) -> list[dict]:
         """
-        Execute the plan in the simulation.
+        Execute the plan in the simulation with rich display.
         """
+        # Store current plan for rich formatting
+        self._current_plan = plan
+
+        # Extract tool calls for display
+        if hasattr(self, "_step_display_data"):
+            self._step_display_data["tool_calls"] = extract_tool_calls(plan.llm_plan)
+
+        # Execute tool calls
         tool_call_resp = self.tool_manager.call_tools(
             agent=self, llm_response=plan.llm_plan
         )
+
+        # Add to memory
         self.memory.add_to_memory(
             type="Tool_Call_Action", content=str(tool_call_resp), step=plan.step
         )
+
+        # Display the complete step with rich formatting
+        if hasattr(self, "_step_display_data"):
+            display_agent_step(
+                step=self._step_display_data["step"],
+                agent_class=self._step_display_data["agent_class"],
+                agent_id=self._step_display_data["agent_id"],
+                observation=self._step_display_data["observation"],
+                plan_content=self._step_display_data.get("plan_content"),
+                tool_calls=self._step_display_data["tool_calls"],
+            )
 
         if self.recorder is not None:
             self.recorder.record_event(
@@ -113,6 +139,17 @@ class LLMAgent(Agent):
 
         """
         step = self.model.steps
+
+        # Initialize step display data at the start of observation
+        self._step_display_data = {
+            "step": step,
+            "agent_class": self.__class__.__name__.replace("Agent", " agent"),
+            "agent_id": self.unique_id,
+            "observation": None,
+            "plan_content": None,
+            "tool_calls": None,
+        }
+
         self_state = {
             "agent_unique_id": self.unique_id,
             "system_prompt": self.system_prompt,
@@ -146,6 +183,13 @@ class LLMAgent(Agent):
                 "internal_state": i.internal_state,
             }
 
+        # Store observation data for rich display
+        self._step_display_data["observation"] = {
+            "self_state": self_state,
+            "local_state": local_state,
+        }
+
+        # Add to memory (memory handles its own display separately)
         self.memory.add_to_memory(
             type="Observation",
             content=f"local_state: {local_state}, self_state: {self_state}",

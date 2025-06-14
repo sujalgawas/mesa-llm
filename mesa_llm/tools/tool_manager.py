@@ -70,7 +70,7 @@ class ToolManager:
         Returns:
             A list of tool results
         """
-        sprint("tool_calls :", llm_response.tool_calls, color="teal")
+        # sprint("tool_calls :", llm_response.tool_calls, color="teal")  # Suppress for rich integration
 
         try:
             # Extract response message and tool calls
@@ -93,7 +93,7 @@ class ToolManager:
                     function_args_str = tool_call.function.arguments
                     tool_call_id = tool_call.id
 
-                    print(f"Processing tool call {i + 1}: {function_name}")
+                    # print(f"Processing tool call {i + 1}: {function_name}")  # Suppress for rich integration
 
                     # Validate function exists in tool_manager
                     if function_name not in self.tools:

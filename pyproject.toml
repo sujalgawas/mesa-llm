@@ -15,6 +15,7 @@ dependencies = [
     "mesa[rec]>=3.0",
     "litellm",
     "terminal-style",
+    "rich",
 ]
 dynamic = ["version"]
 
