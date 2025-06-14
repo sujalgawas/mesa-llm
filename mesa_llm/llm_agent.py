@@ -90,9 +90,9 @@ class LLMAgent(Agent):
 
     def apply_plan(self, plan: Plan) -> list[dict]:
         """
-        Execute the plan in the simulation with rich display.
+        Execute the plan in the simulation.
         """
-        # Store current plan for rich formatting
+        # Store current plan for display
         self._current_plan = plan
 
         # Extract tool calls for display
@@ -109,7 +109,7 @@ class LLMAgent(Agent):
             type="Tool_Call_Action", content=str(tool_call_resp), step=plan.step
         )
 
-        # Display the complete step with rich formatting
+        # Display the complete step
         if hasattr(self, "_step_display_data"):
             display_agent_step(
                 step=self._step_display_data["step"],
@@ -183,7 +183,7 @@ class LLMAgent(Agent):
                 "internal_state": i.internal_state,
             }
 
-        # Store observation data for rich display
+        # Store observation data for display
         self._step_display_data["observation"] = {
             "self_state": self_state,
             "local_state": local_state,
