@@ -37,18 +37,22 @@ class Observation:
     def __str__(self) -> str:
         lines = [
             # f"Step: {self.step}",
-            f"\n {style('└──', color='green')} {style('[Self State]', color='cyan', bold=True)}",
+            f"\n {style('└──', color='green')} {style('[Self State] : ', color='cyan', bold=True, end='')}",
         ]
-        for k, v in self.self_state.items():
-            lines.append(f"   • {style(k, color='bold')}: {v}")
+        lines.append(
+            self.self_state["location"],
+            ", state : ",
+            self.self_state["internal_state"],
+            end="",
+        )
 
         lines.append(
-            f"\n  {style('└──', color='green')} {style('[Local State of Nearby Agents]', color='cyan', bold=True)}"
+            f"\n  {style('└──', color='green')} {style('[Local State of Nearby Agents] : ', color='cyan', bold=True, end='')}"
         )
         for agent_id, agent_info in self.local_state.items():
-            lines.append(f"   • {style(agent_id, color='bold')}:")
-            for k, v in agent_info.items():
-                lines.append(f"    • {style(k, color='bold')}: {v}")
+            lines.append(
+                f"{style(agent_id, color='bold')}: {agent_info['position']}, state : {agent_info['internal_state']}"
+            )
 
         return "\n".join(lines)
 

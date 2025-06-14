@@ -91,6 +91,17 @@ class Memory:
                 for _ in range(self.consolidation_capacity)
             ]
             self._update_long_term_memory(memories_to_consolidate)
+<<<<<<< HEAD
+=======
+        # agent_display_name = (
+        #    self.agent.__class__.__name__ + " " + str(self.agent.unique_id) + " "
+        # )
+        print(
+            # style("\nAdded to the memory of ", color="green"),
+            # style(agent_display_name, color="cyan"),
+            new_entry,
+        )
+>>>>>>> 50eaa2a (refactor : step formatting)
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:

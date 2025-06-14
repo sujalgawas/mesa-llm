@@ -69,4 +69,6 @@ page = SolaraViz(
 
 page  # noqa
 
-# run with : solara run examples/negotiation/app.py
+"""run with:
+conda activate mesa-llm && solara run examples/negotiation/app.py
+"""
