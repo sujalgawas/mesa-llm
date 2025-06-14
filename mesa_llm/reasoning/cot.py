@@ -73,6 +73,10 @@ class CoTReasoning(Reasoning):
 
         chaining_message = rsp.choices[0].message.content
         memory.add_to_memory(type="Plan", content=chaining_message, step=step)
+
+        # Pass plan content to agent for rich display
+        if hasattr(self.agent, "_step_display_data"):
+            self.agent._step_display_data["plan_content"] = chaining_message
         system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
@@ -83,5 +87,12 @@ class CoTReasoning(Reasoning):
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
 
         memory.add_to_memory(type="Plan-Execution", content=str(cot_plan), step=step)
+
+        if self.agent.recorder is not None:
+            self.agent.recorder.record_event(
+                event_type="plan",
+                content={"plan": str(cot_plan)},
+                agent_id=self.agent.unique_id,
+            )
 
         return cot_plan
