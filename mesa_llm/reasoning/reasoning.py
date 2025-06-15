@@ -36,14 +36,10 @@ class Observation:
 
     def __str__(self) -> str:
         lines = [
-            # f"Step: {self.step}",
             f"\n {style('└──', color='green')} {style('[Self State] : ', color='cyan', bold=True, end='')}",
         ]
         lines.append(
-            self.self_state["location"],
-            ", state : ",
-            self.self_state["internal_state"],
-            end="",
+            f"{self.self_state['location']}, state : {self.self_state['internal_state']}"
         )
 
         lines.append(

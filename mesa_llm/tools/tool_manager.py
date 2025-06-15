@@ -44,7 +44,7 @@ class ToolManager:
 
     def get_tool_schema(self, fn: Callable, schema_name: str) -> dict:
         return getattr(fn, "__tool_schema__", None) or {
-            "error": style(f"Tool {schema_name} missing __tool_schema__", color="red")
+            "error": f"Tool {schema_name} missing __tool_schema__"
         }
 
     def get_all_tools_schema(self) -> list[dict]:
@@ -119,17 +119,13 @@ class ToolManager:
                         )
                     except TypeError as e:
                         # Handle case where function arguments don't match function signature
-                        print(
-                            style(
-                                f"Warning: Function call failed with TypeError: {e}",
-                                color="yellow",
-                            )
+                        sprint(
+                            f"Warning: Function call failed with TypeError: {e}",
+                            color="yellow",
                         )
-                        print(
-                            style(
-                                "Attempting to call with filtered arguments...",
-                                color="yellow",
-                            )
+                        sprint(
+                            "Attempting to call with filtered arguments...",
+                            color="yellow",
                         )
 
                         # Try to filter arguments to match function signature
@@ -165,28 +161,27 @@ class ToolManager:
 
                 except Exception as e:
                     # Handle individual tool call errors
-                    error_message = style(
+                    sprint(
                         f"Error executing tool call {i + 1} ({function_name}): {e!s}",
                         color="red",
                     )
-                    print(error_message)
 
                     # Create error response
                     error_result = {
                         "tool_call_id": tool_call.id,
                         "role": "tool",
                         "name": function_name,
-                        "response": style(f"Error: {e!s}", color="red"),
+                        "response": f"Error: {e!s}",
                     }
 
                     tool_results.append(error_result)
             return tool_results
 
         except AttributeError as e:
-            print(style(f"Error accessing LLM response structure: {e}", color="red"))
+            sprint(f"Error accessing LLM response structure: {e}", color="red")
             return []
         except Exception as e:
-            print(style(f"Unexpected error in call_tools: {e}", color="red"))
+            sprint(f"Unexpected error in call_tools: {e}", color="red")
             return []
 
 

@@ -22,7 +22,7 @@ def teleport_to_location(
     target_coordinates: list[int],
 ) -> str:
     """
-    Teleport the agent to specific (x, y) coordinates. Example call: {"name": "teleport_to_location", "arguments": { "target_coordinates": [3, 7] }}
+    Teleport the agent to specific (x, y) coordinates within the grid.
 
     Args:
         target_coordinates: Exactly two integers in the form [x, y] that fall inside the current environment bounds. Example: [3, 7]
@@ -75,11 +75,3 @@ def speak_to(
             },
         )
     return f"{agent.unique_id} → {listener_agents} : {message}"
-
-
-if __name__ == "__main__":
-    # CL to execute this file: python -m mesa_llm.tools.inbuilt_tools
-    import json
-
-    print(json.dumps(teleport_to_location.__tool_schema__, indent=2))
-    print(json.dumps(speak_to.__tool_schema__, indent=2))

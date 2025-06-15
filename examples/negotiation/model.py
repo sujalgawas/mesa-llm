@@ -2,6 +2,7 @@ import math
 
 from mesa.model import Model
 from mesa.space import MultiGrid
+from rich import print
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from mesa_llm.reasoning.reasoning import Reasoning
@@ -72,7 +73,8 @@ class NegotiationModel(Model):
             (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2)),
         )
 
-        seller_b = SellerAgent(
+        # Just for testing purposes, we can add more seller agents later
+        """seller_b = SellerAgent(
             model=self,
             api_key=api_key,
             reasoning=reasoning,
@@ -85,9 +87,16 @@ class NegotiationModel(Model):
             seller_b,
             (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2) + 1),
         )
+        """
 
     def step(self):
         """
         Execute one step of the model.
         """
+        print(
+            f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
+        )
         self.agents.shuffle_do("step")
+
+        for agent in self.agents:
+            print(agent.memory)

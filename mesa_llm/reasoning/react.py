@@ -50,7 +50,7 @@ class ReActReasoning(Reasoning):
         Based on the information above, think about what you should do with proper reasoning, And then decide your plan of action. Respond in the
         following format:
         Reasoning: [Your reasoning about the situation, including how your memory informs your decision]
-        Action: [The action you decide to take]
+        Action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
 
         """
 

@@ -3,8 +3,6 @@ from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from terminal_style import style
-
 from mesa_llm.module_llm import ModuleLLM
 
 if TYPE_CHECKING:
@@ -19,12 +17,7 @@ class MemoryEntry:
     metadata: dict
 
     def __str__(self) -> str:
-        return (
-            style(
-                f"[{self.type.title()} @ Step {self.step}] : ", color="green", bold=True
-            )
-            + self.content
-        )
+        return f"[{self.type.title()} @ Step {self.step}] : " + self.content
 
 
 class Memory:
@@ -91,17 +84,6 @@ class Memory:
                 for _ in range(self.consolidation_capacity)
             ]
             self._update_long_term_memory(memories_to_consolidate)
-<<<<<<< HEAD
-=======
-        # agent_display_name = (
-        #    self.agent.__class__.__name__ + " " + str(self.agent.unique_id) + " "
-        # )
-        print(
-            # style("\nAdded to the memory of ", color="green"),
-            # style(agent_display_name, color="cyan"),
-            new_entry,
-        )
->>>>>>> 50eaa2a (refactor : step formatting)
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:
@@ -144,3 +126,6 @@ class Memory:
             "step": entry.step,
             "metadata": entry.metadata,
         }
+
+    def __str__(self) -> str:
+        return f"Short term memory:\n {self.format_short_term()}\n\nLong term memory: \n{self.format_long_term()}"
