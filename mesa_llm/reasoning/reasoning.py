@@ -73,6 +73,4 @@ class Reasoning(ABC):
         response_message = rsp.choices[0].message
         plan = Plan(step=self.agent.model.steps, llm_plan=response_message, ttl=1)
 
-        self.agent.memory.add_to_memory(type="Tool_call_response", content=str(plan))
-
         return plan

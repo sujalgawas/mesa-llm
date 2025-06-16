@@ -103,7 +103,10 @@ class LLMAgent(Agent):
         self.memory.add_to_memory(
             type="Action",
             content={
-                "tool_call_response": tool_call_resp,
+                k: v
+                for tool_call in tool_call_resp
+                for k, v in tool_call.items()
+                if k not in ["tool_call_id", "role"]
             },
         )
 

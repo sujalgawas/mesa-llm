@@ -32,24 +32,25 @@ class MemoryEntry:
         def format_nested_dict(data, indent_level=0):
             lines = []
             indent = "   " * indent_level
-            tree_symbol = "└── "
 
             for key, value in data.items():
                 if isinstance(value, dict):
-                    lines.append(f"{indent}[cyan]{tree_symbol}{key}[/cyan]")
+                    lines.append(f"{indent}[blue]└──[/blue] [cyan]{key} :[/cyan]")
                     lines.extend(format_nested_dict(value, indent_level + 1))
                 else:
-                    lines.append(f"{indent}[cyan]{tree_symbol}{key}[/cyan]: {value}")
+                    lines.append(
+                        f"{indent}[blue]└──[/blue] [cyan]{key} : [/cyan]{value}"
+                    )
 
             return lines
 
         lines = []
-        for key, value in self.content.items():
-            lines.append(f"[bold cyan][{key.title()}][/bold cyan]")
+        for key, value in [item for item in self.content.items() if item[1]]:
+            lines.append(f"\n[bold cyan][{key.title()}][/bold cyan]")
             if isinstance(value, dict):
                 lines.extend(format_nested_dict(value, 1))
             else:
-                lines.append(f"   [cyan]└── [/cyan]{value}")
+                lines.append(f"   [blue]└──[/blue] [cyan]{value} :[/cyan]")
 
         content = "\n".join(lines)
 
@@ -105,21 +106,25 @@ class Memory:
 
         self.llm.set_system_prompt(self.system_prompt)
 
-        self.step_content: dict[str, str] = {}
+        self.step_content: dict = {}
+        self.last_observation: dict = {}
 
     def add_to_memory(self, type: str, content: dict):
         """
         Add a new entry to the memory
         """
-        if "observation" in type:
-            self.step_content[type] = "".join(
-                [f"{k}: {v} ;" for k, v in content.items()]
-            )
-
+        if type == "Observation":
+            # Only store changed parts of observation
+            changed_parts = {
+                k: v for k, v in content.items() if v != self.last_observation.get(k)
+            }
+            if changed_parts:
+                self.step_content[type] = changed_parts
+            self.last_observation = content
         else:
             self.step_content[type] = content
 
-    def _update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
+    def _update_long_term_memory(self):
         """
         Update the long term memory by summarizing the short term memory with a LLM
         """
@@ -141,6 +146,7 @@ class Memory:
         - Display the new entry
         """
 
+        # Add the new entry to the short term memory
         new_entry = MemoryEntry(
             content=self.step_content,
             step=self.agent.model.steps,
@@ -150,11 +156,8 @@ class Memory:
 
         # Consolidate memory if the short term memory is over capacity
         if len(self.short_term_memory) > self.capacity + self.consolidation_capacity:
-            memories_to_consolidate = [
-                self.short_term_memory.popleft()
-                for _ in range(self.consolidation_capacity)
-            ]
-            self._update_long_term_memory(memories_to_consolidate)
+            self.short_term_memory.popleft()
+            self._update_long_term_memory()
 
         # Display the new entry
         title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] agent [bold purple]{self.agent.unique_id}[/bold purple]"
@@ -174,8 +177,8 @@ class Memory:
 
         lines = [f"[{self.agent} Short-Term Memory]"]
         for entry in self.short_term_memory:
-            lines.append(f"\n[{entry.type.title()} @ Step {entry.step}]")
-            lines.append(entry.content.strip())
+            lines.append(f"\n[Step {entry.step}]")
+            lines.append(str(entry.content))
         return str("\n".join(lines))
 
     def format_long_term(self) -> str:

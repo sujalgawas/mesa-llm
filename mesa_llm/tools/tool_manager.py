@@ -65,7 +65,7 @@ class ToolManager:
         and output as successfully executed.
 
         Args:
-            llm_response: The response from the LLM.
+            llm_response: The raw response from the LLM.
 
         Returns:
             A list of tool results

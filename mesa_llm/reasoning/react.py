@@ -28,10 +28,6 @@ class ReActReasoning(Reasoning):
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
         short_term_memory = memory.format_short_term()
-        obs_str = str(
-            obs
-        )  # passing the latest obs separately from memory so that the llm can pay more attention to it.
-        memory.add_to_memory(type="Observation", content=obs_str)
 
         system_prompt = f"""
         You are an autonomous agent in a simulation environment.
