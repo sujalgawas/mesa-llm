@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from terminal_style import style
-
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
@@ -33,24 +31,6 @@ class Observation:
     step: int
     self_state: dict
     local_state: dict
-
-    def __str__(self) -> str:
-        lines = [
-            f"\n {style('└──', color='green')} {style('[Self State] : ', color='cyan', bold=True, end='')}",
-        ]
-        lines.append(
-            f"{self.self_state['location']}, state : {self.self_state['internal_state']}"
-        )
-
-        lines.append(
-            f"\n  {style('└──', color='green')} {style('[Local State of Nearby Agents] : ', color='cyan', bold=True, end='')}"
-        )
-        for agent_id, agent_info in self.local_state.items():
-            lines.append(
-                f"{style(agent_id, color='bold')}: {agent_info['position']}, state : {agent_info['internal_state']}"
-            )
-
-        return "\n".join(lines)
 
 
 @dataclass
@@ -82,3 +62,17 @@ class Reasoning(ABC):
         ttl: int = 1,
     ) -> Plan:
         pass
+
+    def execute_tool_call(self, chaining_message):
+        system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
+        self.agent.llm.set_system_prompt(system_prompt)
+        rsp = self.agent.llm.generate(
+            prompt=chaining_message,
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+        )
+        response_message = rsp.choices[0].message
+        plan = Plan(step=self.agent.model.steps, llm_plan=response_message, ttl=1)
+
+        self.agent.memory.add_to_memory(type="Tool_call_response", content=str(plan))
+
+        return plan

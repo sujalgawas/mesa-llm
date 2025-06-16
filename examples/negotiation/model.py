@@ -97,6 +97,3 @@ class NegotiationModel(Model):
             f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
         )
         self.agents.shuffle_do("step")
-
-        for agent in self.agents:
-            print(agent.memory)

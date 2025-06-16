@@ -17,7 +17,6 @@ from mesa_llm.reasoning.reasoning import (
     Observation,
     Reasoning,
 )
-from mesa_llm.recording.agent_step_display import display_agent_step, extract_tool_calls
 from mesa_llm.recording.simulation_recorder import SimulationRecorder
 from mesa_llm.tools.tool_manager import ToolManager
 
@@ -95,10 +94,6 @@ class LLMAgent(Agent):
         # Store current plan for display
         self._current_plan = plan
 
-        # Extract tool calls for display
-        if hasattr(self, "_step_display_data"):
-            self._step_display_data["tool_calls"] = extract_tool_calls(plan.llm_plan)
-
         # Execute tool calls
         tool_call_resp = self.tool_manager.call_tools(
             agent=self, llm_response=plan.llm_plan
@@ -106,19 +101,11 @@ class LLMAgent(Agent):
 
         # Add to memory
         self.memory.add_to_memory(
-            type="Tool_Call_Action", content=str(tool_call_resp), step=plan.step
+            type="Action",
+            content={
+                "tool_call_response": tool_call_resp,
+            },
         )
-
-        # Display the complete step
-        if hasattr(self, "_step_display_data"):
-            display_agent_step(
-                step=self._step_display_data["step"],
-                agent_class=self._step_display_data["agent_class"],
-                agent_id=self._step_display_data["agent_id"],
-                observation=self._step_display_data["observation"],
-                plan_content=self._step_display_data.get("plan_content"),
-                tool_calls=self._step_display_data["tool_calls"],
-            )
 
         if self.recorder is not None:
             self.recorder.record_event(
@@ -140,16 +127,6 @@ class LLMAgent(Agent):
         """
         step = self.model.steps
 
-        # Initialize step display data at the start of observation
-        self._step_display_data = {
-            "step": step,
-            "agent_class": self.__class__.__name__.replace("Agent", " agent"),
-            "agent_id": self.unique_id,
-            "observation": None,
-            "plan_content": None,
-            "tool_calls": None,
-        }
-
         self_state = {
             "agent_unique_id": self.unique_id,
             "system_prompt": self.system_prompt,
@@ -170,9 +147,11 @@ class LLMAgent(Agent):
 
             elif isinstance(self.model.space, ContinuousSpace):
                 neighbors, _ = self.get_neighbors_in_radius(radius=self.vision)
+
         elif self.vision == -1:
             all_agents = list(self.model.agents)
             neighbors = [agent for agent in all_agents if agent is not self]
+
         else:
             neighbors = []
 
@@ -183,17 +162,13 @@ class LLMAgent(Agent):
                 "internal_state": i.internal_state,
             }
 
-        # Store observation data for display
-        self._step_display_data["observation"] = {
-            "self_state": self_state,
-            "local_state": local_state,
-        }
-
         # Add to memory (memory handles its own display separately)
         self.memory.add_to_memory(
             type="Observation",
-            content=f"local_state: {local_state}, self_state: {self_state}",
-            step=step,
+            content={
+                "self_state": self_state,
+                "local_state": local_state,
+            },
         )
 
         # --------------------------------------------------
@@ -224,9 +199,8 @@ class LLMAgent(Agent):
         for recipient in [*recipients, self]:
             recipient.memory.add_to_memory(
                 type="Message",
-                content=message,
-                step=self.model.steps,
-                metadata={
+                content={
+                    "message": message,
                     "sender": self,
                     "recipients": recipients,
                 },
@@ -241,3 +215,29 @@ class LLMAgent(Agent):
             )
 
         return f"{self} → {recipients} : {message}"
+
+    def step(self):
+        """
+        This is some code that is executed after the step method of the child agent is called.
+        It functions because of the __init_subclass__ method that creates a wrapper around the step method of the child agent.
+        """
+        self.memory.process_step()
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Wrapper - allows to automatically integrate code to be executed after the step method of the child agent (created by the user) is called.
+        """
+        super().__init_subclass__(**kwargs)
+        # only wrap if subclass actually defines its own step
+        user_step = cls.__dict__.get("step")
+        if not user_step:
+            return
+
+        def wrapped(self, *args, **kwargs):
+            # first run the override
+            result = user_step(self, *args, **kwargs)
+            # then run the base-class logic
+            LLMAgent.step(self, *args, **kwargs)
+            return result
+
+        cls.step = wrapped

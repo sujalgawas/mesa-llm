@@ -26,7 +26,7 @@ class ReWOOReasoning(Reasoning):
         obs_str = str(obs)
 
         # Add current observation to memory
-        memory.add_to_memory(type="Observation", content=obs_str, step=step)
+        memory.add_to_memory(type="Observation", content=obs_str)
 
         system_prompt = f"""
         You are an autonomous agent that creates multi-step plans without re-observing during execution.
@@ -90,7 +90,7 @@ class ReWOOReasoning(Reasoning):
         response_message = rsp.choices[0].message
 
         rewoo_plan = Plan(step=step, llm_plan=response_message, ttl=ttl)
-        memory.add_to_memory(type="Plan", content=str(rewoo_plan), step=step)
+        memory.add_to_memory(type="Plan", content=str(rewoo_plan))
 
         if self.agent.recorder is not None:
             self.agent.recorder.record_event(

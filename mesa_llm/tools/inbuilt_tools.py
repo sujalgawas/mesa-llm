@@ -67,9 +67,8 @@ def speak_to(
     for recipient in [*listener_agents, agent]:
         recipient.memory.add_to_memory(
             type="Message",
-            content=message,
-            step=agent.model.steps,
-            metadata={
+            content={
+                "message": message,
                 "sender": agent,
                 "recipients": listener_agents,
             },

@@ -1,9 +1,19 @@
+import json
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from pydantic import BaseModel
 
 from mesa_llm.reasoning.reasoning import Observation, Plan, Reasoning
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
+
+
+@dataclass
+class ReActOutput(BaseModel):
+    reasoning: str
+    action: str
 
 
 class ReActReasoning(Reasoning):
@@ -14,7 +24,6 @@ class ReActReasoning(Reasoning):
         """
         Plan the next (ReAct) action based on the current observation and the agent's memory.
         """
-        step = obs.step + 1
         llm = self.agent.llm
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
@@ -22,7 +31,7 @@ class ReActReasoning(Reasoning):
         obs_str = str(
             obs
         )  # passing the latest obs separately from memory so that the llm can pay more attention to it.
-        memory.add_to_memory(type="Observation", content=obs_str, step=step)
+        memory.add_to_memory(type="Observation", content=obs_str)
 
         system_prompt = f"""
         You are an autonomous agent in a simulation environment.
@@ -42,15 +51,15 @@ class ReActReasoning(Reasoning):
         ---
 
         # Current Observation
-        {obs_str}
+        {obs}
 
         ---
 
         # Instructions
         Based on the information above, think about what you should do with proper reasoning, And then decide your plan of action. Respond in the
         following format:
-        Reasoning: [Your reasoning about the situation, including how your memory informs your decision]
-        Action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
+        reasoning: [Your reasoning about the situation, including how your memory informs your decision]
+        action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
 
         """
 
@@ -59,24 +68,14 @@ class ReActReasoning(Reasoning):
             prompt=prompt,
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
             tool_choice="none",
+            response_format=ReActOutput,
         )
 
-        chaining_message = rsp.choices[0].message.content
-        memory.add_to_memory(type="Plan", content=chaining_message, step=step)
+        formatted_response = json.loads(rsp.choices[0].message.content)
 
-        # Pass plan content to agent for display
-        if hasattr(self.agent, "_step_display_data"):
-            self.agent._step_display_data["plan_content"] = chaining_message
-        system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
-        llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(
-            prompt=chaining_message,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
-        )
-        response_message = rsp.choices[0].message
-        react_plan = Plan(step=step, llm_plan=response_message, ttl=1)
+        memory.add_to_memory(type="Plan", content=formatted_response)
 
-        memory.add_to_memory(type="Plan-Execution", content=str(react_plan), step=step)
+        react_plan = self.execute_tool_call(formatted_response["action"])
 
         # --------------------------------------------------
         # Recording hook for plan event

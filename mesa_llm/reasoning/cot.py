@@ -26,7 +26,7 @@ class CoTReasoning(Reasoning):
         obs_str = str(obs)
 
         # Add current observation to memory (for record)
-        memory.add_to_memory(type="Observation", content=obs_str, step=step)
+        memory.add_to_memory(type="Observation", content=obs_str)
 
         system_prompt = f"""
         You are an autonomous agent operating in a simulation.
@@ -72,7 +72,7 @@ class CoTReasoning(Reasoning):
         )
 
         chaining_message = rsp.choices[0].message.content
-        memory.add_to_memory(type="Plan", content=chaining_message, step=step)
+        memory.add_to_memory(type="Plan", content=chaining_message)
 
         # Pass plan content to agent for display
         if hasattr(self.agent, "_step_display_data"):
@@ -86,7 +86,7 @@ class CoTReasoning(Reasoning):
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
 
-        memory.add_to_memory(type="Plan-Execution", content=str(cot_plan), step=step)
+        memory.add_to_memory(type="Plan-Execution", content=str(cot_plan))
 
         if self.agent.recorder is not None:
             self.agent.recorder.record_event(

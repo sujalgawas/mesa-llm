@@ -1,7 +1,11 @@
+import json
 import os
 from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from rich.console import Console
+from rich.panel import Panel
 
 from mesa_llm.module_llm import ModuleLLM
 
@@ -11,13 +15,45 @@ if TYPE_CHECKING:
 
 @dataclass
 class MemoryEntry:
-    type: str
-    content: str
+    content: dict
     step: int
-    metadata: dict
 
     def __str__(self) -> str:
-        return f"[{self.type.title()} @ Step {self.step}] : " + self.content
+        """
+        Returns the memory entry as a string without formatting (simply an indented dict)
+        """
+        return str(json.dumps(self.content, indent=4))
+
+    def style_format(self) -> str:
+        """
+        content is a dict that can have nested dictionaries of arbitrary depth
+        """
+
+        def format_nested_dict(data, indent_level=0):
+            lines = []
+            indent = "   " * indent_level
+            tree_symbol = "└── "
+
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    lines.append(f"{indent}[cyan]{tree_symbol}{key}[/cyan]")
+                    lines.extend(format_nested_dict(value, indent_level + 1))
+                else:
+                    lines.append(f"{indent}[cyan]{tree_symbol}{key}[/cyan]: {value}")
+
+            return lines
+
+        lines = []
+        for key, value in self.content.items():
+            lines.append(f"[bold cyan][{key.title()}][/bold cyan]")
+            if isinstance(value, dict):
+                lines.extend(format_nested_dict(value, 1))
+            else:
+                lines.append(f"   [cyan]└── [/cyan]{value}")
+
+        content = "\n".join(lines)
+
+        return content
 
 
 class Memory:
@@ -53,8 +89,10 @@ class Memory:
         """
         self.agent = agent
         self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
+
         self.capacity = short_term_capacity
         self.consolidation_capacity = consolidation_capacity
+
         self.short_term_memory = deque()
         self.long_term_memory = ""
 
@@ -67,15 +105,48 @@ class Memory:
 
         self.llm.set_system_prompt(self.system_prompt)
 
-    def add_to_memory(
-        self, type: str, content: str, step: int, metadata: dict | None = None
-    ):
+        self.step_content: dict[str, str] = {}
+
+    def add_to_memory(self, type: str, content: dict):
         """
         Add a new entry to the memory
         """
-        metadata = metadata or {}
-        new_entry = MemoryEntry(type, content, step, metadata)
+        if "observation" in type:
+            self.step_content[type] = "".join(
+                [f"{k}: {v} ;" for k, v in content.items()]
+            )
+
+        else:
+            self.step_content[type] = content
+
+    def _update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
+        """
+        Update the long term memory by summarizing the short term memory with a LLM
+        """
+
+        prompt = f"""
+            Short term memory:
+                {self.format_short_term()}
+            Long term memory:
+                {self.long_term_memory}
+            """
+
+        self.long_term_memory = self.llm.generate(prompt)
+
+    def process_step(self):
+        """
+        Process the step of the agent :
+        - Add the new entry to the short term memory
+        - Consolidate the memory if the short term memory is over capacity
+        - Display the new entry
+        """
+
+        new_entry = MemoryEntry(
+            content=self.step_content,
+            step=self.agent.model.steps,
+        )
         self.short_term_memory.append(new_entry)
+        self.step_content = {}
 
         # Consolidate memory if the short term memory is over capacity
         if len(self.short_term_memory) > self.capacity + self.consolidation_capacity:
@@ -84,6 +155,18 @@ class Memory:
                 for _ in range(self.consolidation_capacity)
             ]
             self._update_long_term_memory(memories_to_consolidate)
+
+        # Display the new entry
+        title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] agent [bold purple]{self.agent.unique_id}[/bold purple]"
+        panel = Panel(
+            new_entry.style_format(),
+            title=title,
+            title_align="left",
+            border_style="bright_blue",
+            padding=(0, 1),
+        )
+        console = Console()
+        console.print(panel)
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:
@@ -100,32 +183,6 @@ class Memory:
         Get the long term memory
         """
         return str(self.long_term_memory)
-
-    def _update_long_term_memory(self, memories_to_consolidate: list[MemoryEntry]):
-        """
-        Update the long term memory by summarizing the short term memory with a LLM
-        """
-        entries = [self.convert_entry_to_dict(m) for m in memories_to_consolidate]
-
-        prompt = f"""
-            Short term memory:
-                {entries}
-            Long term memory:
-                {self.long_term_memory}
-            """
-
-        self.long_term_memory = self.llm.generate(prompt)
-
-    def convert_entry_to_dict(self, entry: MemoryEntry) -> dict:
-        """
-        Convert a memory entry to a dictionary
-        """
-        return {
-            "type": entry.type,
-            "content": entry.content,
-            "step": entry.step,
-            "metadata": entry.metadata,
-        }
 
     def __str__(self) -> str:
         return f"Short term memory:\n {self.format_short_term()}\n\nLong term memory: \n{self.format_long_term()}"
