@@ -1,0 +1,928 @@
+{
+  "metadata": {
+    "simulation_id": "e6881947",
+    "start_time": "2025-06-16T17:42:06.521159+00:00",
+    "model_class": "NegotiationModel",
+    "recording_config": {
+      "observations": true,
+      "plans": true,
+      "actions": true,
+      "messages": true,
+      "state_changes": true
+    },
+    "end_time": "2025-06-16T17:43:54.403034+00:00",
+    "total_steps": 5,
+    "total_events": 42,
+    "total_agents": 2,
+    "duration_seconds": 107.881875,
+    "completion_status": "unknown",
+    "final_step": 5
+  },
+  "events": [
+    {
+      "event_id": "e6881947_000000",
+      "timestamp": "2025-06-16 17:42:18.602281+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 1
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000001",
+      "timestamp": "2025-06-16 17:42:18.602281+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000002",
+      "timestamp": "2025-06-16 17:42:34.498183+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\": [1, 2, 3, 4, 5], \"message\": \"Hello, I\\'m excited to introduce my product to you! It\\'s designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?\"}', name='speak_to'), id='call_qzCCLTFhU6ncfHLao4n3glhF', type='function'), ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\": [10, 11, 12, 13, 14], \"message\": \"Hello, I\\'m excited to introduce my product to you! It\\'s designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?\"}', name='speak_to'), id='call_edoV4r0fFgiko5HLMrZDQyA3', type='function'), ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\": [20, 21, 22, 23, 24], \"message\": \"Hello, I\\'m excited to introduce my product to you! It\\'s designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?\"}', name='speak_to'), id='call_0CvLaw7O3oAU72rJ2xd0CRqH', type='function'), ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\": [30, 31, 32, 33, 34], \"message\": \"Hello, I\\'m excited to introduce my product to you! It\\'s designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?\"}', name='speak_to'), id='call_SurxCbMDGStr2KKOHNfGidnT', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000003",
+      "timestamp": "2025-06-16 17:42:34.498183+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_qzCCLTFhU6ncfHLao4n3glhF",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [1] : Hello, I'm excited to introduce my product to you! It's designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?"
+          },
+          {
+            "tool_call_id": "call_edoV4r0fFgiko5HLMrZDQyA3",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [] : Hello, I'm excited to introduce my product to you! It's designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?"
+          },
+          {
+            "tool_call_id": "call_0CvLaw7O3oAU72rJ2xd0CRqH",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [] : Hello, I'm excited to introduce my product to you! It's designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?"
+          },
+          {
+            "tool_call_id": "call_SurxCbMDGStr2KKOHNfGidnT",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [] : Hello, I'm excited to introduce my product to you! It's designed to enhance your productivity and streamline your daily tasks. Would you like to know more about its benefits?"
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000004",
+      "timestamp": "2025-06-16 17:42:34.518066+00:00",
+      "step": 1,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 1,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            "0",
+            "3"
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000005",
+      "timestamp": "2025-06-16 17:42:40.416808+00:00",
+      "step": 1,
+      "agent_id": 1,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[1,3]}', name='teleport_to_location'), id='call_gZxRcB7UZ1XYi2E0A6ZWHLpN', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000006",
+      "timestamp": "2025-06-16 17:42:40.416808+00:00",
+      "step": 1,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_gZxRcB7UZ1XYi2E0A6ZWHLpN",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 1 moved to (1, 3)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000007",
+      "timestamp": "2025-06-16 17:42:40.427040+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "step_end",
+      "content": {
+        "step": 1
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000008",
+      "timestamp": "2025-06-16 17:42:40.653064+00:00",
+      "step": 2,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 2
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000009",
+      "timestamp": "2025-06-16 17:42:40.655077+00:00",
+      "step": 2,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {
+          "BuyerAgent 1": {
+            "position": [
+              1,
+              3
+            ],
+            "internal_state": [
+              ""
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000010",
+      "timestamp": "2025-06-16 17:42:46.656082+00:00",
+      "step": 2,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\":[1],\"message\":\"Hello, I\\'m excited to introduce you to my product! It has several benefits that could really enhance your experience. Would you like to know more?\"}', name='speak_to'), id='call_5R8WNWDpa2GYiGXoXtYD4c7G', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000011",
+      "timestamp": "2025-06-16 17:42:46.656082+00:00",
+      "step": 2,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_5R8WNWDpa2GYiGXoXtYD4c7G",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [1] : Hello, I'm excited to introduce you to my product! It has several benefits that could really enhance your experience. Would you like to know more?"
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000012",
+      "timestamp": "2025-06-16 17:42:46.675689+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 1,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            1,
+            3
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {
+          "SellerAgent 2": {
+            "position": [
+              2,
+              2
+            ],
+            "internal_state": [
+              "hardworking",
+              "dedicated",
+              "persuasive"
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000013",
+      "timestamp": "2025-06-16 17:42:46.675689+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "state_change",
+      "content": {
+        "location": {
+          "old": [
+            "0",
+            "3"
+          ],
+          "new": [
+            1,
+            3
+          ]
+        }
+      },
+      "metadata": {
+        "source": "state_tracking"
+      }
+    },
+    {
+      "event_id": "e6881947_000014",
+      "timestamp": "2025-06-16 17:42:53.001723+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[2,3]}', name='teleport_to_location'), id='call_57RVink8qPD0hwxV5hMhAiGg', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000015",
+      "timestamp": "2025-06-16 17:42:53.001723+00:00",
+      "step": 2,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_57RVink8qPD0hwxV5hMhAiGg",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 1 moved to (2, 3)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000016",
+      "timestamp": "2025-06-16 17:42:53.019406+00:00",
+      "step": 2,
+      "agent_id": null,
+      "event_type": "step_end",
+      "content": {
+        "step": 2
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000017",
+      "timestamp": "2025-06-16 17:42:53.245802+00:00",
+      "step": 3,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 3
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000018",
+      "timestamp": "2025-06-16 17:42:53.247814+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 1,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            2,
+            3
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {
+          "SellerAgent 2": {
+            "position": [
+              2,
+              2
+            ],
+            "internal_state": [
+              "hardworking",
+              "dedicated",
+              "persuasive"
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000019",
+      "timestamp": "2025-06-16 17:42:53.247814+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "state_change",
+      "content": {
+        "location": {
+          "old": [
+            1,
+            3
+          ],
+          "new": [
+            2,
+            3
+          ]
+        }
+      },
+      "metadata": {
+        "source": "state_tracking"
+      }
+    },
+    {
+      "event_id": "e6881947_000020",
+      "timestamp": "2025-06-16 17:43:00.045579+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\":[2],\"message\":\"Can you provide more details about your product? I\\'m interested in understanding the benefits it offers.\"}', name='speak_to'), id='call_YycNtveXA2JUVdUZ4piA0FpL', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000021",
+      "timestamp": "2025-06-16 17:43:00.045579+00:00",
+      "step": 3,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_YycNtveXA2JUVdUZ4piA0FpL",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "1 \u2192 [2] : Can you provide more details about your product? I'm interested in understanding the benefits it offers."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000022",
+      "timestamp": "2025-06-16 17:43:00.055704+00:00",
+      "step": 3,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {
+          "BuyerAgent 1": {
+            "position": [
+              2,
+              3
+            ],
+            "internal_state": [
+              ""
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000023",
+      "timestamp": "2025-06-16 17:43:08.324648+00:00",
+      "step": 3,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\":[1],\"message\":\"Hello! I would like to introduce you to my product, which has several benefits that I believe you\\'ll find valuable. Please let me know if you\\'d like to hear more details!\"}', name='speak_to'), id='call_n2KH0YbXy5vD7r34ESpGDTGK', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000024",
+      "timestamp": "2025-06-16 17:43:08.324648+00:00",
+      "step": 3,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_n2KH0YbXy5vD7r34ESpGDTGK",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [1] : Hello! I would like to introduce you to my product, which has several benefits that I believe you'll find valuable. Please let me know if you'd like to hear more details!"
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000025",
+      "timestamp": "2025-06-16 17:43:08.361513+00:00",
+      "step": 3,
+      "agent_id": null,
+      "event_type": "step_end",
+      "content": {
+        "step": 3
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000026",
+      "timestamp": "2025-06-16 17:43:08.581807+00:00",
+      "step": 4,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 4
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000027",
+      "timestamp": "2025-06-16 17:43:08.581807+00:00",
+      "step": 4,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {
+          "BuyerAgent 1": {
+            "position": [
+              2,
+              3
+            ],
+            "internal_state": [
+              ""
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000028",
+      "timestamp": "2025-06-16 17:43:15.877802+00:00",
+      "step": 4,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\":[1],\"message\":\"Hello BuyerAgent 1! I want to share some key advantages of my product with you. It offers outstanding value and can significantly enhance your experience. Let\\'s discuss how it might meet your needs!\"}', name='speak_to'), id='call_7OlOiFxaLvw0YcPn6pMUBXBL', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000029",
+      "timestamp": "2025-06-16 17:43:15.877802+00:00",
+      "step": 4,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_7OlOiFxaLvw0YcPn6pMUBXBL",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "2 \u2192 [1] : Hello BuyerAgent 1! I want to share some key advantages of my product with you. It offers outstanding value and can significantly enhance your experience. Let's discuss how it might meet your needs!"
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000030",
+      "timestamp": "2025-06-16 17:43:15.885000+00:00",
+      "step": 4,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 1,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            2,
+            3
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {
+          "SellerAgent 2": {
+            "position": [
+              2,
+              2
+            ],
+            "internal_state": [
+              "hardworking",
+              "dedicated",
+              "persuasive"
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000031",
+      "timestamp": "2025-06-16 17:43:21.924189+00:00",
+      "step": 4,
+      "agent_id": 1,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"listener_agents_unique_ids\":[2],\"message\":\"Could you please provide me with more information about your product?\"}', name='speak_to'), id='call_OalzgZaiCcpMTsfyUrULqrSC', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000032",
+      "timestamp": "2025-06-16 17:43:21.924189+00:00",
+      "step": 4,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_OalzgZaiCcpMTsfyUrULqrSC",
+            "role": "tool",
+            "name": "speak_to",
+            "response": "1 \u2192 [2] : Could you please provide me with more information about your product?"
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000033",
+      "timestamp": "2025-06-16 17:43:21.940280+00:00",
+      "step": 4,
+      "agent_id": null,
+      "event_type": "step_end",
+      "content": {
+        "step": 4
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000034",
+      "timestamp": "2025-06-16 17:43:22.165186+00:00",
+      "step": 5,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 5
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000035",
+      "timestamp": "2025-06-16 17:43:22.167708+00:00",
+      "step": 5,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {
+          "BuyerAgent 1": {
+            "position": [
+              2,
+              3
+            ],
+            "internal_state": [
+              ""
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000036",
+      "timestamp": "2025-06-16 17:43:29.516867+00:00",
+      "step": 5,
+      "agent_id": 2,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[2,3]}', name='teleport_to_location'), id='call_9A50gam0xo4KCximIPJlI1rs', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000037",
+      "timestamp": "2025-06-16 17:43:29.516867+00:00",
+      "step": 5,
+      "agent_id": 2,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_9A50gam0xo4KCximIPJlI1rs",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 2 moved to (2, 3)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000038",
+      "timestamp": "2025-06-16 17:43:29.522144+00:00",
+      "step": 5,
+      "agent_id": 1,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 1,
+          "system_prompt": "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller.",
+          "location": [
+            2,
+            3
+          ],
+          "internal_state": [
+            ""
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "e6881947_000039",
+      "timestamp": "2025-06-16 17:43:35.131416+00:00",
+      "step": 5,
+      "agent_id": 1,
+      "event_type": "plan",
+      "content": {
+        "plan": "Message(content=None, role='assistant', tool_calls=[ChatCompletionMessageToolCall(function=Function(arguments='{\"target_coordinates\":[3,3]}', name='teleport_to_location'), id='call_oGP3qMIMVqTD3YvYrCPo28h2', type='function')], function_call=None, provider_specific_fields={'refusal': None}, annotations=[])\n"
+      },
+      "metadata": {
+        "source": "agent_planning"
+      }
+    },
+    {
+      "event_id": "e6881947_000040",
+      "timestamp": "2025-06-16 17:43:35.131416+00:00",
+      "step": 5,
+      "agent_id": 1,
+      "event_type": "action",
+      "content": {
+        "tool_call_response": [
+          {
+            "tool_call_id": "call_oGP3qMIMVqTD3YvYrCPo28h2",
+            "role": "tool",
+            "name": "teleport_to_location",
+            "response": "agent 1 moved to (3, 3)."
+          }
+        ]
+      },
+      "metadata": {
+        "source": "agent_action"
+      }
+    },
+    {
+      "event_id": "e6881947_000041",
+      "timestamp": "2025-06-16 17:43:35.148910+00:00",
+      "step": 5,
+      "agent_id": null,
+      "event_type": "step_end",
+      "content": {
+        "step": 5
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "e6881947_000042",
+      "timestamp": "2025-06-16 17:43:54.403034+00:00",
+      "step": 5,
+      "agent_id": null,
+      "event_type": "simulation_end",
+      "content": {
+        "status": "unknown",
+        "final_step": 5,
+        "total_events": 42
+      },
+      "metadata": {
+        "source": "model"
+      }
+    }
+  ],
+  "agent_summaries": {
+    "1": {
+      "total_events": 17,
+      "event_types": [
+        "observation",
+        "action",
+        "state_change",
+        "plan"
+      ],
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event": "2025-06-16T17:42:34.518066+00:00",
+      "last_event": "2025-06-16T17:43:35.131416+00:00"
+    },
+    "2": {
+      "total_events": 15,
+      "event_types": [
+        "observation",
+        "action",
+        "plan"
+      ],
+      "active_steps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_event": "2025-06-16T17:42:18.602281+00:00",
+      "last_event": "2025-06-16T17:43:29.516867+00:00"
+    }
+  },
+  "communication_network": {
+    "total_messages": 0,
+    "communication_matrix": {},
+    "agents_involved": []
+  }
+}

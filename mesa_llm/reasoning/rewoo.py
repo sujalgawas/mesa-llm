@@ -1,40 +1,9 @@
 from typing import TYPE_CHECKING
 
-# import json
-# from pydantic import BaseModel, Field, model_validator
-from mesa_llm.reasoning.reasoning import Observation, Plan, Reasoning
+from mesa_llm.reasoning.reasoning import Plan, Reasoning
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
-
-
-# @dataclass
-# class ReWOOOutput(BaseModel):
-#     plan: str
-#     step_1: str = Field(description="First action with expected outcome")
-#     step_2: Optional[str] = Field(None, description="Second action building on Step 1")
-#     step_3: Optional[str] = Field(None, description="Third action if needed")
-#     step_4: Optional[str] = Field(None, description="Fourth action if needed")
-#     step_5: Optional[str] = Field(None, description="Final action if needed")
-#     contingency: str
-
-#     @model_validator(mode='after')
-#     def validate_consecutive_steps(self):
-#         # Get all step values
-#         steps = [self.step_1, self.step_2, self.step_3, self.step_4, self.step_5]
-
-#         # Find the last non-None step
-#         last_step_index = -1
-#         for i, step in enumerate(steps):
-#             if step is not None:
-#                 last_step_index = i
-
-#         # Ensure no gaps in steps (no None values before the last step)
-#         for i in range(last_step_index):
-#             if steps[i] is None:
-#                 raise ValueError(f"Steps must be consecutive. Found None at step_{i+1} but step_{last_step_index+1} has a value.")
-
-#         return self
 
 
 class ReWOOReasoning(Reasoning):
@@ -44,11 +13,26 @@ class ReWOOReasoning(Reasoning):
 
     def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
+        self.remaining_tool_calls = 0  # Initialize remaining tool calls
+        self.current_plan = None
 
-    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+    def plan(self, prompt: str) -> Plan:
         """
         Plan the next (ReWOO) action based on the current observation and the agent's memory.
         """
+
+        # If we have remaining tool calls, skip observation and plan generation
+        if self.remaining_tool_calls > 0:
+            index_of_tool = (
+                self.current_plan.tool_calls.length() - self.remaining_tool_calls
+            )
+            self.remaining_tool_calls -= 1
+            tool_call = [self.current_plan.tool_calls[index_of_tool]]
+            current_plan = self.current_plan
+            current_plan.tool_calls = tool_call
+            return Plan(llm_plan=current_plan, step=10, ttl=1)  # change step
+
+        obs = self.agent.generate_obs()
         llm = self.agent.llm
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
@@ -106,12 +90,22 @@ class ReWOOReasoning(Reasoning):
             prompt=prompt,
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
             tool_choice="none",
-            # response_format=ReWOOOutput
         )
 
         memory.add_to_memory(type="Plan", content=rsp.choices[0].message.content)
 
         rewoo_plan = self.execute_tool_call(rsp.choices[0].message.content)
+
+        # Count the number of tool calls in the response and set remaining_tool_calls
+        if hasattr(rewoo_plan, "tool_calls"):
+            self.remaining_tool_calls = len(rewoo_plan.tool_calls)
+            print(
+                "############################################################",
+                self.remaining_tool_calls,
+            )
+        else:
+            self.remaining_tool_calls = 0
+        self.current_plan = rewoo_plan
 
         # --------------------------------------------------
         # Recording hook for plan event

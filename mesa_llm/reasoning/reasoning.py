@@ -58,7 +58,7 @@ class Reasoning(ABC):
     def plan(
         self,
         prompt: str,
-        obs: Observation,
+        obs: Observation | None = None,
         ttl: int = 1,
     ) -> Plan:
         pass
