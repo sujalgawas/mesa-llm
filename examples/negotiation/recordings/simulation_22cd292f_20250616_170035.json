@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "simulation_id": "22cd292f",
+    "start_time": "2025-06-16T16:58:29.904827+00:00",
+    "model_class": "NegotiationModel",
+    "recording_config": {
+      "observations": true,
+      "plans": true,
+      "actions": true,
+      "messages": true,
+      "state_changes": true
+    },
+    "end_time": "2025-06-16T17:00:35.015510+00:00",
+    "total_steps": 1,
+    "total_events": 2,
+    "total_agents": 2,
+    "duration_seconds": 125.110683,
+    "completion_status": "unknown",
+    "final_step": 1
+  },
+  "events": [
+    {
+      "event_id": "22cd292f_000000",
+      "timestamp": "2025-06-16 16:58:33.900855+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "step_start",
+      "content": {
+        "step": 1
+      },
+      "metadata": {
+        "source": "model"
+      }
+    },
+    {
+      "event_id": "22cd292f_000001",
+      "timestamp": "2025-06-16 16:58:33.902359+00:00",
+      "step": 1,
+      "agent_id": 2,
+      "event_type": "observation",
+      "content": {
+        "self_state": {
+          "agent_unique_id": 2,
+          "system_prompt": "You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+          "location": [
+            2,
+            2
+          ],
+          "internal_state": [
+            "hardworking",
+            "dedicated",
+            "persuasive"
+          ]
+        },
+        "local_state": {}
+      },
+      "metadata": {
+        "source": "agent_observation"
+      }
+    },
+    {
+      "event_id": "22cd292f_000002",
+      "timestamp": "2025-06-16 17:00:35.015510+00:00",
+      "step": 1,
+      "agent_id": null,
+      "event_type": "simulation_end",
+      "content": {
+        "status": "unknown",
+        "final_step": 1,
+        "total_events": 2
+      },
+      "metadata": {
+        "source": "model"
+      }
+    }
+  ],
+  "agent_summaries": {
+    "2": {
+      "total_events": 1,
+      "event_types": [
+        "observation"
+      ],
+      "active_steps": [
+        1
+      ],
+      "first_event": "2025-06-16T16:58:33.902359+00:00",
+      "last_event": "2025-06-16T16:58:33.902359+00:00"
+    }
+  },
+  "communication_network": {
+    "total_messages": 0,
+    "communication_matrix": {},
+    "agents_involved": []
+  }
+}
