@@ -64,14 +64,13 @@ def speak_to(
         and listener_agent.unique_id != agent.unique_id
     ]
 
-    for recipient in [*listener_agents, agent]:
+    for recipient in listener_agents:
         recipient.memory.add_to_memory(
             type="Message",
-            content=message,
-            step=agent.model.steps,
-            metadata={
+            content={
+                "message": message,
                 "sender": agent,
                 "recipients": listener_agents,
             },
         )
-    return f"{agent.unique_id} → {listener_agents} : {message}"
+    return f"{agent.unique_id} → {[agent.unique_id for agent in listener_agents]} : {message}"

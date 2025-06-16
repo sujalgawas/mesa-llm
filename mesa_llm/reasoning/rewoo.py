@@ -1,9 +1,19 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from pydantic import BaseModel
 
 from mesa_llm.reasoning.reasoning import Observation, Plan, Reasoning
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
+
+
+@dataclass
+class ReWOOOutput(BaseModel):
+    plan: str
+    plan_steps: list[str]
+    contingency: str
 
 
 class ReWOOReasoning(Reasoning):
@@ -23,10 +33,6 @@ class ReWOOReasoning(Reasoning):
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
         short_term_memory = memory.format_short_term()
-        obs_str = str(obs)
-
-        # Add current observation to memory
-        memory.add_to_memory(type="Observation", content=obs_str, step=step)
 
         system_prompt = f"""
         You are an autonomous agent that creates multi-step plans without re-observing during execution.
@@ -46,7 +52,7 @@ class ReWOOReasoning(Reasoning):
         ---
 
         # Current Observation
-        {obs_str}
+        {obs}
 
         ---
 
@@ -90,7 +96,7 @@ class ReWOOReasoning(Reasoning):
         response_message = rsp.choices[0].message
 
         rewoo_plan = Plan(step=step, llm_plan=response_message, ttl=ttl)
-        memory.add_to_memory(type="Plan", content=str(rewoo_plan), step=step)
+        memory.add_to_memory(type="Plan", content=str(rewoo_plan))
 
         if self.agent.recorder is not None:
             self.agent.recorder.record_event(

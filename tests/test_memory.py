@@ -73,22 +73,21 @@ class TestMemory:
         memory = Memory(agent=mock_agent, api_key="test_key")
 
         # Test basic addition
-        memory.add_to_memory("observation", "Test content", 1)
+        memory.add_to_memory("observation", "Test content")
         assert len(memory.short_term_memory) == 1
 
         entry = memory.short_term_memory[0]
         assert entry.type == "observation"
         assert entry.content == "Test content"
-        assert entry.step == 1
         assert entry.metadata == {}
 
-        # Test with metadata
-        memory.add_to_memory("planning", "Test plan", 2, {"importance": "high"})
+        # Test with metadata (note: new interface doesn't support metadata parameter)
+        memory.add_to_memory("planning", {"content": "Test plan", "importance": "high"})
         assert len(memory.short_term_memory) == 2
         assert memory.short_term_memory[1].metadata == {"importance": "high"}
 
-        # Test None metadata handling
-        memory.add_to_memory("action", "Test action", 3, None)
+        # Test content handling
+        memory.add_to_memory("action", {"content": "Test action"})
         assert memory.short_term_memory[2].metadata == {}
 
     @patch("mesa_llm.memory.style")
@@ -106,7 +105,7 @@ class TestMemory:
 
         # Add memories to trigger consolidation (capacity + consolidation + 1 = 4)
         for i in range(4):
-            memory.add_to_memory(f"type_{i}", f"content_{i}", i)
+            memory.add_to_memory(f"type_{i}", f"content_{i}")
 
         # Should have consolidated 1 memory, leaving 3
         assert len(memory.short_term_memory) == 3

@@ -39,6 +39,7 @@ class ModuleLLM:
         prompt: str,
         tool_schema: list[dict] | None = None,
         tool_choice: str = "auto",
+        response_format: dict | object | None = None,
     ) -> str:
         if self.system_prompt:
             messages = [
@@ -53,21 +54,10 @@ class ModuleLLM:
                 messages=messages,
                 tools=tool_schema,
                 tool_choice=tool_choice,
+                response_format=response_format,
             )
         else:
-            response = completion(model=self.llm_model, messages=messages)
+            response = completion(
+                model=self.llm_model, messages=messages, response_format=response_format
+            )
         return response
-
-
-# test the module
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    print("ready to go ------------------------------")
-
-    api_key = os.getenv("GEMINI_API_KEY")  # Or simply your API key
-    llm = ModuleLLM(api_key=api_key, llm_model="gemini/gemini-2.0-flash")
-
-    response = llm.generate("Say 'hi'.")
-    print(response.choices[0].message.content)
