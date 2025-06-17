@@ -8,7 +8,7 @@ from mesa.visualization import (
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from examples.negotiation.model import NegotiationModel
-from mesa_llm.reasoning.react import ReAct
+from mesa_llm.reasoning.rewoo import ReWOOReasoning
 
 load_dotenv()
 
@@ -42,9 +42,9 @@ model_params = {
     "initial_buyers": 1,
     "width": 4,
     "height": 4,
-    "api_key": os.getenv("OPENAI_API_KEY"),
-    "reasoning": ReAct,
-    "llm_model": "openai/gpt-4o-mini",
+    "api_key": os.getenv("GEMINI_API_KEY"),
+    "reasoning": ReWOOReasoning,
+    "llm_model": "gemini/gemini-2.0-flash",
     "vision": 5,
 }
 
