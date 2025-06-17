@@ -8,7 +8,7 @@ from mesa.visualization import (
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from examples.negotiation.model import NegotiationModel
-from mesa_llm.reasoning.rewoo import ReWOOReasoning
+from mesa_llm.reasoning.react import ReActReasoning
 
 load_dotenv()
 
@@ -43,7 +43,7 @@ model_params = {
     "width": 4,
     "height": 4,
     "api_key": os.getenv("OPENAI_API_KEY"),
-    "reasoning": ReWOOReasoning,
+    "reasoning": ReActReasoning,
     "llm_model": "openai/gpt-4o-mini",
     "vision": 5,
 }
