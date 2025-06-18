@@ -8,7 +8,7 @@ from mesa.visualization import (
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from examples.negotiation.model import NegotiationModel
-from mesa_llm.reasoning.rewoo import ReWOOReasoning
+from mesa_llm.reasoning.react import ReActReasoning
 
 load_dotenv()
 
@@ -45,6 +45,7 @@ model_params = {
     "api_key": os.getenv("GEMINI_API_KEY"),
     "reasoning": ReWOOReasoning,
     "llm_model": "gemini/gemini-2.0-flash",
+
     "vision": 5,
 }
 
