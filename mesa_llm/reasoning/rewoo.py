@@ -92,7 +92,7 @@ class ReWOOReasoning(Reasoning):
             tool_choice="none",
         )
 
-        memory.add_to_memory(type="Plan", content=rsp.choices[0].message.content)
+        memory.add_to_memory(type="plan", content=rsp.choices[0].message.content)
 
         rewoo_plan = self.execute_tool_call(rsp.choices[0].message.content)
 

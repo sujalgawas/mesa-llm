@@ -113,7 +113,7 @@ class Memory:
         """
         Add a new entry to the memory
         """
-        if type == "Observation":
+        if type == "observation":
             # Only store changed parts of observation
             changed_parts = {
                 k: v for k, v in content.items() if v != self.last_observation.get(k)

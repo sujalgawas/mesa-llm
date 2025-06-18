@@ -328,3 +328,6 @@ pip-log.txt
 
 # Cursor file
 .cursorrules
+
+# Gathered data
+**/recordings

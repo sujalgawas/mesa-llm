@@ -69,7 +69,7 @@ class ReActReasoning(Reasoning):
 
         formatted_response = json.loads(rsp.choices[0].message.content)
 
-        memory.add_to_memory(type="Plan", content=formatted_response)
+        memory.add_to_memory(type="plan", content=formatted_response)
 
         react_plan = self.execute_tool_call(formatted_response["action"])
 

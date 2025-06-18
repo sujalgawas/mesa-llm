@@ -66,7 +66,7 @@ def speak_to(
 
     for recipient in listener_agents:
         recipient.memory.add_to_memory(
-            type="Message",
+            type="message",
             content={
                 "message": message,
                 "sender": agent,

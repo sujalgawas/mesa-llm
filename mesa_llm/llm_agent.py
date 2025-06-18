@@ -101,7 +101,7 @@ class LLMAgent(Agent):
 
         # Add to memory
         self.memory.add_to_memory(
-            type="Action",
+            type="action",
             content={
                 k: v
                 for tool_call in tool_call_resp
@@ -167,7 +167,7 @@ class LLMAgent(Agent):
 
         # Add to memory (memory handles its own display separately)
         self.memory.add_to_memory(
-            type="Observation",
+            type="observation",
             content={
                 "self_state": self_state,
                 "local_state": local_state,
@@ -201,7 +201,7 @@ class LLMAgent(Agent):
         """
         for recipient in [*recipients, self]:
             recipient.memory.add_to_memory(
-                type="Message",
+                type="message",
                 content={
                     "message": message,
                     "sender": self,
@@ -219,11 +219,12 @@ class LLMAgent(Agent):
 
         return f"{self} → {recipients} : {message}"
 
-    def step(self):
+    def post_step(self):
         """
         This is some code that is executed after the step method of the child agent is called.
         It functions because of the __init_subclass__ method that creates a wrapper around the step method of the child agent.
         """
+        print("post_step")
         self.memory.process_step()
 
     def __init_subclass__(cls, **kwargs):
@@ -240,7 +241,7 @@ class LLMAgent(Agent):
             # first run the override
             result = user_step(self, *args, **kwargs)
             # then run the base-class logic
-            LLMAgent.step(self, *args, **kwargs)
+            LLMAgent.post_step(self, *args, **kwargs)
             return result
 
         cls.step = wrapped
