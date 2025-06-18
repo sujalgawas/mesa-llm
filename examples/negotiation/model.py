@@ -96,3 +96,52 @@ class NegotiationModel(Model):
             f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
         )
         self.agents.shuffle_do("step")
+
+
+# ===============================================================
+#                     RUN WITHOUT GRAPHICS
+# ===============================================================
+
+if __name__ == "__main__":
+    """
+    run the model without the solara integration with:
+    conda activate mesa-llm && python -m examples.negotiation.model
+    """
+
+    import os
+
+    from dotenv import load_dotenv
+
+    from mesa_llm.reasoning.react import ReActReasoning
+
+    load_dotenv()
+
+    model_params = {
+        "seed": {
+            "type": "InputText",
+            "value": 42,
+            "label": "Random Seed",
+        },
+        "initial_buyers": 1,
+        "width": 4,
+        "height": 4,
+        "api_key": os.getenv("OPENAI_API_KEY"),
+        "reasoning": ReActReasoning,
+        "llm_model": "openai/gpt-4o-mini",
+        "vision": 5,
+    }
+
+    model = NegotiationModel(
+        initial_buyers=model_params["initial_buyers"],
+        width=model_params["width"],
+        height=model_params["height"],
+        api_key=model_params["api_key"],
+        reasoning=model_params["reasoning"],
+        llm_model=model_params["llm_model"],
+        vision=model_params["vision"],
+        seed=model_params["seed"]["value"],
+    )
+
+    # Run the model for 10 steps
+    for _ in range(10):
+        model.step()

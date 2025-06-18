@@ -160,7 +160,7 @@ class Memory:
             self._update_long_term_memory()
 
         # Display the new entry
-        title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] agent [bold purple]{self.agent.unique_id}[/bold purple]"
+        title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
         panel = Panel(
             new_entry.style_format(),
             title=title,
