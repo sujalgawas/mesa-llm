@@ -24,10 +24,16 @@ class ReActReasoning(Reasoning):
         """
         Plan the next (ReAct) action based on the current observation and the agent's memory.
         """
-        llm = self.agent.llm
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
         short_term_memory = memory.format_short_term()
+
+        if memory.short_term_memory:
+            last_communication = memory.short_term_memory[-1].content.get(
+                "message", "No recent communication history"
+            )
+        else:
+            last_communication = "No recent communication history"
 
         system_prompt = f"""
         You are an autonomous agent in a simulation environment.
@@ -41,7 +47,7 @@ class ReActReasoning(Reasoning):
 
         ---
 
-        # Short-Term Memory (Recent History)
+        # Short-Term Memory (Recent History) - be particularly attentive to the messages (if any).
         {short_term_memory}
 
         ---
@@ -58,10 +64,11 @@ class ReActReasoning(Reasoning):
         action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
 
         """
+        # print(system_prompt, "\n\n last communication: " + str(last_communication))
 
-        llm.set_system_prompt(system_prompt)
-        rsp = llm.generate(
-            prompt=prompt,
+        self.agent.llm.set_system_prompt(system_prompt)
+        rsp = self.agent.llm.generate(
+            prompt=prompt + "\n\n last communication: " + str(last_communication),
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
             tool_choice="none",
             response_format=ReActOutput,

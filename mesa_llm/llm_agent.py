@@ -224,7 +224,6 @@ class LLMAgent(Agent):
         This is some code that is executed after the step method of the child agent is called.
         It functions because of the __init_subclass__ method that creates a wrapper around the step method of the child agent.
         """
-        print("post_step")
         self.memory.process_step()
 
     def __init_subclass__(cls, **kwargs):
