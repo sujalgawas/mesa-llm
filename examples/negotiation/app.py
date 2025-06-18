@@ -42,9 +42,10 @@ model_params = {
     "initial_buyers": 1,
     "width": 4,
     "height": 4,
-    "api_key": os.getenv("OPENAI_API_KEY"),
-    "reasoning": ReActReasoning,
-    "llm_model": "openai/gpt-4o-mini",
+    "api_key": os.getenv("GEMINI_API_KEY"),
+    "reasoning": ReWOOReasoning,
+    "llm_model": "gemini/gemini-2.0-flash",
+
     "vision": 5,
 }
 

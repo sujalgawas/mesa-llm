@@ -15,6 +15,7 @@ class ReWOOReasoning(Reasoning):
         super().__init__(agent=agent)
         self.remaining_tool_calls = 0  # Initialize remaining tool calls
         self.current_plan = None
+        self.current_obs = None
 
     def plan(self, prompt: str) -> Plan:
         """
@@ -24,15 +25,15 @@ class ReWOOReasoning(Reasoning):
         # If we have remaining tool calls, skip observation and plan generation
         if self.remaining_tool_calls > 0:
             index_of_tool = (
-                self.current_plan.tool_calls.length() - self.remaining_tool_calls
+                len(self.current_plan.tool_calls) - self.remaining_tool_calls
             )
             self.remaining_tool_calls -= 1
             tool_call = [self.current_plan.tool_calls[index_of_tool]]
             current_plan = self.current_plan
             current_plan.tool_calls = tool_call
-            return Plan(llm_plan=current_plan, step=10, ttl=1)  # change step
+            return Plan(llm_plan=current_plan, step=self.current_obs.step, ttl=1)
 
-        obs = self.agent.generate_obs()
+        self.current_obs = self.agent.generate_obs()
         llm = self.agent.llm
         memory = self.agent.memory
         long_term_memory = memory.format_long_term()
@@ -56,7 +57,7 @@ class ReWOOReasoning(Reasoning):
         ---
 
         # Current Observation
-        {obs}
+        {self.current_obs}
 
         ---
 
@@ -95,17 +96,12 @@ class ReWOOReasoning(Reasoning):
         memory.add_to_memory(type="plan", content=rsp.choices[0].message.content)
 
         rewoo_plan = self.execute_tool_call(rsp.choices[0].message.content)
-
         # Count the number of tool calls in the response and set remaining_tool_calls
-        if hasattr(rewoo_plan, "tool_calls"):
-            self.remaining_tool_calls = len(rewoo_plan.tool_calls)
-            print(
-                "############################################################",
-                self.remaining_tool_calls,
-            )
+        if hasattr(rewoo_plan.llm_plan, "tool_calls"):
+            self.remaining_tool_calls = len(rewoo_plan.llm_plan.tool_calls)
         else:
             self.remaining_tool_calls = 0
-        self.current_plan = rewoo_plan
+        self.current_plan = rewoo_plan.llm_plan
 
         # --------------------------------------------------
         # Recording hook for plan event

@@ -69,6 +69,7 @@ class Reasoning(ABC):
         rsp = self.agent.llm.generate(
             prompt=chaining_message,
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_choice="required",
         )
         response_message = rsp.choices[0].message
         plan = Plan(step=self.agent.model.steps, llm_plan=response_message, ttl=1)
