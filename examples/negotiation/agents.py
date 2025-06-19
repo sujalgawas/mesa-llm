@@ -27,6 +27,7 @@ class SellerAgent(LLMAgent):
         )
 
         self.tool_manager = seller_tool_manager
+        self.sales = 0
 
     def step(self):
         observation = self.generate_obs()
@@ -45,6 +46,7 @@ class BuyerAgent(LLMAgent):
         system_prompt,
         vision,
         internal_state,
+        budget,
     ):
         super().__init__(
             model=model,
@@ -55,8 +57,9 @@ class BuyerAgent(LLMAgent):
             vision=vision,
             internal_state=internal_state,
         )
-        self.chosen_brand = None
         self.tool_manager = buyer_tool_manager
+        self.budget = budget
+        self.products = []
 
     def step(self):
         observation = self.generate_obs()
