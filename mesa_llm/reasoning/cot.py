@@ -14,7 +14,13 @@ class CoTReasoning(Reasoning):
     def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
 
-    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+    def plan(
+        self,
+        prompt: str,
+        obs: Observation,
+        ttl: int = 1,
+        selected_tools: list[str] | None = None,
+    ) -> Plan:
         """
         Plan the next (CoT) action based on the current observation and the agent's memory.
         """
@@ -67,7 +73,7 @@ class CoTReasoning(Reasoning):
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
             prompt=prompt,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(selected_tools),
             tool_choice="none",
         )
 
@@ -81,7 +87,8 @@ class CoTReasoning(Reasoning):
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
             prompt=chaining_message,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(selected_tools),
+            tool_choice="required",
         )
         response_message = rsp.choices[0].message
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)

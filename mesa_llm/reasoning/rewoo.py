@@ -17,7 +17,7 @@ class ReWOOReasoning(Reasoning):
         self.current_plan = None
         self.current_obs = None
 
-    def plan(self, prompt: str) -> Plan:
+    def plan(self, prompt: str, selected_tools: list[str] | None = None) -> Plan:
         """
         Plan the next (ReWOO) action based on the current observation and the agent's memory.
         """

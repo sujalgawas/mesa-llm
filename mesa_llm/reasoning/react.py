@@ -20,7 +20,13 @@ class ReActReasoning(Reasoning):
     def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
 
-    def plan(self, prompt: str, obs: Observation, ttl: int = 1) -> Plan:
+    def plan(
+        self,
+        prompt: str,
+        obs: Observation,
+        ttl: int = 1,
+        selected_tools: list[str] | None = None,
+    ) -> Plan:
         """
         Plan the next (ReAct) action based on the current observation and the agent's memory.
         """
@@ -69,7 +75,7 @@ class ReActReasoning(Reasoning):
         self.agent.llm.set_system_prompt(system_prompt)
         rsp = self.agent.llm.generate(
             prompt=prompt,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(selected_tools),
             tool_choice="none",
             response_format=ReActOutput,
         )

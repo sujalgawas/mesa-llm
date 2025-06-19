@@ -60,6 +60,7 @@ class Reasoning(ABC):
         prompt: str,
         obs: Observation | None = None,
         ttl: int = 1,
+        selected_tools: list[str] | None = None,
     ) -> Plan:
         pass
 

@@ -47,8 +47,13 @@ class ToolManager:
             "error": f"Tool {schema_name} missing __tool_schema__"
         }
 
-    def get_all_tools_schema(self) -> list[dict]:
-        return [fn.__tool_schema__ for fn in self.tools.values()]
+    def get_all_tools_schema(
+        self, selected_tools: list[str] | None = None
+    ) -> list[dict]:
+        if selected_tools:
+            return [self.tools[tool].__tool_schema__ for tool in selected_tools]
+        else:
+            return [fn.__tool_schema__ for fn in self.tools.values()]
 
     def call(self, name: str, arguments: dict) -> str:
         """Call a registered tool with validated args"""
