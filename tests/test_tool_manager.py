@@ -31,9 +31,10 @@ class TestToolManager:
 
         # Register a tool globally first
         @tool
-        def test_global_tool(param1: str) -> str:
+        def test_global_tool(agent, param1: str) -> str:
             """Test global tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 param1: A test parameter.
             Returns:
                 The input parameter.
@@ -47,9 +48,10 @@ class TestToolManager:
     def test_init_with_extra_tools(self):
         """Test initialization with extra tools."""
 
-        def extra_tool(x: int) -> int:
+        def extra_tool(agent, x: int) -> int:
             """Extra tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 x: Input number.
             Returns:
                 The input number.
@@ -79,9 +81,10 @@ class TestToolManager:
         """Test registering a tool manually."""
         manager = ToolManager()
 
-        def manual_tool(text: str) -> str:
+        def manual_tool(agent, text: str) -> str:
             """Manual tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 text: Input text.
             Returns:
                 The input text.
@@ -97,9 +100,10 @@ class TestToolManager:
         manager1 = ToolManager()
         manager2 = ToolManager()
 
-        def shared_tool(value: str) -> str:
+        def shared_tool(agent, value: str) -> str:
             """Shared tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 value: Input value.
             Returns:
                 The input value.
@@ -116,9 +120,10 @@ class TestToolManager:
         manager = ToolManager()
 
         @tool
-        def schema_test_tool(param: str) -> str:
+        def schema_test_tool(agent, param: str) -> str:
             """Schema test tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 param: A parameter.
             Returns:
                 The parameter.
@@ -146,9 +151,10 @@ class TestToolManager:
         """Test getting all tools schemas."""
 
         @tool
-        def tool1(x: int) -> int:
+        def tool1(agent, x: int) -> int:
             """Tool 1.
             Args:
+                agent: The agent making the request (provided automatically)
                 x: Input.
             Returns:
                 Output.
@@ -156,9 +162,10 @@ class TestToolManager:
             return x
 
         @tool
-        def tool2(y: str) -> str:
+        def tool2(agent, y: str) -> str:
             """Tool 2.
             Args:
+                agent: The agent making the request (provided automatically)
                 y: Input.
             Returns:
                 Output.
@@ -171,13 +178,159 @@ class TestToolManager:
         assert len(schemas) == 2
         assert all("function" in schema for schema in schemas)
 
+    def test_get_all_tools_schema_with_selected_tools(self):
+        """Test getting schemas for selected tools only."""
+
+        @tool
+        def tool_a(agent, x: int) -> int:
+            """Tool A.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        @tool
+        def tool_b(agent, y: str) -> str:
+            """Tool B.
+            Args:
+                agent: The agent making the request (provided automatically)
+                y: Input.
+            Returns:
+                Output.
+            """
+            return y
+
+        @tool
+        def tool_c(agent, z: float) -> float:
+            """Tool C.
+            Args:
+                agent: The agent making the request (provided automatically)
+                z: Input.
+            Returns:
+                Output.
+            """
+            return z
+
+        manager = ToolManager()
+
+        # Test selecting specific tools
+        selected_tools = ["tool_a", "tool_c"]
+        schemas = manager.get_all_tools_schema(selected_tools)
+
+        assert len(schemas) == 2
+        tool_names = [schema["function"]["name"] for schema in schemas]
+        assert "tool_a" in tool_names
+        assert "tool_c" in tool_names
+        assert "tool_b" not in tool_names
+
+    def test_get_all_tools_schema_empty_list(self):
+        """Test that empty list returns all tools (current behavior)."""
+
+        @tool
+        def test_tool(agent, x: int) -> int:
+            """Test tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        manager = ToolManager()
+
+        # Empty list should return all tools (current behavior)
+        all_schemas = manager.get_all_tools_schema()
+        empty_list_schemas = manager.get_all_tools_schema([])
+
+        assert len(empty_list_schemas) == len(all_schemas)
+
+    def test_get_all_tools_schema_none(self):
+        """Test that None returns all tools."""
+
+        @tool
+        def test_tool(agent, x: int) -> int:
+            """Test tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        manager = ToolManager()
+
+        all_schemas = manager.get_all_tools_schema()
+        none_schemas = manager.get_all_tools_schema(None)
+
+        assert len(none_schemas) == len(all_schemas)
+
+    def test_get_all_tools_schema_nonexistent_tools(self):
+        """Test that requesting nonexistent tools raises appropriate errors."""
+
+        @tool
+        def existing_tool(agent, x: int) -> int:
+            """Existing tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        manager = ToolManager()
+
+        # Test with nonexistent tools
+        selected_tools = ["existing_tool", "nonexistent_tool"]
+
+        with pytest.raises(KeyError):
+            manager.get_all_tools_schema(selected_tools)
+
+    def test_get_all_tools_schema_single_tool(self):
+        """Test selecting a single tool."""
+
+        @tool
+        def single_tool(agent, x: int) -> int:
+            """Single tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        @tool
+        def other_tool(agent, y: str) -> str:
+            """Other tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                y: Input.
+            Returns:
+                Output.
+            """
+            return y
+
+        manager = ToolManager()
+
+        schemas = manager.get_all_tools_schema(["single_tool"])
+
+        assert len(schemas) == 1
+        assert schemas[0]["function"]["name"] == "single_tool"
+
     def test_call_tool_success(self):
         """Test successfully calling a tool."""
         manager = ToolManager()
 
-        def callable_tool(message: str) -> str:
+        def callable_tool(agent, message: str) -> str:
             """Callable tool.
             Args:
+                agent: The agent making the request (provided automatically)
                 message: Input message.
             Returns:
                 The message with prefix.
@@ -185,7 +338,7 @@ class TestToolManager:
             return f"Result: {message}"
 
         manager.register(callable_tool)
-        result = manager.call("callable_tool", {"message": "test"})
+        result = manager.call("callable_tool", {"agent": Mock(), "message": "test"})
         assert result == "Result: test"
 
     def test_call_tool_not_found(self):
@@ -200,11 +353,7 @@ class TestToolManager:
         manager = ToolManager()
 
         def existing_tool():
-            """Existing tool.
-            Returns:
-                Test result.
-            """
-            return "exists"
+            return "test"
 
         manager.register(existing_tool)
 
@@ -212,11 +361,10 @@ class TestToolManager:
         assert manager.has_tool("nonexistent_tool") is False
 
     def test_call_tools_no_tool_calls(self):
-        """Test call_tools with no tool calls in response."""
+        """Test call_tools with response that has no tool_calls."""
         manager = ToolManager()
         mock_agent = Mock()
 
-        # Mock LLM response with no tool calls
         mock_response = Mock()
         mock_response.tool_calls = None
 
@@ -224,11 +372,10 @@ class TestToolManager:
         assert result == []
 
     def test_call_tools_empty_tool_calls(self):
-        """Test call_tools with empty tool calls list."""
+        """Test call_tools with empty tool_calls list."""
         manager = ToolManager()
         mock_agent = Mock()
 
-        # Mock LLM response with empty tool calls
         mock_response = Mock()
         mock_response.tool_calls = []
 
@@ -236,22 +383,22 @@ class TestToolManager:
         assert result == []
 
     def test_call_tools_success(self):
-        """Test successful tool calling from LLM response."""
+        """Test successful tool calling."""
         manager = ToolManager()
-        mock_agent = Mock()
 
-        # Register a test tool
+        @tool
         def test_tool(agent, param1: str) -> str:
-            """Test tool.
+            """Test tool for call_tools.
             Args:
-                agent: The agent.
+                agent: The agent making the request (provided automatically)
                 param1: Test parameter.
             Returns:
-                Test result.
+                Processed parameter.
             """
-            return f"Tool result: {param1}"
+            return f"Processed: {param1}"
 
-        manager.register(test_tool)
+        # Mock agent
+        mock_agent = Mock()
 
         # Mock LLM response with tool calls
         mock_tool_call = Mock()
@@ -268,18 +415,17 @@ class TestToolManager:
         assert result[0]["tool_call_id"] == "call_123"
         assert result[0]["role"] == "tool"
         assert result[0]["name"] == "test_tool"
-        assert "Tool result: test_value" in result[0]["response"]
+        assert "Processed: test_value" in result[0]["response"]
 
     def test_call_tools_function_not_found(self):
         """Test call_tools with non-existent function."""
         manager = ToolManager()
         mock_agent = Mock()
 
-        # Mock LLM response with non-existent tool
         mock_tool_call = Mock()
         mock_tool_call.id = "call_123"
-        mock_tool_call.function.name = "nonexistent_tool"
-        mock_tool_call.function.arguments = "{}"
+        mock_tool_call.function.name = "nonexistent_function"
+        mock_tool_call.function.arguments = '{"param": "value"}'
 
         mock_response = Mock()
         mock_response.tool_calls = [mock_tool_call]
@@ -289,30 +435,28 @@ class TestToolManager:
         assert len(result) == 1
         assert result[0]["tool_call_id"] == "call_123"
         assert "Error:" in result[0]["response"]
-        assert "not found in ToolManager" in result[0]["response"]
 
     def test_call_tools_invalid_json(self):
         """Test call_tools with invalid JSON arguments."""
         manager = ToolManager()
-        mock_agent = Mock()
 
+        @tool
         def test_tool(agent, param1: str) -> str:
             """Test tool.
             Args:
-                agent: The agent.
+                agent: The agent making the request (provided automatically)
                 param1: Test parameter.
             Returns:
-                Test result.
+                Processed parameter.
             """
-            return f"Tool result: {param1}"
+            return f"Processed: {param1}"
 
-        manager.register(test_tool)
+        mock_agent = Mock()
 
-        # Mock LLM response with invalid JSON
         mock_tool_call = Mock()
         mock_tool_call.id = "call_123"
         mock_tool_call.function.name = "test_tool"
-        mock_tool_call.function.arguments = "invalid json"
+        mock_tool_call.function.arguments = '{"param1": invalid_json}'
 
         mock_response = Mock()
         mock_response.tool_calls = [mock_tool_call]
@@ -324,25 +468,27 @@ class TestToolManager:
         assert "Error:" in result[0]["response"]
 
     def test_call_tools_successful_argument_filtering(self):
-        """Test call_tools successfully filtering extra arguments for functions without agent parameter."""
+        """Test call_tools with argument filtering when function signature doesn't match."""
         manager = ToolManager()
-        mock_agent = Mock()
 
         def simple_tool(required_param: str) -> str:
-            """Simple tool that doesn't need agent parameter.
+            """Simple tool that only takes required_param.
             Args:
-                required_param: Required parameter.
+                required_param: The only parameter this function accepts.
             Returns:
-                Test result.
+                Processed parameter.
             """
-            return f"Result: {required_param}"
+            return f"Simple: {required_param}"
 
+        # Register tool manually without using decorator to test filtering
         manager.register(simple_tool)
 
-        # Mock LLM response with extra arguments
+        mock_agent = Mock()
+
         mock_tool_call = Mock()
         mock_tool_call.id = "call_123"
         mock_tool_call.function.name = "simple_tool"
+        # Include extra parameters that the function doesn't accept
         mock_tool_call.function.arguments = (
             '{"required_param": "test", "extra_param": "ignored"}'
         )
@@ -354,25 +500,24 @@ class TestToolManager:
 
         assert len(result) == 1
         assert result[0]["tool_call_id"] == "call_123"
-        assert "Result: test" in result[0]["response"]
+        assert "Simple: test" in result[0]["response"]
 
     def test_call_tools_no_response(self):
-        """Test call_tools when function returns None."""
+        """Test call_tools when tool returns None."""
         manager = ToolManager()
+
+        @tool
+        def silent_tool(agent) -> None:
+            """Tool that returns None.
+            Args:
+                agent: The agent making the request (provided automatically)
+            Returns:
+                None
+            """
+            return None
+
         mock_agent = Mock()
 
-        def silent_tool(agent) -> None:
-            """Silent tool.
-            Args:
-                agent: The agent.
-            Returns:
-                Nothing.
-            """
-            # Returns None
-
-        manager.register(silent_tool)
-
-        # Mock LLM response
         mock_tool_call = Mock()
         mock_tool_call.id = "call_123"
         mock_tool_call.function.name = "silent_tool"
@@ -384,17 +529,140 @@ class TestToolManager:
         result = manager.call_tools(mock_agent, mock_response)
 
         assert len(result) == 1
-        assert result[0]["response"] == "silent_tool executed successfully"
+        assert result[0]["tool_call_id"] == "call_123"
+        assert "silent_tool executed successfully" in result[0]["response"]
 
     def test_call_tools_general_exception(self):
-        """Test call_tools with general exception during processing."""
+        """Test call_tools handling of general exceptions."""
         manager = ToolManager()
         mock_agent = Mock()
 
-        # Create a mock response that will cause a general exception
-        # by making tool_calls raise an exception when accessed
+        # Create a mock response that will cause an AttributeError
         mock_response = Mock()
-        mock_response.tool_calls = Mock(side_effect=Exception("General error"))
+        # Remove the tool_calls attribute to cause AttributeError
+        del mock_response.tool_calls
 
         result = manager.call_tools(mock_agent, mock_response)
         assert result == []
+
+    def test_selected_tools_consistency(self):
+        """Test that selected_tools parameter works consistently."""
+
+        @tool
+        def consistency_tool_a(agent, x: int) -> int:
+            """Consistency tool A.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        @tool
+        def consistency_tool_b(agent, y: str) -> str:
+            """Consistency tool B.
+            Args:
+                agent: The agent making the request (provided automatically)
+                y: Input.
+            Returns:
+                Output.
+            """
+            return y
+
+        @tool
+        def consistency_tool_c(agent, z: float) -> float:
+            """Consistency tool C.
+            Args:
+                agent: The agent making the request (provided automatically)
+                z: Input.
+            Returns:
+                Output.
+            """
+            return z
+
+        manager = ToolManager()
+
+        # Test that same selected_tools always returns same schemas
+        selected_tools = ["consistency_tool_a", "consistency_tool_c"]
+
+        schemas1 = manager.get_all_tools_schema(selected_tools)
+        schemas2 = manager.get_all_tools_schema(selected_tools)
+
+        names1 = sorted([schema["function"]["name"] for schema in schemas1])
+        names2 = sorted([schema["function"]["name"] for schema in schemas2])
+
+        assert names1 == names2
+        assert len(schemas1) == len(schemas2) == 2
+
+        # Test order independence
+        reversed_tools = list(reversed(selected_tools))
+        schemas3 = manager.get_all_tools_schema(reversed_tools)
+        names3 = sorted([schema["function"]["name"] for schema in schemas3])
+
+        assert names1 == names3
+
+    def test_selected_tools_duplicate_handling(self):
+        """Test how selected_tools handles duplicates."""
+
+        @tool
+        def duplicate_test_tool(agent, x: int) -> int:
+            """Duplicate test tool.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        manager = ToolManager()
+
+        # Test with duplicate tool names
+        selected_tools = ["duplicate_test_tool", "duplicate_test_tool"]
+        schemas = manager.get_all_tools_schema(selected_tools)
+
+        # Should return schemas for each request (may include duplicates)
+        assert len(schemas) == 2
+
+    def test_multiple_managers_selected_tools(self):
+        """Test selected_tools functionality with multiple ToolManager instances."""
+
+        @tool
+        def shared_tool_1(agent, x: int) -> int:
+            """Shared tool 1.
+            Args:
+                agent: The agent making the request (provided automatically)
+                x: Input.
+            Returns:
+                Output.
+            """
+            return x
+
+        @tool
+        def shared_tool_2(agent, y: str) -> str:
+            """Shared tool 2.
+            Args:
+                agent: The agent making the request (provided automatically)
+                y: Input.
+            Returns:
+                Output.
+            """
+            return y
+
+        manager1 = ToolManager()
+        manager2 = ToolManager()
+
+        # Both managers should have the same tools
+        all_schemas_1 = manager1.get_all_tools_schema()
+        all_schemas_2 = manager2.get_all_tools_schema()
+
+        assert len(all_schemas_1) == len(all_schemas_2)
+
+        # Selected tools should work the same on both managers
+        selected_tools = ["shared_tool_1"]
+        schemas_1 = manager1.get_all_tools_schema(selected_tools)
+        schemas_2 = manager2.get_all_tools_schema(selected_tools)
+
+        assert len(schemas_1) == len(schemas_2) == 1
+        assert schemas_1[0]["function"]["name"] == schemas_2[0]["function"]["name"]

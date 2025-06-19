@@ -89,7 +89,7 @@ class ReWOOReasoning(Reasoning):
         llm.set_system_prompt(system_prompt)
         rsp = llm.generate(
             prompt=prompt,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(selected_tools),
             tool_choice="none",
         )
 
