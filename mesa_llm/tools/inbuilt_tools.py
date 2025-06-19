@@ -69,8 +69,10 @@ def speak_to(
             type="message",
             content={
                 "message": message,
-                "sender": agent,
-                "recipients": listener_agents,
+                "sender": agent.unique_id,
+                "recipients": [
+                    listener_agent.unique_id for listener_agent in listener_agents
+                ],
             },
         )
     return f"{agent.unique_id} → {[agent.unique_id for agent in listener_agents]} : {message}"

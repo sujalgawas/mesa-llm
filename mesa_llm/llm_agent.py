@@ -219,6 +219,12 @@ class LLMAgent(Agent):
 
         return f"{self} → {recipients} : {message}"
 
+    def pre_step(self):
+        """
+        This is some code that is executed before the step method of the child agent is called.
+        """
+        self.memory.process_step(pre_step=True)
+
     def post_step(self):
         """
         This is some code that is executed after the step method of the child agent is called.
@@ -237,9 +243,11 @@ class LLMAgent(Agent):
             return
 
         def wrapped(self, *args, **kwargs):
-            # first run the override
+            """
+            This is the wrapper that is used to integrate the pre_step and post_step methods into the step method of the child agent.
+            """
+            LLMAgent.pre_step(self, *args, **kwargs)
             result = user_step(self, *args, **kwargs)
-            # then run the base-class logic
             LLMAgent.post_step(self, *args, **kwargs)
             return result
 

@@ -64,11 +64,11 @@ class ReActReasoning(Reasoning):
         action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
 
         """
-        # print(system_prompt, "\n\n last communication: " + str(last_communication))
+        prompt = prompt + "\n\n last conversation: " + str(last_communication)
 
         self.agent.llm.set_system_prompt(system_prompt)
         rsp = self.agent.llm.generate(
-            prompt=prompt + "\n\n last communication: " + str(last_communication),
+            prompt=prompt,
             tool_schema=self.agent.tool_manager.get_all_tools_schema(),
             tool_choice="none",
             response_format=ReActOutput,

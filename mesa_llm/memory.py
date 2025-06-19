@@ -138,7 +138,7 @@ class Memory:
 
         self.long_term_memory = self.llm.generate(prompt)
 
-    def process_step(self):
+    def process_step(self, pre_step: bool = False):
         """
         Process the step of the agent :
         - Add the new entry to the short term memory
@@ -147,12 +147,25 @@ class Memory:
         """
 
         # Add the new entry to the short term memory
-        new_entry = MemoryEntry(
-            content=self.step_content,
-            step=self.agent.model.steps,
-        )
-        self.short_term_memory.append(new_entry)
-        self.step_content = {}
+        if pre_step:
+            new_entry = MemoryEntry(
+                content=self.step_content,
+                step=None,
+            )
+            self.short_term_memory.append(new_entry)
+            self.step_content = {}
+            return
+
+        elif not self.short_term_memory[-1].content.get("step", None):
+            pre_step = self.short_term_memory.pop()
+            self.step_content.update(pre_step.content)
+            new_entry = MemoryEntry(
+                content=self.step_content,
+                step=self.agent.model.steps,
+            )
+
+            self.short_term_memory.append(new_entry)
+            self.step_content = {}
 
         # Consolidate memory if the short term memory is over capacity
         if len(self.short_term_memory) > self.capacity + self.consolidation_capacity:
