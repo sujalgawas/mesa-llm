@@ -43,9 +43,8 @@ model_params = {
     "width": 4,
     "height": 4,
     "api_key": os.getenv("GEMINI_API_KEY"),
-    "reasoning": ReWOOReasoning,
+    "reasoning": ReActReasoning,
     "llm_model": "gemini/gemini-2.0-flash",
-
     "vision": 5,
 }
 

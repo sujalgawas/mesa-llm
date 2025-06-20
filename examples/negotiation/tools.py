@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from examples.negotiation.agents import buyer_tool_manager
+from examples.negotiation.agents import SellerAgent, buyer_tool_manager
 from mesa_llm.tools.tool_decorator import tool
 
 if TYPE_CHECKING:
@@ -8,16 +8,51 @@ if TYPE_CHECKING:
 
 
 @tool(tool_manager=buyer_tool_manager)
-def set_chosen_brand(agent: "LLMAgent", chosen_brand: str) -> str:
+def set_chosen_brand(agent: "LLMAgent", chosen_product: str) -> str:
     """
-    A tool to set the brand of choice of the buyer agent, It can either be brand A or brand B.
+    A tool to set the brand of choice of the buyer agent. The product must be one of:
+    "Brand A Shoes", "Brand A Track Suit", "Brand B Shoes", or "Brand B Track Suit".
 
     Args:
-        agent : The agent to set the brand of choice for.
-        chosen_brand : The brand of choice of the buyer agent, either "A" or "B".
+        agent : The buyer agent.
+        chosen_product : The product chosen by the buyer, specifying brand and type.
 
     Returns:
         str: The brand of choice of the buyer agent, either "A" or "B".
     """
-    agent.chosen_brand = chosen_brand
-    return f"Chosen brand of {agent} set to {chosen_brand}"
+    valid_products = {
+        "Brand A Shoes": 40,
+        "Brand A Track Suit": 50,
+        "Brand B Shoes": 35,
+        "Brand B Track Suit": 47,
+    }
+
+    if chosen_product not in valid_products:
+        raise ValueError(
+            f"Invalid product choice: {chosen_product}. Must be one of {list(valid_products.keys())}."
+        )
+
+    price = valid_products[chosen_product]
+    if agent.budget < price:
+        raise ValueError(f"Insufficient budget: {agent.budget}. Product costs {price}.")
+
+    agent.products.append(chosen_product)
+    agent.internal_state.append(f"Owner of the following product: {chosen_product}")
+    agent.budget -= price
+
+    # Get model and identify seller agent
+    model = agent.model
+    brand = "A" if "Brand A" in chosen_product else "B"
+
+    # Increment sales of appropriate seller
+    for cell in model.grid.coord_iter():
+        contents, x, y = cell
+        for a in contents:
+            if isinstance(a, SellerAgent) and (
+                (brand == "A" and "brand A" in a.system_prompt.lower())
+                or (brand == "B" and "brand B" in a.system_prompt.lower())
+            ):
+                a.sales += 1
+                break
+
+    return f"The agent has chosen {chosen_product} as their brand of choice. Remaining budget: {agent.budget}."

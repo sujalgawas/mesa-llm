@@ -43,13 +43,31 @@ class NegotiationModel(Model):
 
         agents = BuyerAgent.create_agents(
             self,
-            n=initial_buyers,
+            n=initial_buyers - math.floor(initial_buyers / 2),
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=buyer_system_prompt,
             vision=vision,
             internal_state=buyer_internal_state,
+            budget=50,  # Each buyer has a budget of $50
+        )
+
+        x = self.rng.integers(0, self.grid.width, size=(initial_buyers,))
+        y = self.rng.integers(0, self.grid.height, size=(initial_buyers,))
+        for a, i, j in zip(agents, x, y):
+            self.grid.place_agent(a, (i, j))
+
+        agents = BuyerAgent.create_agents(
+            self,
+            n=math.floor(initial_buyers / 2),
+            api_key=api_key,
+            reasoning=reasoning,
+            llm_model=llm_model,
+            system_prompt=buyer_system_prompt,
+            vision=vision,
+            internal_state=buyer_internal_state,
+            budget=100,
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_buyers,))
@@ -63,7 +81,7 @@ class NegotiationModel(Model):
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+            system_prompt="You are a Seller in a negotiation game trying to sell shoes($40) and track suit($50) of brand A. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["hardworking", "dedicated", "persuasive"],
         )
@@ -73,12 +91,12 @@ class NegotiationModel(Model):
         )
 
         # Just for testing purposes, we can add more seller agents later
-        """seller_b = SellerAgent(
+        seller_b = SellerAgent(
             model=self,
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
+            system_prompt="You are a Seller in a negotiation game trying to sell shoes($35) and track suit($47) of brand A. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["lazy", "unmotivated"],
         )
@@ -86,7 +104,6 @@ class NegotiationModel(Model):
             seller_b,
             (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2) + 1),
         )
-        """
 
     def step(self):
         """
