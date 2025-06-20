@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+import solara
 from dotenv import load_dotenv
 from mesa.visualization import (
     SolaraViz,
@@ -60,14 +62,35 @@ model = NegotiationModel(
     seed=model_params["seed"]["value"],
 )
 
+
+@solara.component
+def ShowSalesButton(*args, **kwargs):
+    show = solara.use_reactive(False)
+    df = solara.use_memo(
+        lambda: model.datacollector.get_model_vars_dataframe()
+        if show.value
+        else pd.DataFrame(),
+        [show.value],
+    )
+
+    def on_click():
+        show.set(True)
+
+    solara.Button(label="Show Sales Data", on_click=on_click)
+    if show.value and not df.empty:
+        solara.DataFrame(df)
+
+
 page = SolaraViz(
     model,
-    components=[make_space_component(model_portrayal)],
+    components=[
+        make_space_component(model_portrayal),
+        ShowSalesButton,
+    ],  # Add ShowSalesButton here
     model_params=model_params,
     name="Negotiation",
 )
 
-page  # noqa
 
 """run with:
 conda activate mesa-llm && solara run examples/negotiation/app.py

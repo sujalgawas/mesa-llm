@@ -1,14 +1,16 @@
 import math
 
+from mesa.datacollection import DataCollector
 from mesa.model import Model
 from mesa.space import MultiGrid
 from rich import print
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from mesa_llm.reasoning.reasoning import Reasoning
+from mesa_llm.recording.integration_hooks import record_model
 
 
-# @record_model
+@record_model
 class NegotiationModel(Model):
     """
     A model for a negotiation game between a seller and a buyer.
@@ -89,6 +91,7 @@ class NegotiationModel(Model):
             seller_a,
             (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2)),
         )
+        self.seller_a = seller_a  # Store reference to seller A
 
         # Just for testing purposes, we can add more seller agents later
         seller_b = SellerAgent(
@@ -104,62 +107,22 @@ class NegotiationModel(Model):
             seller_b,
             (math.floor(self.grid.width / 2), math.floor(self.grid.height / 2) + 1),
         )
+        self.seller_b = seller_b  # Store reference to seller B
+
+        # Initialize DataCollector to track sales of both sellers
+        self.datacollector = DataCollector(
+            model_reporters={
+                "SellerA_Sales": lambda m: m.seller_a.sales,
+                "SellerB_Sales": lambda m: m.seller_b.sales,
+            }
+        )
 
     def step(self):
         """
         Execute one step of the model.
         """
+        self.datacollector.collect(self)
         print(
             f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
         )
-        self.agents.do("step")
-        self.agents.do("advance")
-
-
-# ===============================================================
-#                     RUN WITHOUT GRAPHICS
-# ===============================================================
-
-if __name__ == "__main__":
-    """
-    run the model without the solara integration with:
-    conda activate mesa-llm && python -m examples.negotiation.model
-    """
-
-    import os
-
-    from dotenv import load_dotenv
-
-    from mesa_llm.reasoning.react import ReActReasoning
-
-    load_dotenv()
-
-    model_params = {
-        "seed": {
-            "type": "InputText",
-            "value": 42,
-            "label": "Random Seed",
-        },
-        "initial_buyers": 1,
-        "width": 4,
-        "height": 4,
-        "api_key": os.getenv("OPENAI_API_KEY"),
-        "reasoning": ReActReasoning,
-        "llm_model": "openai/gpt-4o-mini",
-        "vision": 5,
-    }
-
-    model = NegotiationModel(
-        initial_buyers=model_params["initial_buyers"],
-        width=model_params["width"],
-        height=model_params["height"],
-        api_key=model_params["api_key"],
-        reasoning=model_params["reasoning"],
-        llm_model=model_params["llm_model"],
-        vision=model_params["vision"],
-        seed=model_params["seed"]["value"],
-    )
-
-    # Run the model for 10 steps
-    for _ in range(10):
-        model.step()
+        self.agents.shuffle_do("step")
