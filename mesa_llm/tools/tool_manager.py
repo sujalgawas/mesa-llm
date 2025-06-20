@@ -1,3 +1,4 @@
+import inspect
 import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
@@ -134,7 +135,6 @@ class ToolManager:
                         )
 
                         # Try to filter arguments to match function signature
-                        import inspect
 
                         sig = inspect.signature(function_to_call)
                         expects_agent = "agent" in sig.parameters
