@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING
 
-from mesa_llm.reasoning.reasoning import Plan, Reasoning
+from mesa_llm.reasoning.reasoning import (
+    Observation,
+    Plan,
+    Reasoning,
+)
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -14,8 +18,8 @@ class ReWOOReasoning(Reasoning):
     def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
         self.remaining_tool_calls = 0  # Initialize remaining tool calls
-        self.current_plan = None
-        self.current_obs = None
+        self.current_plan: Plan | None = None
+        self.current_obs: Observation | None = None
 
     def plan(self, prompt: str, selected_tools: list[str] | None = None) -> Plan:
         """
