@@ -326,6 +326,10 @@ def quick_agent_view(recording_path: str, agent_id: int, view_type: str = "summa
 
 
 if __name__ == "__main__":
-    path = "recordings/simulation_a22bf17c_20250613_115437.json"
+    """
+    run the model with:
+    conda activate mesa-llm && python -m mesa_llm.recording.agent_analysis
+    """
+    path = "recordings/simulation_ca45dffb_20250623_050620.json"
     viewer = AgentViewer(path)
     viewer.interactive_mode()

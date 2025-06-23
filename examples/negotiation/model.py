@@ -40,7 +40,7 @@ class NegotiationModel(Model):
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the buyer agents---------------------
-        buyer_system_prompt = "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller."
+        buyer_system_prompt = "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller. Prefer speaking over changing location as long as you have a seller in sight."
         buyer_internal_state = ""
 
         agents = BuyerAgent.create_agents(
@@ -83,7 +83,7 @@ class NegotiationModel(Model):
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game trying to sell shoes($40) and track suit($50) of brand A. You are trying to pitch your product A to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
+            system_prompt="You are a Seller in a negotiation game trying to sell shoes($40) and track suit($50) of brand A. You are trying to pitch your product to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["hardworking", "dedicated", "persuasive"],
         )
@@ -99,7 +99,7 @@ class NegotiationModel(Model):
             api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
-            system_prompt="You are a Seller in a negotiation game trying to sell shoes($35) and track suit($47) of brand A. You are trying to pitch your product B to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
+            system_prompt="You are a Seller in a negotiation game trying to sell shoes($35) and track suit($47) of brand B. You are trying to pitch your product to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
             vision=vision,
             internal_state=["lazy", "unmotivated"],
         )
@@ -138,39 +138,7 @@ if __name__ == "__main__":
     conda activate mesa-llm && python -m examples.negotiation.model
     """
 
-    import os
-
-    from dotenv import load_dotenv
-
-    from mesa_llm.reasoning.react import ReActReasoning
-
-    load_dotenv()
-
-    model_params = {
-        "seed": {
-            "type": "InputText",
-            "value": 42,
-            "label": "Random Seed",
-        },
-        "initial_buyers": 1,
-        "width": 4,
-        "height": 4,
-        "api_key": os.getenv("OPENAI_API_KEY"),
-        "reasoning": ReActReasoning,
-        "llm_model": "openai/gpt-4o-mini",
-        "vision": 5,
-    }
-
-    model = NegotiationModel(
-        initial_buyers=model_params["initial_buyers"],
-        width=model_params["width"],
-        height=model_params["height"],
-        api_key=model_params["api_key"],
-        reasoning=model_params["reasoning"],
-        llm_model=model_params["llm_model"],
-        vision=model_params["vision"],
-        seed=model_params["seed"]["value"],
-    )
+    from examples.negotiation.app import model
 
     # Run the model for 10 steps
     for _ in range(10):

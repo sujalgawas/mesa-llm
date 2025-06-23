@@ -8,14 +8,15 @@ if TYPE_CHECKING:
 
 
 @tool(tool_manager=buyer_tool_manager)
-def set_chosen_brand(agent: "LLMAgent", chosen_product: str) -> str:
+def buy_product(agent: "LLMAgent", chosen_product: str, chosen_price: int) -> str:
     """
     A tool to set the brand of choice of the buyer agent. The product must be one of:
-    "Brand A Shoes", "Brand A Track Suit", "Brand B Shoes", or "Brand B Track Suit".
+    ["Brand A Shoes", "Brand A Track Suit", "Brand B Shoes", "Brand B Track Suit"].
 
     Args:
         agent : The buyer agent.
         chosen_product : The product chosen by the buyer, specifying brand and type.
+        chosen_price : The price of the product chosen by the buyer.
 
     Returns:
         str: The brand of choice of the buyer agent, either "A" or "B".

@@ -73,9 +73,13 @@ class ReActReasoning(Reasoning):
         prompt = prompt + "\n\n last conversation: " + str(last_communication)
 
         self.agent.llm.set_system_prompt(system_prompt)
+        selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
+            selected_tools
+        )
+
         rsp = self.agent.llm.generate(
             prompt=prompt,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(selected_tools),
+            tool_schema=selected_tools_schema,
             tool_choice="none",
             response_format=ReActOutput,
         )

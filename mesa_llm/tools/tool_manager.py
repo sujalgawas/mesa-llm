@@ -53,6 +53,7 @@ class ToolManager:
     ) -> list[dict]:
         if selected_tools:
             return [self.tools[tool].__tool_schema__ for tool in selected_tools]
+
         else:
             return [fn.__tool_schema__ for fn in self.tools.values()]
 
