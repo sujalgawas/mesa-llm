@@ -8,7 +8,7 @@ from mesa_llm.recording.integration_hooks import record_model
 
 
 @record_model
-class Model(Model):
+class EpsteinModel(Model):
     def __init__(
         self,
         initial_cops: int,
@@ -39,7 +39,6 @@ class Model(Model):
             system_prompt=cop_system_prompt,
             vision=vision,
             internal_state=None,
-            budget=50,  # Each buyer has a budget of $50
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_cops,))
