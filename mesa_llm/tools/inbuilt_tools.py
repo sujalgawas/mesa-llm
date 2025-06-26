@@ -47,6 +47,32 @@ def teleport_to_location(
 
 
 @tool
+def move_one_step(agent: "LLMAgent", target_coordinates: list[int]) -> str:
+    """
+    Move the agent to specific (x, y) coordinates within the grid.
+
+        Args:
+            target_coordinates: Exactly two integers in the form [x, y] that will be used to move the agent in a nearby cell. Example: [3, 7]
+            agent: Provided automatically
+
+        Returns:
+            a string confirming the agent's new position.
+    """
+    target_coordinates = tuple(target_coordinates)
+    if isinstance(agent.model.grid, SingleGrid | MultiGrid):
+        agent.model.grid.move_agent(agent, target_coordinates)
+
+    elif isinstance(agent.model.grid, OrthogonalMooreGrid | OrthogonalVonNeumannGrid):
+        cell = agent.model.grid._cells[target_coordinates]
+        agent.cell = cell
+
+    elif isinstance(agent.model.space, ContinuousSpace):
+        agent.model.space.move_agent(agent.model.space, agent, target_coordinates)
+
+    return f"agent {agent.unique_id} moved to {target_coordinates}."
+
+
+@tool
 def speak_to(
     agent: "LLMAgent", listener_agents_unique_ids: list[int], message: str
 ) -> str:

@@ -7,7 +7,7 @@ class ModuleLLM:
     """
     A module that provides a simple interface for using LLMs
 
-    Note : Currently supports OpenAI, Anthropic, xAI, Huggingface, Ollama, OpenRouter, NovitaAI
+    Note : Currently supports OpenAI, Anthropic, xAI, Huggingface, Ollama, OpenRouter, NovitaAI, Gemini
     """
 
     def __init__(self, api_key: str, llm_model: str, system_prompt: str | None = None):
