@@ -88,7 +88,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
             plan = self.reasoning.plan(
                 prompt=prompt,
                 obs=observation,
-                selected_tools=["change_state", "move_citizen"],
+                selected_tools=["change_state", "move_one_step"],
             )
             self.apply_plan(plan)
         else:
@@ -168,6 +168,6 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         plan = self.reasoning.plan(
             prompt=prompt,
             obs=observation,
-            selected_tools=["move_cop", "arrest_citizen"],
+            selected_tools=["move_one_step", "arrest_citizen"],
         )
         self.apply_plan(plan)
