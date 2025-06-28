@@ -83,7 +83,9 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.internal_state.append(
             f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
         )
-
+        self.internal_state.append(
+            f"my current state in the simulation is {self.state}"
+        )
         self.tool_manager = citizen_tool_manager
         self.system_prompt = "You are a citizen in a country that is experiencing civil violence. You are a member of the general population, may or may not be in active rebellion. In general, more your suffering more the tendency for you to become active. You can move one step in a nearby cell or change your state."
 
