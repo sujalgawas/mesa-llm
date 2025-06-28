@@ -1,3 +1,4 @@
+import random
 from typing import TYPE_CHECKING
 
 from examples.epstein_civil_violence.agents import (
@@ -6,6 +7,9 @@ from examples.epstein_civil_violence.agents import (
     cop_tool_manager,
 )
 from mesa_llm.tools.tool_decorator import tool
+
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
@@ -43,4 +47,5 @@ def arrest_citizen(agent: "LLMAgent", citizen: "LLMAgent") -> str:
             a string confirming the citizen's arrest.
     """
     citizen.citizen_state = CitizenState.ARRESTED
+    citizen.jail_senttence_left = random.randint(1, agent.max_jail_term)
     return f"agent {citizen.unique_id} arrested by {agent.unique_id}."

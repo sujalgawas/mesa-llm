@@ -63,14 +63,13 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
             internal_state=internal_state,
         )
 
-        super().__init__(model)
         self.hardship = self.random.random()
         self.risk_aversion = self.random.random()
         self.regime_legitimacy = regime_legitimacy
         self.threshold = threshold
         self.state = CitizenState.QUIET
         self.vision = vision
-        self.jail_sentence = 0
+        self.jail_sentence_left = 0  # A jail sentence of 1 implies that the agent cannot participate in the next 10 steps.
         self.grievance = self.hardship * (1 - self.regime_legitimacy)
         self.arrest_prob_constant = arrest_prob_constant
         self.arrest_probability = None
@@ -83,14 +82,17 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.system_prompt = "You are a citizen in a country that is experiencing civil violence. You are a member of the general population, may or may not be in active rebellion. You can move one step in a nearby cell or change your state."
 
     def step(self):
-        observation = self.generate_obs()
-        prompt = "Move around and change your state if necessary."
-        plan = self.reasoning.plan(
-            prompt=prompt,
-            obs=observation,
-            selected_tools=["move_one_step", "change_state"],
-        )
-        self.apply_plan(plan)
+        if self.jail_sentence_left == 0:
+            observation = self.generate_obs()
+            prompt = "Move around and change your state if necessary."
+            plan = self.reasoning.plan(
+                prompt=prompt,
+                obs=observation,
+                selected_tools=["change_state", "move_one_step"],
+            )
+            self.apply_plan(plan)
+        else:
+            self.jail_sentence_left -= 0.1
 
     def update_estimated_arrest_probability(self):
         """
@@ -154,6 +156,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
             internal_state=internal_state,
         )
         self.max_jail_term = max_jail_term
+        self.tool_manager = cop_tool_manager
 
     def step(self):
         """
@@ -163,6 +166,8 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         observation = self.generate_obs()
         prompt = "Inspect your local vision and arrest a random active agent. Move if applicable."
         plan = self.reasoning.plan(
-            prompt=prompt, obs=observation, selected_tools=["arrest", "move_one_step"]
+            prompt=prompt,
+            obs=observation,
+            selected_tools=["move_one_step", "arrest_citizen"],
         )
         self.apply_plan(plan)

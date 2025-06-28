@@ -15,6 +15,40 @@ from mesa_llm.tools.tool_decorator import tool
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
+# Mapping directions to (dx, dy)
+direction_map = {
+    "North": (0, 1),
+    "South": (0, -1),
+    "East": (1, 0),
+    "West": (-1, 0),
+    "NorthEast": (1, 1),
+    "NorthWest": (-1, 1),
+    "SouthEast": (1, -1),
+    "SouthWest": (-1, -1),
+}
+
+
+@tool
+def move_one_step(agent: "LLMAgent", direction: str) -> str:
+    """
+    Move the agent one step in the specified direction.
+
+        Args:
+            direction: The direction to move in. Must be one of:
+                'North', 'South', 'East', 'West',
+                'NorthEast', 'NorthWest', 'SouthEast', or 'SouthWest'.
+            agent: Provided automatically.
+
+        Returns:
+            A string confirming the result of the movement attempt.
+    """
+    dx, dy = direction_map[direction]
+    x, y = agent.pos
+    new_pos = (x + dx, y + dy)
+    target_coordinates = tuple(new_pos)
+    teleport_to_location(agent, target_coordinates)
+    return f"agent {agent.unique_id} moved to {target_coordinates}."
+
 
 @tool
 def teleport_to_location(
@@ -31,32 +65,6 @@ def teleport_to_location(
     Returns:
         a string confirming the agent's new position.
 
-    """
-    target_coordinates = tuple(target_coordinates)
-    if isinstance(agent.model.grid, SingleGrid | MultiGrid):
-        agent.model.grid.move_agent(agent, target_coordinates)
-
-    elif isinstance(agent.model.grid, OrthogonalMooreGrid | OrthogonalVonNeumannGrid):
-        cell = agent.model.grid._cells[target_coordinates]
-        agent.cell = cell
-
-    elif isinstance(agent.model.space, ContinuousSpace):
-        agent.model.space.move_agent(agent.model.space, agent, target_coordinates)
-
-    return f"agent {agent.unique_id} moved to {target_coordinates}."
-
-
-@tool
-def move_one_step(agent: "LLMAgent", target_coordinates: list[int]) -> str:
-    """
-    Move the agent to specific (x, y) coordinates within the grid.
-
-        Args:
-            target_coordinates: Exactly two integers in the form [x, y] that will be used to move the agent in a nearby cell. Example: [3, 7]
-            agent: Provided automatically
-
-        Returns:
-            a string confirming the agent's new position.
     """
     target_coordinates = tuple(target_coordinates)
     if isinstance(agent.model.grid, SingleGrid | MultiGrid):
