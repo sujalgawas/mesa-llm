@@ -19,12 +19,13 @@ class EpsteinModel(Model):
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
+        parallel_stepping=False,
         seed=None,
     ):
         super().__init__(seed=seed)
         self.width = width
         self.height = height
-
+        self.parallel_stepping = parallel_stepping
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the cop agents---------------------
