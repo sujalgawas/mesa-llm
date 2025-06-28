@@ -34,5 +34,19 @@ class Bunny(LLMAgent):
         self.apply_plan(plan)
         print(f"Bunny {self.unique_id} moved to {self.pos}")
 
+    async def astep(self):
+        """
+        Asynchronous version of step() for parallel execution.
+        Uses async LLM calls to allow multiple bunnies to plan simultaneously.
+        """
+        prompt = "Move around the grid."
+        plan = await self.reasoning.aplan(
+            prompt=prompt,
+            obs=self.generate_obs(),
+            selected_tools=["move_one_step", "teleport_to_location"],
+        )
+        self.apply_plan(plan)
+        print(f"Bunny {self.unique_id} moved to {self.pos}")
+
     def generate_obs(self):
         return f"You are a bunny at position {self.pos}."

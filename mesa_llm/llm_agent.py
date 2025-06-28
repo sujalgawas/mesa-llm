@@ -225,12 +225,42 @@ class LLMAgent(Agent):
         """
         self.memory.process_step(pre_step=True)
 
+    async def apre_step(self):
+        """
+        Async version of pre_step() for asynchronous stepping.
+        """
+        self.memory.process_step(pre_step=True)
+
     def post_step(self):
         """
         This is some code that is executed after the step method of the child agent is called.
         It functions because of the __init_subclass__ method that creates a wrapper around the step method of the child agent.
         """
         self.memory.process_step()
+
+    async def apost_step(self):
+        """
+        Async version of post_step() for asynchronous stepping.
+        """
+        self.memory.process_step()
+
+    async def astep(self):
+        """
+        Default asynchronous step method for parallel agent execution.
+        Subclasses should override this method for custom async behavior.
+        If not overridden, falls back to calling the synchronous step() method.
+        """
+        # Call pre-step processing
+        await self.apre_step()
+
+        # If subclass has overridden astep, it will handle the logic
+        # Otherwise, fall back to calling regular step if it exists
+        if hasattr(self, "step") and self.__class__.step != LLMAgent.step:
+            # Call the synchronous step method if available
+            self.step()
+
+        # Call post-step processing
+        await self.apost_step()
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -239,16 +269,30 @@ class LLMAgent(Agent):
         super().__init_subclass__(**kwargs)
         # only wrap if subclass actually defines its own step
         user_step = cls.__dict__.get("step")
-        if not user_step:
-            return
+        user_astep = cls.__dict__.get("astep")
 
-        def wrapped(self, *args, **kwargs):
-            """
-            This is the wrapper that is used to integrate the pre_step and post_step methods into the step method of the child agent.
-            """
-            LLMAgent.pre_step(self, *args, **kwargs)
-            result = user_step(self, *args, **kwargs)
-            LLMAgent.post_step(self, *args, **kwargs)
-            return result
+        if user_step:
 
-        cls.step = wrapped
+            def wrapped(self, *args, **kwargs):
+                """
+                This is the wrapper that is used to integrate the pre_step and post_step methods into the step method of the child agent.
+                """
+                LLMAgent.pre_step(self, *args, **kwargs)
+                result = user_step(self, *args, **kwargs)
+                LLMAgent.post_step(self, *args, **kwargs)
+                return result
+
+            cls.step = wrapped
+
+        if user_astep:
+
+            async def awrapped(self, *args, **kwargs):
+                """
+                Async wrapper for astep method.
+                """
+                await LLMAgent.apre_step(self, *args, **kwargs)
+                result = await user_astep(self, *args, **kwargs)
+                await LLMAgent.apost_step(self, *args, **kwargs)
+                return result
+
+            cls.astep = awrapped

@@ -2,12 +2,20 @@ import datetime
 
 import mesa_llm.tools.inbuilt_tools  # noqa: F401, to register inbuilt tools
 
+from .parallel_stepping import (
+    enable_automatic_parallel_stepping,
+    step_agents_parallel,
+    step_agents_parallel_sync,
+)
 from .reasoning.reasoning import Observation, Plan
 from .recording import SimulationEvent, SimulationRecorder
 from .recording.integration_hooks import (
     record_model,
 )
 from .tools import ToolManager
+
+# Enable automatic parallel stepping when mesa_llm is imported
+enable_automatic_parallel_stepping()
 
 __all__ = [
     "Observation",
@@ -16,6 +24,8 @@ __all__ = [
     "SimulationRecorder",
     "ToolManager",
     "record_model",
+    "step_agents_parallel",
+    "step_agents_parallel_sync",
 ]
 
 __title__ = "Mesa-LLM"

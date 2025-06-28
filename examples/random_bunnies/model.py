@@ -19,12 +19,14 @@ class RandomBunniesModel(Model):
         llm_model,
         vision,
         seed,
+        parallel_stepping=False,
     ):
         super().__init__(seed=seed)
 
         self.width = width
         self.height = height
         self.grid = MultiGrid(self.height, self.width, torus=False)
+        self.parallel_stepping = parallel_stepping
 
         agents = Bunny.create_agents(
             self,
@@ -42,6 +44,12 @@ class RandomBunniesModel(Model):
             self.grid.place_agent(a, (i, j))
 
     def step(self):
+        """
+        Execute one step of the model.
+
+        The parallel_stepping flag automatically controls whether agents
+        step sequentially or in parallel - no code changes needed!
+        """
         self.agents.shuffle_do("step")
 
 
@@ -69,6 +77,7 @@ model_params = {
     "reasoning": ReActReasoning,
     "llm_model": llm_model,
     "vision": 2,
+    "parallel_stepping": False,  # Set to True to enable parallel stepping
 }
 
 
@@ -81,12 +90,23 @@ model = RandomBunniesModel(
     llm_model=model_params["llm_model"],
     vision=model_params["vision"],
     seed=model_params["seed"]["value"],
+    parallel_stepping=model_params["parallel_stepping"],
 )
+
 if __name__ == "__main__":
     """
     run with
     conda activate mesa-llm
     python -m examples.random_bunnies.model
+
+    To test parallel stepping, change parallel_stepping to True in model_params
     """
-    for _ in range(10):
+    print(f"Running simulation with parallel_stepping={model.parallel_stepping}")
+    if model.parallel_stepping:
+        print("Using automatic parallel stepping via agents.shuffle_do('step')")
+    else:
+        print("Using traditional sequential stepping")
+
+    for i in range(10):
+        print(f"\n--- Model Step {i + 1} ---")
         model.step()

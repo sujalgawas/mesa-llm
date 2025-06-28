@@ -104,7 +104,7 @@ class Memory:
         If the long term memory is not empty, update it to include the new information from the short term memory.
         """
 
-        self.llm.set_system_prompt(self.system_prompt)
+        self.llm.system_prompt = self.system_prompt
 
         self.step_content: dict = {}
         self.last_observation: dict = {}

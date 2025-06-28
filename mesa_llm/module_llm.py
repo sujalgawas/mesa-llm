@@ -1,6 +1,6 @@
 import os
 
-from litellm import completion, litellm
+from litellm import acompletion, completion, litellm
 
 
 class ModuleLLM:
@@ -10,7 +10,13 @@ class ModuleLLM:
     Note : Currently supports OpenAI, Anthropic, xAI, Huggingface, Ollama, OpenRouter, NovitaAI, Gemini
     """
 
-    def __init__(self, api_key: str, llm_model: str, system_prompt: str | None = None):
+    def __init__(
+        self,
+        api_key: str,
+        llm_model: str,
+        system_prompt: str | None = None,
+        batch_size: int = 1,
+    ):
         """
         Initialize the LLM module
 
@@ -22,6 +28,7 @@ class ModuleLLM:
         self.api_key = api_key
         self.llm_model = llm_model
         self.system_prompt = system_prompt
+        self.batch_size = batch_size
         provider = self.llm_model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
@@ -30,10 +37,6 @@ class ModuleLLM:
                 f"Warning: {self.llm_model} does not support function calling. This model may not be able to use tools."
             )
 
-    def set_system_prompt(self, system_prompt: str):
-        """Set or update the system prompt."""
-        self.system_prompt = system_prompt
-
     def generate(
         self,
         prompt: str,
@@ -41,23 +44,50 @@ class ModuleLLM:
         tool_choice: str = "auto",
         response_format: dict | object | None = None,
     ) -> str:
-        if self.system_prompt:
-            messages = [
+        messages = (
+            [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
-        else:
-            messages = [{"role": "user", "content": prompt}]
-        if tool_schema:
+            if self.system_prompt
+            else [{"role": "user", "content": prompt}]
+        )
+
+        if self.batch_size == 1:
             response = completion(
                 model=self.llm_model,
                 messages=messages,
                 tools=tool_schema,
-                tool_choice=tool_choice,
+                tool_choice=tool_choice if tool_schema else None,
                 response_format=response_format,
             )
-        else:
-            response = completion(
-                model=self.llm_model, messages=messages, response_format=response_format
+            return response
+
+    async def agenerate(
+        self,
+        prompt: str,
+        tool_schema: list[dict] | None = None,
+        tool_choice: str = "auto",
+        response_format: dict | object | None = None,
+    ) -> str:
+        """
+        Asynchronous version of generate() method for parallel LLM calls.
+        """
+        messages = (
+            [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+            if self.system_prompt
+            else [{"role": "user", "content": prompt}]
+        )
+
+        if self.batch_size == 1:
+            response = await acompletion(
+                model=self.llm_model,
+                messages=messages,
+                tools=tool_schema,
+                tool_choice=tool_choice if tool_schema else None,
+                response_format=response_format,
             )
-        return response
+            return response
