@@ -1,4 +1,5 @@
 import asyncio
+import threading
 import time
 
 import pytest
@@ -80,8 +81,6 @@ def test_step_agents_parallel_sync_inside_event_loop():
 
     def run():
         step_agents_parallel_sync(agents)
-
-    import threading
 
     def thread_target():
         loop = asyncio.new_event_loop()

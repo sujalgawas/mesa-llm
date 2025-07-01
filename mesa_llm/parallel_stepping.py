@@ -5,6 +5,7 @@ Automatic parallel stepping for Mesa-LLM simulations.
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 from typing import TYPE_CHECKING
 
 from mesa.agent import Agent, AgentSet
@@ -34,7 +35,6 @@ def step_agents_parallel_sync(agents: list[Agent | LLMAgent]) -> None:
     try:
         asyncio.get_running_loop()
         # If in event loop, use thread
-        import concurrent.futures
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(lambda: asyncio.run(step_agents_parallel(agents)))
