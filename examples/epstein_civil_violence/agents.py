@@ -49,7 +49,6 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         vision,
         internal_state,
         regime_legitimacy=0.5,
-        arrest_prob_constant=0.5,
         threshold=0.5,
     ):
         # Call the superclass constructor with updated internal state
@@ -66,23 +65,64 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.hardship = self.random.random()
         self.risk_aversion = self.random.random()
         self.regime_legitimacy = regime_legitimacy
-        self.threshold = threshold
         self.state = CitizenState.QUIET
         self.vision = vision
         self.jail_sentence_left = 0  # A jail sentence of 1 implies that the agent cannot participate in the next 10 steps.
         self.grievance = self.hardship * (1 - self.regime_legitimacy)
-        self.arrest_prob_constant = arrest_prob_constant
         self.arrest_probability = None
 
-        self.neighborhood = []
-        self.neighbors = []
-        self.empty_neighbors = []
-
+        self.threshold = threshold
+        self.internal_state.append(
+            f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
+        )
+        self.internal_state.append(
+            f"On a scale from 0 to 1, my threshold for suffering is {self.threshold}"
+        )
+        self.internal_state.append(
+            f"On a scale of 0 to 1 my grievance due to current legitimacy of rule and personal hardships is {self.grievance}"
+        )
+        self.internal_state.append(
+            f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
+        )
+        self.internal_state.append(
+            f"my current state in the simulation is {self.state}"
+        )
         self.tool_manager = citizen_tool_manager
-        self.system_prompt = "You are a citizen in a country that is experiencing civil violence. You are a member of the general population, may or may not be in active rebellion. You can move one step in a nearby cell or change your state."
+        self.system_prompt = "You are a citizen in a country that is experiencing civil violence. You are a member of the general population, may or may not be in active rebellion. In general, more your suffering more the tendency for you to become active. You can move one step in a nearby cell or change your state."
+
+    def update_estimated_arrest_probability(self):
+        """
+        Based on the ratio of cops to actives in my neighborhood, estimate the
+        p(Arrest | I go active).
+        """
+        cops_in_vision = 0
+        actives_in_vision = 1  # citizen counts herself
+
+        neighbors = self.model.grid.get_neighbors(
+            tuple(self.pos), moore=True, include_center=False, radius=self.vision
+        )
+        for i in neighbors:
+            if isinstance(i, Cop):
+                cops_in_vision += 1
+            elif i.state == CitizenState.ACTIVE:
+                actives_in_vision += 1
+        # there is a body of literature on this equation
+        # the round is not in the pnas paper but without it, its impossible to replicate
+        # the dynamics shown there.
+        self.arrest_probability = 1 - math.exp(
+            -1 * self.arrest_prob_constant * round(cops_in_vision / actives_in_vision)
+        )
+        for item in self.internal_state:
+            if item.lower().startswith("my arrest probability is"):
+                self.internal_state.remove(item)
+                break
+        self.internal_state.append(
+            f"my arrest probability is {self.arrest_probability}"
+        )
 
     def step(self):
         if self.jail_sentence_left == 0:
+            self.update_estimated_arrest_probability()
             observation = self.generate_obs()
             prompt = "Move around and change your state if necessary."
             plan = self.reasoning.plan(
@@ -93,26 +133,6 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
             self.apply_plan(plan)
         else:
             self.jail_sentence_left -= 0.1
-
-    def update_estimated_arrest_probability(self):
-        """
-        Based on the ratio of cops to actives in my neighborhood, estimate the
-        p(Arrest | I go active).
-        """
-        cops_in_vision = 0
-        actives_in_vision = 1  # citizen counts herself
-        for neighbor in self.neighbors:
-            if isinstance(neighbor, Cop):
-                cops_in_vision += 1
-            elif neighbor.state == CitizenState.ACTIVE:
-                actives_in_vision += 1
-
-        # there is a body of literature on this equation
-        # the round is not in the pnas paper but without it, its impossible to replicate
-        # the dynamics shown there.
-        self.arrest_probability = 1 - math.exp(
-            -1 * self.arrest_prob_constant * round(cops_in_vision / actives_in_vision)
-        )
 
 
 class Cop(LLMAgent, mesa.discrete_space.CellAgent):

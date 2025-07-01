@@ -7,7 +7,7 @@ from mesa.visualization import (
 )
 
 from examples.epstein_civil_violence.agents import Citizen, Cop
-from examples.epstein_civil_violence.model import EpsteinCivilViolenceModel
+from examples.epstein_civil_violence.model import EpsteinModel
 from mesa_llm.reasoning.react import ReActReasoning
 
 load_dotenv()
@@ -19,10 +19,10 @@ model_params = {
         "value": 42,
         "label": "Random Seed",
     },
-    "initial_citizens": 1,
-    "initial_cops": 1,
-    "width": 4,
-    "height": 4,
+    "initial_citizens": 20,
+    "initial_cops": 5,
+    "width": 10,
+    "height": 10,
     "api_key": os.getenv("GEMINI_API_KEY"),
     "reasoning": ReActReasoning,
     "llm_model": "gemini/gemini-2.0-flash",
@@ -30,7 +30,7 @@ model_params = {
 }
 
 
-model = EpsteinCivilViolenceModel(
+model = EpsteinModel(
     initial_citizens=model_params["initial_citizens"],
     initial_cops=model_params["initial_cops"],
     width=model_params["width"],
@@ -74,5 +74,5 @@ if __name__ == "__main__":
 
 
 """run with:
-conda activate mesa-llm && solara run examples/negotiation/app.py
+conda activate mesa-llm && solara run examples/epstein_civil_violence/app.py
 """

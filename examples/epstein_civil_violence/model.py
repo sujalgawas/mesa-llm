@@ -8,7 +8,7 @@ from mesa_llm.recording.integration_hooks import record_model
 
 
 @record_model
-class Model(Model):
+class EpsteinModel(Model):
     def __init__(
         self,
         initial_cops: int,
@@ -19,12 +19,13 @@ class Model(Model):
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
+        parallel_stepping=False,
         seed=None,
     ):
         super().__init__(seed=seed)
         self.width = width
         self.height = height
-
+        self.parallel_stepping = parallel_stepping
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the cop agents---------------------
@@ -39,7 +40,6 @@ class Model(Model):
             system_prompt=cop_system_prompt,
             vision=vision,
             internal_state=None,
-            budget=50,  # Each buyer has a budget of $50
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_cops,))
