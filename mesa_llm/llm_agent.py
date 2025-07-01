@@ -225,22 +225,10 @@ class LLMAgent(Agent):
         """
         self.memory.process_step(pre_step=True)
 
-    async def apre_step(self):
-        """
-        Async version of pre_step() for asynchronous stepping.
-        """
-        self.memory.process_step(pre_step=True)
-
     def post_step(self):
         """
         This is some code that is executed after the step method of the child agent is called.
         It functions because of the __init_subclass__ method that creates a wrapper around the step method of the child agent.
-        """
-        self.memory.process_step()
-
-    async def apost_step(self):
-        """
-        Async version of post_step() for asynchronous stepping.
         """
         self.memory.process_step()
 
@@ -250,17 +238,12 @@ class LLMAgent(Agent):
         Subclasses should override this method for custom async behavior.
         If not overridden, falls back to calling the synchronous step() method.
         """
-        # Call pre-step processing
-        await self.apre_step()
+        self.pre_step()
 
-        # If subclass has overridden astep, it will handle the logic
-        # Otherwise, fall back to calling regular step if it exists
         if hasattr(self, "step") and self.__class__.step != LLMAgent.step:
-            # Call the synchronous step method if available
             self.step()
 
-        # Call post-step processing
-        await self.apost_step()
+        self.post_step()
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -290,9 +273,9 @@ class LLMAgent(Agent):
                 """
                 Async wrapper for astep method.
                 """
-                await LLMAgent.apre_step(self, *args, **kwargs)
+                self.pre_step()
                 result = await user_astep(self, *args, **kwargs)
-                await LLMAgent.apost_step(self, *args, **kwargs)
+                self.post_step()
                 return result
 
             cls.astep = awrapped

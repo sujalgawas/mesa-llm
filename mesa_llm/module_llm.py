@@ -15,7 +15,6 @@ class ModuleLLM:
         api_key: str,
         llm_model: str,
         system_prompt: str | None = None,
-        batch_size: int = 1,
     ):
         """
         Initialize the LLM module
@@ -28,7 +27,6 @@ class ModuleLLM:
         self.api_key = api_key
         self.llm_model = llm_model
         self.system_prompt = system_prompt
-        self.batch_size = batch_size
         provider = self.llm_model.split("/")[0].upper()
         os.environ[f"{provider}_API_KEY"] = self.api_key
 
@@ -53,15 +51,14 @@ class ModuleLLM:
             else [{"role": "user", "content": prompt}]
         )
 
-        if self.batch_size == 1:
-            response = completion(
-                model=self.llm_model,
-                messages=messages,
-                tools=tool_schema,
-                tool_choice=tool_choice if tool_schema else None,
-                response_format=response_format,
-            )
-            return response
+        response = completion(
+            model=self.llm_model,
+            messages=messages,
+            tools=tool_schema,
+            tool_choice=tool_choice if tool_schema else None,
+            response_format=response_format,
+        )
+        return response
 
     async def agenerate(
         self,
@@ -82,12 +79,11 @@ class ModuleLLM:
             else [{"role": "user", "content": prompt}]
         )
 
-        if self.batch_size == 1:
-            response = await acompletion(
-                model=self.llm_model,
-                messages=messages,
-                tools=tool_schema,
-                tool_choice=tool_choice if tool_schema else None,
-                response_format=response_format,
-            )
-            return response
+        response = await acompletion(
+            model=self.llm_model,
+            messages=messages,
+            tools=tool_schema,
+            tool_choice=tool_choice if tool_schema else None,
+            response_format=response_format,
+        )
+        return response

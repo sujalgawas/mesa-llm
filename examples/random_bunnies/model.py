@@ -1,4 +1,5 @@
 import os
+import time
 
 from dotenv import load_dotenv
 from mesa import Model
@@ -78,14 +79,14 @@ if __name__ == "__main__":
             "value": 42,
             "label": "Random Seed",
         },
-        "initial_bunnies": 3,
+        "initial_bunnies": 10,
         "width": 10,
         "height": 10,
         "api_key": api_key,
         "reasoning": ReActReasoning,
         "llm_model": llm_model,
         "vision": 2,
-        "parallel_stepping": False,  # Set to True to enable parallel stepping
+        "parallel_stepping": True,  # Set to True to enable parallel stepping
     }
 
     model = RandomBunniesModel(
@@ -100,6 +101,9 @@ if __name__ == "__main__":
         parallel_stepping=model_params["parallel_stepping"],
     )
 
+    time_start = time.time()
     for i in range(3):
         print(f"\n--- Model Step {i + 1} ---")
         model.step()
+    time_end = time.time()
+    print(f"Time taken: {time_end - time_start} seconds")
