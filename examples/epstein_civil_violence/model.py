@@ -19,7 +19,7 @@ class EpsteinModel(Model):
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
-        parallel_stepping=False,
+        parallel_stepping=True,
         seed=None,
     ):
         super().__init__(seed=seed)

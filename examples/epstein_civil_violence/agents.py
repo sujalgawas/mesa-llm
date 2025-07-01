@@ -48,6 +48,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         system_prompt,
         vision,
         internal_state,
+        arrest_prob_constant=0.5,
         regime_legitimacy=0.5,
         threshold=0.5,
     ):
@@ -69,6 +70,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.vision = vision
         self.jail_sentence_left = 0  # A jail sentence of 1 implies that the agent cannot participate in the next 10 steps.
         self.grievance = self.hardship * (1 - self.regime_legitimacy)
+        self.arrest_prob_constant = arrest_prob_constant
         self.arrest_probability = None
 
         self.threshold = threshold
@@ -134,6 +136,20 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         else:
             self.jail_sentence_left -= 0.1
 
+    async def astep(self):
+        if self.jail_sentence_left == 0:
+            self.update_estimated_arrest_probability()
+            observation = self.generate_obs()
+            prompt = "Move around and change your state if necessary."
+            plan = await self.reasoning.aplan(
+                prompt=prompt,
+                obs=observation,
+                selected_tools=["change_state", "move_one_step"],
+            )
+            self.apply_plan(plan)
+        else:
+            self.jail_sentence_left -= 0.1
+
 
 class Cop(LLMAgent, mesa.discrete_space.CellAgent):
     """
@@ -186,6 +202,20 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         observation = self.generate_obs()
         prompt = "Inspect your local vision and arrest a random active agent. Move if applicable."
         plan = self.reasoning.plan(
+            prompt=prompt,
+            obs=observation,
+            selected_tools=["move_one_step", "arrest_citizen"],
+        )
+        self.apply_plan(plan)
+
+    async def astep(self):
+        """
+        Inspect local vision and arrest a random active agent. Move if
+        applicable.
+        """
+        observation = self.generate_obs()
+        prompt = "Inspect your local vision and arrest a random active agent. Move if applicable."
+        plan = await self.reasoning.aplan(
             prompt=prompt,
             obs=observation,
             selected_tools=["move_one_step", "arrest_citizen"],

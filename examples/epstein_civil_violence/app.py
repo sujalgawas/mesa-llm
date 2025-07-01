@@ -19,14 +19,15 @@ model_params = {
         "value": 42,
         "label": "Random Seed",
     },
-    "initial_citizens": 20,
-    "initial_cops": 5,
+    "initial_citizens": 3,
+    "initial_cops": 1,
     "width": 10,
     "height": 10,
     "api_key": os.getenv("GEMINI_API_KEY"),
     "reasoning": ReActReasoning,
     "llm_model": "gemini/gemini-2.0-flash",
     "vision": 5,
+    "parallel_stepping": True,
 }
 
 
@@ -40,6 +41,7 @@ model = EpsteinModel(
     llm_model=model_params["llm_model"],
     vision=model_params["vision"],
     seed=model_params["seed"]["value"],
+    parallel_stepping=model_params["parallel_stepping"],
 )
 
 if __name__ == "__main__":
