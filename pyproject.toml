@@ -16,6 +16,7 @@ dependencies = [
     "litellm",
     "terminal-style",
     "rich",
+    "pytest-asyncio",
 ]
 dynamic = ["version"]
 

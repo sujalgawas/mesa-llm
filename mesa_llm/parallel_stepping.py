@@ -2,11 +2,15 @@
 Automatic parallel stepping for Mesa-LLM simulations.
 """
 
+from __future__ import annotations
+
 import asyncio
+from typing import TYPE_CHECKING
 
 from mesa.agent import Agent, AgentSet
 
-from .llm_agent import LLMAgent
+if TYPE_CHECKING:
+    from .llm_agent import LLMAgent
 
 
 async def step_agents_parallel(agents: list[Agent | LLMAgent]) -> None:
@@ -15,15 +19,14 @@ async def step_agents_parallel(agents: list[Agent | LLMAgent]) -> None:
     for agent in agents:
         if hasattr(agent, "astep"):
             tasks.append(agent.astep())
-        else:
+        elif hasattr(agent, "step"):
             tasks.append(_sync_step(agent))
     await asyncio.gather(*tasks)
 
 
 async def _sync_step(agent: Agent) -> None:
     """Run synchronous step in async context."""
-    if hasattr(agent, "step"):
-        agent.step()
+    agent.step()
 
 
 def step_agents_parallel_sync(agents: list[Agent | LLMAgent]) -> None:
