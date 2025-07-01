@@ -3,6 +3,11 @@ from mesa_llm.tools.tool_manager import ToolManager
 
 
 class Bunny(LLMAgent):
+    """
+    This is a simple example of an LLM agent that moves (randomly hops) around a grid.
+    Made to demonstrate the parallel stepping feature.
+    """
+
     def __init__(
         self,
         model,
@@ -12,6 +17,9 @@ class Bunny(LLMAgent):
         vision,
         internal_state,
     ):
+        """
+        Initialize the bunny agent.
+        """
         super().__init__(
             model=model,
             api_key=api_key,
@@ -25,6 +33,9 @@ class Bunny(LLMAgent):
         self.system_prompt = "You are a bunny that randomly moves around a grid."
 
     def step(self):
+        """
+        Step the bunny agent (synchronous version).
+        """
         prompt = "Move around the grid."
         plan = self.reasoning.plan(
             prompt=prompt,
@@ -36,8 +47,9 @@ class Bunny(LLMAgent):
 
     async def astep(self):
         """
-        Asynchronous version of step() for parallel execution.
-        Uses async LLM calls to allow multiple bunnies to plan simultaneously.
+        Step the bunny agent (asynchronous version).
+
+        Note :
         """
         prompt = "Move around the grid."
         plan = await self.reasoning.aplan(

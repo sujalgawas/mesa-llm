@@ -58,41 +58,6 @@ class RandomBunniesModel(Model):
 # ===============================================================
 
 
-load_dotenv()
-
-api_key = os.getenv("OPENAI_API_KEY")
-llm_model = "openai/gpt-4o"
-
-
-model_params = {
-    "seed": {
-        "type": "InputText",
-        "value": 42,
-        "label": "Random Seed",
-    },
-    "initial_bunnies": 10,
-    "width": 10,
-    "height": 10,
-    "api_key": api_key,
-    "reasoning": ReActReasoning,
-    "llm_model": llm_model,
-    "vision": 2,
-    "parallel_stepping": False,  # Set to True to enable parallel stepping
-}
-
-
-model = RandomBunniesModel(
-    initial_bunnies=model_params["initial_bunnies"],
-    width=model_params["width"],
-    height=model_params["height"],
-    api_key=model_params["api_key"],
-    reasoning=model_params["reasoning"],
-    llm_model=model_params["llm_model"],
-    vision=model_params["vision"],
-    seed=model_params["seed"]["value"],
-    parallel_stepping=model_params["parallel_stepping"],
-)
-
 if __name__ == "__main__":
     """
     run with
@@ -101,12 +66,40 @@ if __name__ == "__main__":
 
     To test parallel stepping, change parallel_stepping to True in model_params
     """
-    print(f"Running simulation with parallel_stepping={model.parallel_stepping}")
-    if model.parallel_stepping:
-        print("Using automatic parallel stepping via agents.shuffle_do('step')")
-    else:
-        print("Using traditional sequential stepping")
 
-    for i in range(10):
+    load_dotenv()
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    llm_model = "openai/gpt-4o-mini"
+
+    model_params = {
+        "seed": {
+            "type": "InputText",
+            "value": 42,
+            "label": "Random Seed",
+        },
+        "initial_bunnies": 3,
+        "width": 10,
+        "height": 10,
+        "api_key": api_key,
+        "reasoning": ReActReasoning,
+        "llm_model": llm_model,
+        "vision": 2,
+        "parallel_stepping": False,  # Set to True to enable parallel stepping
+    }
+
+    model = RandomBunniesModel(
+        initial_bunnies=model_params["initial_bunnies"],
+        width=model_params["width"],
+        height=model_params["height"],
+        api_key=model_params["api_key"],
+        reasoning=model_params["reasoning"],
+        llm_model=model_params["llm_model"],
+        vision=model_params["vision"],
+        seed=model_params["seed"]["value"],
+        parallel_stepping=model_params["parallel_stepping"],
+    )
+
+    for i in range(3):
         print(f"\n--- Model Step {i + 1} ---")
         model.step()
