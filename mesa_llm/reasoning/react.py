@@ -20,26 +20,9 @@ class ReActReasoning(Reasoning):
     def __init__(self, agent: "LLMAgent"):
         super().__init__(agent=agent)
 
-    def plan(
-        self,
-        prompt: str,
-        obs: Observation,
-        ttl: int = 1,
-        selected_tools: list[str] | None = None,
-    ) -> Plan:
-        """
-        Plan the next (ReAct) action based on the current observation and the agent's memory.
-        """
-        memory = self.agent.memory
-        long_term_memory = memory.format_long_term()
-        short_term_memory = memory.format_short_term()
-
-        if memory.short_term_memory:
-            last_communication = memory.short_term_memory[-1].content.get(
-                "message", "No recent communication history"
-            )
-        else:
-            last_communication = "No recent communication history"
+    def get_react_system_prompt(self, obs: Observation, last_communication: str) -> str:
+        long_term_memory = self.agent.memory.format_long_term()
+        short_term_memory = self.agent.memory.format_short_term()
 
         system_prompt = f"""
         You are an autonomous agent in a simulation environment.
@@ -70,9 +53,29 @@ class ReActReasoning(Reasoning):
         action: [The action you decide to take - Do NOT use any tools here, just describe the action you will take]
 
         """
+        return system_prompt
+
+    def plan(
+        self,
+        prompt: str,
+        obs: Observation,
+        ttl: int = 1,
+        selected_tools: list[str] | None = None,
+    ) -> Plan:
+        """
+        Plan the next (ReAct) action based on the current observation and the agent's memory.
+        """
+        if self.agent.memory.short_term_memory:
+            last_communication = self.agent.memory.short_term_memory[-1].content.get(
+                "message", "No recent communication history"
+            )
+        else:
+            last_communication = "No recent communication history"
+
+        system_prompt = self.get_react_system_prompt(obs, last_communication)
         prompt = prompt + "\n\n last conversation: " + str(last_communication)
 
-        self.agent.llm.set_system_prompt(system_prompt)
+        self.agent.llm.system_prompt = system_prompt
         selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
             selected_tools
         )
@@ -86,9 +89,60 @@ class ReActReasoning(Reasoning):
 
         formatted_response = json.loads(rsp.choices[0].message.content)
 
-        memory.add_to_memory(type="plan", content=formatted_response)
+        self.agent.memory.add_to_memory(type="plan", content=formatted_response)
 
         react_plan = self.execute_tool_call(formatted_response["action"])
+
+        # --------------------------------------------------
+        # Recording hook for plan event
+        # --------------------------------------------------
+        if self.agent.recorder is not None:
+            self.agent.recorder.record_event(
+                event_type="plan",
+                content={"plan": str(react_plan)},
+                agent_id=self.agent.unique_id,
+            )
+
+        return react_plan
+
+    async def aplan(
+        self,
+        prompt: str,
+        obs: Observation,
+        ttl: int = 1,
+        selected_tools: list[str] | None = None,
+    ) -> Plan:
+        """
+        Asynchronous version of plan() method for parallel planning.
+        """
+
+        if self.agent.memory.short_term_memory:
+            last_communication = self.agent.memory.short_term_memory[-1].content.get(
+                "message", "No recent communication history"
+            )
+        else:
+            last_communication = "No recent communication history"
+
+        system_prompt = self.get_react_system_prompt(obs, last_communication)
+        prompt = prompt + "\n\n last conversation: " + str(last_communication)
+
+        self.agent.llm.system_prompt = system_prompt
+        selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
+            selected_tools
+        )
+
+        rsp = await self.agent.llm.agenerate(
+            prompt=prompt,
+            tool_schema=selected_tools_schema,
+            tool_choice="none",
+            response_format=ReActOutput,
+        )
+
+        formatted_response = json.loads(rsp.choices[0].message.content)
+
+        self.agent.memory.add_to_memory(type="plan", content=formatted_response)
+
+        react_plan = await self.aexecute_tool_call(formatted_response["action"])
 
         # --------------------------------------------------
         # Recording hook for plan event

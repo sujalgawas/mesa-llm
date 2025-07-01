@@ -70,6 +70,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.jail_sentence_left = 0  # A jail sentence of 1 implies that the agent cannot participate in the next 10 steps.
         self.grievance = self.hardship * (1 - self.regime_legitimacy)
         self.arrest_probability = None
+
         self.threshold = threshold
         self.internal_state.append(
             f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
