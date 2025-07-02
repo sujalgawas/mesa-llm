@@ -6,12 +6,19 @@ from mesa.visualization import (
     make_space_component,
 )
 
-from examples.epstein_civil_violence.agents import Citizen, Cop
+from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from examples.epstein_civil_violence.model import EpsteinModel
 from mesa_llm.reasoning.react import ReActReasoning
 
 load_dotenv()
 
+COP_COLOR = "#000000"
+
+agent_colors = {
+    CitizenState.ACTIVE: "#FE6100",
+    CitizenState.QUIET: "#648FFF",
+    CitizenState.ARRESTED: "#808080",
+}
 
 model_params = {
     "seed": {
@@ -51,17 +58,14 @@ if __name__ == "__main__":
             return
 
         portrayal = {
-            "size": 25,
+            "size": 50,
         }
 
         if isinstance(agent, Cop):
-            portrayal["color"] = "tab:red"
-            portrayal["marker"] = "o"
-            portrayal["zorder"] = 2
+            portrayal["color"] = COP_COLOR
+
         elif isinstance(agent, Citizen):
-            portrayal["color"] = "tab:blue"
-            portrayal["marker"] = "o"
-            portrayal["zorder"] = 1
+            portrayal["color"] = agent_colors[agent.state]
 
         return portrayal
 

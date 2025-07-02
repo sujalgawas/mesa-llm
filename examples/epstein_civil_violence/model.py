@@ -29,7 +29,7 @@ class EpsteinModel(Model):
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the cop agents---------------------
-        cop_system_prompt = "You are a buyer in a negotiation game. You are interested in buying a product from a seller. You are also interested in negotiating with the seller. Prefer speaking over changing location as long as you have a seller in sight."
+        cop_system_prompt = "You are a cop. You are tasked with arresting citizens if they are active and their arrest probability is high enough. You are also tasked with moving to a new location if there is no citizen in sight."
 
         agents = Cop.create_agents(
             self,
