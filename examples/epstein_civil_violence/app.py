@@ -17,7 +17,7 @@ COP_COLOR = "#000000"
 agent_colors = {
     CitizenState.ACTIVE: "#FE6100",
     CitizenState.QUIET: "#648FFF",
-    CitizenState.ARRESTED: "#808080",
+    CitizenState.ARRESTED: "#DB28A2",
 }
 
 model_params = {

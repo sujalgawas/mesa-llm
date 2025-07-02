@@ -162,7 +162,9 @@ class LLMAgent(Agent):
         for i in neighbors:
             local_state[i.__class__.__name__ + " " + str(i.unique_id)] = {
                 "position": i.pos if i.pos is not None else i.cell.coordinate,
-                "internal_state": i.internal_state,
+                "internal_state": [
+                    s for s in i.internal_state if not s.startswith("_")
+                ],
             }
 
         # Add to memory (memory handles its own display separately)
