@@ -35,17 +35,20 @@ def change_state(agent: "LLMAgent", state: CitizenState) -> str:
 
 
 @tool(tool_manager=cop_tool_manager)
-def arrest_citizen(agent: "LLMAgent", citizen: "LLMAgent") -> str:
+def arrest_citizen(agent: "LLMAgent", citizen_id: int) -> str:
     """
     Arrest a citizen.
 
         Args:
-            citizen: The citizen to arrest.
+            citizen_id: The unique id of the citizen to arrest.
             agent: Provided automatically
 
         Returns:
             a string confirming the citizen's arrest.
     """
+    citizen = next(
+        agent for agent in agent.model.agents if agent.unique_id == citizen_id
+    )
     citizen.citizen_state = CitizenState.ARRESTED
     citizen.jail_senttence_left = random.randint(1, agent.max_jail_term)
-    return f"agent {citizen.unique_id} arrested by {agent.unique_id}."
+    return f"agent {citizen_id} arrested by {agent.unique_id}."
