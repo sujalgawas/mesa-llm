@@ -24,13 +24,18 @@ def change_state(agent: "LLMAgent", state: CitizenState) -> str:
     - CitizenState.ARRESTED
 
         Args:
-            state: The state to change the agent to.
+            state: The state to change the agent to. Must be one of the following: "QUIET", "ACTIVE"
             agent: Provided automatically
 
         Returns:
             a string confirming the agent's new state.
     """
-    agent.state = state
+    state_map = {
+        "QUIET": CitizenState.QUIET,
+        "ACTIVE": CitizenState.ACTIVE,
+        "ARRESTED": CitizenState.ARRESTED,
+    }
+    agent.state = state_map[state]
     return f"agent {agent.unique_id} changed state to {state}."
 
 

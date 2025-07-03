@@ -77,12 +77,16 @@ class Reasoning(ABC):
         """
         return self.plan(prompt, obs, ttl, selected_tools)
 
-    def execute_tool_call(self, chaining_message):
+    def execute_tool_call(
+        self, chaining_message, selected_tools: list[str] | None = None
+    ):
         system_prompt = "You are an executor that executes the plan given to you in the prompt through tool calls."
         self.agent.llm.system_prompt = system_prompt
         rsp = self.agent.llm.generate(
             prompt=chaining_message,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(
+                selected_tools=selected_tools
+            ),
             tool_choice="required",
         )
         response_message = rsp.choices[0].message
@@ -90,7 +94,9 @@ class Reasoning(ABC):
 
         return plan
 
-    async def aexecute_tool_call(self, chaining_message):
+    async def aexecute_tool_call(
+        self, chaining_message, selected_tools: list[str] | None = None
+    ):
         """
         Asynchronous version of execute_tool_call() method.
         """
@@ -98,7 +104,9 @@ class Reasoning(ABC):
         self.agent.llm.system_prompt = system_prompt
         rsp = await self.agent.llm.agenerate(
             prompt=chaining_message,
-            tool_schema=self.agent.tool_manager.get_all_tools_schema(),
+            tool_schema=self.agent.tool_manager.get_all_tools_schema(
+                selected_tools=selected_tools
+            ),
             tool_choice="required",
         )
         response_message = rsp.choices[0].message

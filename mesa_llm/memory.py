@@ -78,6 +78,7 @@ class Memory:
         consolidation_capacity: int = 2,
         api_key: str = os.getenv("OPENAI_API_KEY"),
         llm_model: str = "openai/gpt-4o-mini",
+        display: bool = True,
     ):
         """
         Initialize the memory
@@ -93,6 +94,7 @@ class Memory:
 
         self.capacity = short_term_capacity
         self.consolidation_capacity = consolidation_capacity
+        self.display = display
 
         self.short_term_memory = deque()
         self.long_term_memory = ""
@@ -172,17 +174,18 @@ class Memory:
             self.short_term_memory.popleft()
             self._update_long_term_memory()
 
-        # Display the new entry
-        title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
-        panel = Panel(
-            new_entry.style_format(),
-            title=title,
-            title_align="left",
-            border_style="bright_blue",
-            padding=(0, 1),
-        )
-        console = Console()
-        console.print(panel)
+        if self.display:
+            # Display the new entry
+            title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
+            panel = Panel(
+                new_entry.style_format(),
+                title=title,
+                title_align="left",
+                border_style="bright_blue",
+                padding=(0, 1),
+            )
+            console = Console()
+            console.print(panel)
 
     def format_short_term(self) -> str:
         if not self.short_term_memory:

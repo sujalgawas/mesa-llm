@@ -73,3 +73,18 @@ class EpsteinModel(Model):
             f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
         )
         self.agents.shuffle_do("step")
+
+
+# ===============================================================
+#                     RUN WITHOUT GRAPHICS
+# ===============================================================
+
+if __name__ == "__main__":
+    """
+    run the model without the solara integration with:
+    conda activate mesa-llm && python -m examples.epstein_civil_violence.model
+    """
+    from examples.epstein_civil_violence.app import model
+
+    for _ in range(5):
+        model.step()

@@ -104,7 +104,9 @@ class ReWOOReasoning(Reasoning):
             type="plan", content=rsp.choices[0].message.content
         )
 
-        rewoo_plan = self.execute_tool_call(rsp.choices[0].message.content)
+        rewoo_plan = self.execute_tool_call(
+            rsp.choices[0].message.content, selected_tools
+        )
         # Count the number of tool calls in the response and set remaining_tool_calls
         if hasattr(rewoo_plan.llm_plan, "tool_calls"):
             self.remaining_tool_calls = len(rewoo_plan.llm_plan.tool_calls)
@@ -155,7 +157,9 @@ class ReWOOReasoning(Reasoning):
             type="plan", content=rsp.choices[0].message.content
         )
 
-        rewoo_plan = await self.aexecute_tool_call(rsp.choices[0].message.content)
+        rewoo_plan = await self.aexecute_tool_call(
+            rsp.choices[0].message.content, selected_tools
+        )
         # Count the number of tool calls in the response and set remaining_tool_calls
         if hasattr(rewoo_plan.llm_plan, "tool_calls"):
             self.remaining_tool_calls = len(rewoo_plan.llm_plan.tool_calls)

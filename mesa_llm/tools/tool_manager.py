@@ -52,7 +52,10 @@ class ToolManager:
         self, selected_tools: list[str] | None = None
     ) -> list[dict]:
         if selected_tools:
-            return [self.tools[tool].__tool_schema__ for tool in selected_tools]
+            selected_tools_schema = [
+                self.tools[tool].__tool_schema__ for tool in selected_tools
+            ]
+            return selected_tools_schema
 
         else:
             return [fn.__tool_schema__ for fn in self.tools.values()]

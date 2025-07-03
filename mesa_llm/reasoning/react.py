@@ -91,7 +91,9 @@ class ReActReasoning(Reasoning):
 
         self.agent.memory.add_to_memory(type="plan", content=formatted_response)
 
-        react_plan = self.execute_tool_call(formatted_response["action"])
+        react_plan = self.execute_tool_call(
+            formatted_response["action"], selected_tools
+        )
 
         # --------------------------------------------------
         # Recording hook for plan event
@@ -142,7 +144,9 @@ class ReActReasoning(Reasoning):
 
         self.agent.memory.add_to_memory(type="plan", content=formatted_response)
 
-        react_plan = await self.aexecute_tool_call(formatted_response["action"])
+        react_plan = await self.aexecute_tool_call(
+            formatted_response["action"], selected_tools
+        )
 
         # --------------------------------------------------
         # Recording hook for plan event
