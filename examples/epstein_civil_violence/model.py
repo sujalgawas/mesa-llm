@@ -1,13 +1,12 @@
+from mesa.datacollection import DataCollector
 from mesa.model import Model
 from mesa.space import MultiGrid
 from rich import print
 
-from examples.epstein_civil_violence.agents import Citizen, Cop
+from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from mesa_llm.reasoning.reasoning import Reasoning
-from mesa_llm.recording.integration_hooks import record_model
 
 
-@record_model
 class EpsteinModel(Model):
     def __init__(
         self,
@@ -27,6 +26,31 @@ class EpsteinModel(Model):
         self.height = height
         self.parallel_stepping = parallel_stepping
         self.grid = MultiGrid(self.height, self.width, torus=False)
+
+        model_reporters = {
+            "active": lambda m: sum(
+                1
+                for agent in m.agents
+                if isinstance(agent, Citizen) and agent.state == CitizenState.ACTIVE
+            ),
+            "quiet": lambda m: sum(
+                1
+                for agent in m.agents
+                if isinstance(agent, Citizen) and agent.state == CitizenState.QUIET
+            ),
+            "arrested": lambda m: sum(
+                1
+                for agent in m.agents
+                if isinstance(agent, Citizen) and agent.state == CitizenState.ARRESTED
+            ),
+        }
+        agent_reporters = {
+            "jail_sentence": lambda a: getattr(a, "jail_sentence", None),
+            "arrest_probability": lambda a: getattr(a, "arrest_probability", None),
+        }
+        self.datacollector = DataCollector(
+            model_reporters=model_reporters, agent_reporters=agent_reporters
+        )
 
         # ---------------------Create the cop agents---------------------
         cop_system_prompt = "You are a cop. You are tasked with arresting citizens if they are active and their arrest probability is high enough. You are also tasked with moving to a new location if there is no citizen in sight."
@@ -73,6 +97,8 @@ class EpsteinModel(Model):
             f"\n[bold purple] step  {self.steps} ────────────────────────────────────────────────────────────────────────────────[/bold purple]"
         )
         self.agents.shuffle_do("step")
+
+        self.datacollector.collect(self)
 
 
 # ===============================================================

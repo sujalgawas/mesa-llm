@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from mesa.visualization import (
     SolaraViz,
+    make_plot_component,
     make_space_component,
 )
 
@@ -51,28 +52,45 @@ model = EpsteinModel(
     parallel_stepping=model_params["parallel_stepping"],
 )
 
+
+def citizen_cop_portrayal(agent):
+    if agent is None:
+        return
+
+    portrayal = {
+        "size": 50,
+    }
+
+    if isinstance(agent, Cop):
+        portrayal["color"] = COP_COLOR
+
+    elif isinstance(agent, Citizen):
+        portrayal["color"] = agent_colors[agent.state]
+
+    return portrayal
+
+
+def post_process(ax):
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.get_figure().set_size_inches(10, 10)
+
+
+space_component = make_space_component(
+    citizen_cop_portrayal, post_process=post_process, draw_grid=False
+)
+
+chart_component = make_plot_component(
+    {state.name.lower(): agent_colors[state] for state in CitizenState}
+)
+
 if __name__ == "__main__":
-
-    def model_portrayal(agent):
-        if agent is None:
-            return
-
-        portrayal = {
-            "size": 50,
-        }
-
-        if isinstance(agent, Cop):
-            portrayal["color"] = COP_COLOR
-
-        elif isinstance(agent, Citizen):
-            portrayal["color"] = agent_colors[agent.state]
-
-        return portrayal
-
     page = SolaraViz(
         model,
         components=[
-            make_space_component(model_portrayal),
+            space_component,
+            chart_component,
         ],  # Add ShowSalesButton here
         model_params=model_params,
         name="Espstein Civil Violence Model",

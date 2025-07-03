@@ -16,15 +16,12 @@ if TYPE_CHECKING:
 
 
 @tool(tool_manager=citizen_tool_manager)
-def change_state(agent: "LLMAgent", state: CitizenState) -> str:
+def change_state(agent: "LLMAgent", state: str) -> str:
     """
-    Change the state of the agent. The state can be one of the following:
-    - CitizenState.QUIET
-    - CitizenState.ACTIVE
-    - CitizenState.ARRESTED
+    Change the state of the agent. The state can be "QUIET" or "ACTIVE"
 
         Args:
-            state: The state to change the agent to. Must be one of the following: "QUIET", "ACTIVE"
+            state: The state to change the agent to. Must be one of the following: "QUIET" or "ACTIVE"
             agent: Provided automatically
 
         Returns:
@@ -33,8 +30,9 @@ def change_state(agent: "LLMAgent", state: CitizenState) -> str:
     state_map = {
         "QUIET": CitizenState.QUIET,
         "ACTIVE": CitizenState.ACTIVE,
-        "ARRESTED": CitizenState.ARRESTED,
     }
+    if state not in state_map:
+        raise ValueError(f"Invalid state: {state}")
     agent.state = state_map[state]
     return f"agent {agent.unique_id} changed state to {state}."
 
