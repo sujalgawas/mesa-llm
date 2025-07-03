@@ -9,7 +9,10 @@ from mesa.visualization import (
 
 from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from examples.epstein_civil_violence.model import EpsteinModel
+from mesa_llm.parallel_stepping import enable_automatic_parallel_stepping
 from mesa_llm.reasoning.react import ReActReasoning
+
+enable_automatic_parallel_stepping(mode="threading")
 
 load_dotenv()
 
@@ -28,7 +31,7 @@ model_params = {
         "label": "Random Seed",
     },
     "initial_citizens": 10,
-    "initial_cops": 5,
+    "initial_cops": 3,
     "width": 5,
     "height": 5,
     "api_key": os.getenv("OPENAI_API_KEY"),
