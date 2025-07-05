@@ -4,6 +4,7 @@ from enum import Enum
 import mesa
 
 from mesa_llm.llm_agent import LLMAgent
+from mesa_llm.memory import Memory
 from mesa_llm.tools.tool_manager import ToolManager
 
 citizen_tool_manager = ToolManager()
@@ -72,6 +73,13 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.grievance = self.hardship * (1 - self.regime_legitimacy)
         self.arrest_prob_constant = arrest_prob_constant
         self.arrest_probability = None
+
+        self.memory = Memory(
+            agent=self,
+            display=True,
+            short_term_capacity=1,
+            consolidation_capacity=0,
+        )
 
         self.threshold = threshold
         self.internal_state.append(
@@ -193,6 +201,13 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         )
         self.max_jail_term = max_jail_term
         self.tool_manager = cop_tool_manager
+
+        self.memory = Memory(
+            agent=self,
+            display=True,
+            short_term_capacity=1,
+            consolidation_capacity=0,
+        )
 
     def step(self):
         """

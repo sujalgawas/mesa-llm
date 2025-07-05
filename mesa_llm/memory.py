@@ -93,7 +93,9 @@ class Memory:
         self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
 
         self.capacity = short_term_capacity
-        self.consolidation_capacity = consolidation_capacity
+        self.consolidation_capacity = (
+            consolidation_capacity if consolidation_capacity > 0 else None
+        )
         self.display = display
 
         self.short_term_memory = deque()
@@ -170,12 +172,19 @@ class Memory:
             self.step_content = {}
 
         # Consolidate memory if the short term memory is over capacity
-        if len(self.short_term_memory) > self.capacity + self.consolidation_capacity:
+        if (
+            len(self.short_term_memory)
+            > self.capacity + (self.consolidation_capacity or 0)
+            and self.consolidation_capacity
+        ):
             self.short_term_memory.popleft()
             self._update_long_term_memory()
 
+        elif len(self.short_term_memory) > self.capacity:
+            self.short_term_memory.popleft()
+
+        # Display the new entry
         if self.display:
-            # Display the new entry
             title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
             panel = Panel(
                 new_entry.style_format(),
