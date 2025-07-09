@@ -95,3 +95,31 @@ def enable_automatic_parallel_stepping(mode: str = "asyncio"):
 def disable_automatic_parallel_stepping():
     """Restore original shuffle_do behavior."""
     AgentSet.shuffle_do = _original_shuffle_do
+
+
+# --- Monkey-patch AgentSet with do_async for async parallel method calls ---
+
+
+def _agentset_do_async(self, method: str, *args, **kwargs):
+    """
+    Call the given async method on all agents in the set in parallel.
+    Usage: await agents.do_async("async_function")
+    """
+    print(f"Running async method '{method}' on {len(self)} agents")
+
+    async def _run():
+        tasks = []
+        for agent in self:
+            fn = getattr(agent, method, None)
+            if fn is not None and asyncio.iscoroutinefunction(fn):
+                tasks.append(fn(*args, **kwargs))
+            else:
+                raise AttributeError(
+                    f"Agent {agent} does not have async method '{method}'"
+                )
+        return await asyncio.gather(*tasks)
+
+    return _run()
+
+
+AgentSet.do_async = _agentset_do_async
