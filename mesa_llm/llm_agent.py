@@ -11,7 +11,7 @@ from mesa.space import (
 )
 
 from mesa_llm import Plan
-from mesa_llm.memory import Memory
+from mesa_llm.memory.st_lt_memory import STLTMemory
 from mesa_llm.module_llm import ModuleLLM
 from mesa_llm.reasoning.reasoning import (
     Observation,
@@ -57,7 +57,7 @@ class LLMAgent(Agent):
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
 
-        self.memory = Memory(
+        self.memory = STLTMemory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,

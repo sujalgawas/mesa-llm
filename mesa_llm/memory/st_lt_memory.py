@@ -1,63 +1,17 @@
-import json
 import os
 from collections import deque
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.panel import Panel
 
-from mesa_llm.module_llm import ModuleLLM
+from mesa_llm.memory.memory import Memory, MemoryEntry
 
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
 
 
-@dataclass
-class MemoryEntry:
-    content: dict
-    step: int
-
-    def __str__(self) -> str:
-        """
-        Returns the memory entry as a string without formatting (simply an indented dict)
-        """
-        return str(json.dumps(self.content, indent=4))
-
-    def style_format(self) -> str:
-        """
-        content is a dict that can have nested dictionaries of arbitrary depth
-        """
-
-        def format_nested_dict(data, indent_level=0):
-            lines = []
-            indent = "   " * indent_level
-
-            for key, value in data.items():
-                if isinstance(value, dict):
-                    lines.append(f"{indent}[blue]└──[/blue] [cyan]{key} :[/cyan]")
-                    lines.extend(format_nested_dict(value, indent_level + 1))
-                else:
-                    lines.append(
-                        f"{indent}[blue]└──[/blue] [cyan]{key} : [/cyan]{value}"
-                    )
-
-            return lines
-
-        lines = []
-        for key, value in [item for item in self.content.items() if item[1]]:
-            lines.append(f"\n[bold cyan][{key.title()}][/bold cyan]")
-            if isinstance(value, dict):
-                lines.extend(format_nested_dict(value, 1))
-            else:
-                lines.append(f"   [blue]└──[/blue] [cyan]{value} :[/cyan]")
-
-        content = "\n".join(lines)
-
-        return content
-
-
-class Memory:
+class STLTMemory(Memory):
     """
     Create a memory object that stores the agent's short and long term memory
 
@@ -76,9 +30,9 @@ class Memory:
         agent: "LLMAgent",
         short_term_capacity: int = 5,
         consolidation_capacity: int = 2,
+        display: bool = True,
         api_key: str = os.getenv("OPENAI_API_KEY"),
         llm_model: str = "openai/gpt-4o-mini",
-        display: bool = True,
     ):
         """
         Initialize the memory
@@ -89,12 +43,17 @@ class Memory:
             llm_model : the model to use for the summarization
             agent : the agent that the memory belongs to
         """
-        self.agent = agent
-        self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
+        super().__init__(
+            agent=agent,
+            api_key=api_key,
+            llm_model=llm_model,
+            display=display,
+        )
 
         self.capacity = short_term_capacity
-        self.consolidation_capacity = consolidation_capacity
-        self.display = display
+        self.consolidation_capacity = (
+            consolidation_capacity if consolidation_capacity > 0 else None
+        )
 
         self.short_term_memory = deque()
         self.long_term_memory = ""
@@ -107,24 +66,6 @@ class Memory:
         """
 
         self.llm.system_prompt = self.system_prompt
-
-        self.step_content: dict = {}
-        self.last_observation: dict = {}
-
-    def add_to_memory(self, type: str, content: dict):
-        """
-        Add a new entry to the memory
-        """
-        if type == "observation":
-            # Only store changed parts of observation
-            changed_parts = {
-                k: v for k, v in content.items() if v != self.last_observation.get(k)
-            }
-            if changed_parts:
-                self.step_content[type] = changed_parts
-            self.last_observation = content
-        else:
-            self.step_content[type] = content
 
     def _update_long_term_memory(self):
         """
@@ -170,12 +111,19 @@ class Memory:
             self.step_content = {}
 
         # Consolidate memory if the short term memory is over capacity
-        if len(self.short_term_memory) > self.capacity + self.consolidation_capacity:
+        if (
+            len(self.short_term_memory)
+            > self.capacity + (self.consolidation_capacity or 0)
+            and self.consolidation_capacity
+        ):
             self.short_term_memory.popleft()
             self._update_long_term_memory()
 
+        elif len(self.short_term_memory) > self.capacity:
+            self.short_term_memory.popleft()
+
+        # Display the new entry
         if self.display:
-            # Display the new entry
             title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
             panel = Panel(
                 new_entry.style_format(),
