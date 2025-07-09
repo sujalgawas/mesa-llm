@@ -4,7 +4,7 @@ from enum import Enum
 import mesa
 
 from mesa_llm.llm_agent import LLMAgent
-from mesa_llm.memory.memory import Memory
+from mesa_llm.memory.st_lt_memory import STLTMemory
 from mesa_llm.tools.tool_manager import ToolManager
 
 citizen_tool_manager = ToolManager()
@@ -74,7 +74,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.arrest_prob_constant = arrest_prob_constant
         self.arrest_probability = None
 
-        self.memory = Memory(
+        self.memory = STLTMemory(
             agent=self,
             display=True,
             short_term_capacity=1,
@@ -202,7 +202,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         self.max_jail_term = max_jail_term
         self.tool_manager = cop_tool_manager
 
-        self.memory = Memory(
+        self.memory = STLTMemory(
             agent=self,
             display=True,
             short_term_capacity=1,
