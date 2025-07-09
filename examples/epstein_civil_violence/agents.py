@@ -4,7 +4,7 @@ from enum import Enum
 import mesa
 
 from mesa_llm.llm_agent import LLMAgent
-from mesa_llm.memory import Memory
+from mesa_llm.memory.memory import Memory
 from mesa_llm.tools.tool_manager import ToolManager
 
 citizen_tool_manager = ToolManager()

@@ -11,7 +11,7 @@ from mesa.space import (
 )
 
 from mesa_llm import Plan
-from mesa_llm.memory import Memory
+from mesa_llm.memory.memory import Memory
 from mesa_llm.module_llm import ModuleLLM
 from mesa_llm.reasoning.reasoning import (
     Observation,

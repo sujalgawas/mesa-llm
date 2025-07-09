@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mesa_llm.memory import Memory, MemoryEntry
+from mesa_llm.memory.memory import Memory, MemoryEntry
 
 
 @pytest.fixture(autouse=True)
