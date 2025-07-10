@@ -8,6 +8,74 @@ The model generates mass uprising as self-reinforcing processes: if enough agent
 
 This model is implemented using Mesa-LLM unlike the original Mesa and NetLogo versions. All agents have the ability to think and use tools (arresting citizens for cops, changing their state, etc.) depending on their reasoning method.
 
+## Technical Details
+
+The **Epstein Civil Violence Model** simulates the dynamics of civil unrest using two types of agents: **Citizens** and **Cops**.
+
+Each **Citizen** agent is characterized by individual attributes such as:
+
+- **Hardship**
+- **Risk aversion**
+- **Threshold for rebellion**
+
+Additionally, all Citizens share a common perception of **regime legitimacy**.
+
+---
+
+### Rebellion Rule
+
+A Citizen becomes (or remains) *active* (i.e., rebels) if the following condition is met:
+
+\[
+\text{grievance} - (\text{risk\_aversion} \times \text{arrest\_probability}) > \text{threshold}
+\]
+
+Where:
+
+\[
+\text{grievance} = \text{hardship} \times (1 - \text{regime\_legitimacy})
+\]
+
+---
+
+### Arrest Probability
+
+The perceived probability of arrest is calculated as:
+
+\[
+\text{arrest\_probability} = 1 - \exp\left(-k \times \text{round}\left(\frac{\text{cops\_in\_vision}}{\text{actives\_in\_vision}}\right)\right)
+\]
+
+Where:
+
+- \( k \) is a constant
+- \( \text{cops\_in\_vision} \) is the number of cops within the agent’s vision
+- \( \text{actives\_in\_vision} \) is the number of active Citizens (including the agent itself)
+
+---
+
+### Cops' Behavior
+
+**Cops** patrol the grid and attempt to **arrest active Citizens** within their vision.
+
+---
+
+### LLM-Powered Agents
+
+Both Citizens and Cops are implemented as **LLM-powered agents**, meaning:
+
+- Their actions (e.g., `move`, `change state`, `arrest`) are determined by a **reasoning module**.
+- This module takes as input:
+  - The agent’s internal state
+  - Local observations
+  - A set of available tools
+
+This design enables **flexible, context-aware decision-making** that incorporates both:
+
+- Quantitative attributes (e.g., hardship, risk)
+- Qualitative reasoning (e.g., situational awareness, adaptive strategy)
+
+
 ## How to Run
 
 To run the model interactively, in this directory, run the following command
@@ -32,3 +100,6 @@ This model is based adapted from:
 A similar model is also included with NetLogo:
 
 Wilensky, U. (2004). NetLogo Rebellion model. http://ccl.northwestern.edu/netlogo/models/Rebellion. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+
+You can also find Mesa's version of the model without using LLMs here:
+https://github.com/projectmesa/mesa/tree/main/mesa/examples/advanced/epstein_civil_violence
