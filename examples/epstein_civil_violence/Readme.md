@@ -26,15 +26,15 @@ Additionally, all Citizens share a common perception of **regime legitimacy**.
 
 A Citizen becomes (or remains) *active* (i.e., rebels) if the following condition is met:
 
-\[
+$$
 \text{grievance} - (\text{risk\_aversion} \times \text{arrest\_probability}) > \text{threshold}
-\]
+$$
 
 Where:
 
-\[
+$$
 \text{grievance} = \text{hardship} \times (1 - \text{regime\_legitimacy})
-\]
+$$
 
 ---
 
@@ -42,15 +42,16 @@ Where:
 
 The perceived probability of arrest is calculated as:
 
-\[
+$$
 \text{arrest\_probability} = 1 - \exp\left(-k \times \text{round}\left(\frac{\text{cops\_in\_vision}}{\text{actives\_in\_vision}}\right)\right)
-\]
+$$
 
 Where:
 
-- \( k \) is a constant
-- \( \text{cops\_in\_vision} \) is the number of cops within the agent’s vision
-- \( \text{actives\_in\_vision} \) is the number of active Citizens (including the agent itself)
+- `k` is a constant
+- `cops_in_vision` is the number of cops within the agent’s vision
+- `actives_in_vision` is the number of active Citizens (including the agent itself)
+
 
 ---
 
@@ -74,6 +75,7 @@ This design enables **flexible, context-aware decision-making** that incorporate
 
 - Quantitative attributes (e.g., hardship, risk)
 - Qualitative reasoning (e.g., situational awareness, adaptive strategy)
+
 
 
 ## How to Run
