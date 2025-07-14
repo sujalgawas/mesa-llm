@@ -37,7 +37,7 @@ class ModuleLLM:
 
     def generate(
         self,
-        prompt: str,
+        prompt: str | list[str],
         tool_schema: list[dict] | None = None,
         tool_choice: str = "auto",
         response_format: dict | object | None = None,
@@ -49,6 +49,8 @@ class ModuleLLM:
             ]
             if self.system_prompt
             else [{"role": "user", "content": prompt}]
+            if isinstance(prompt, str)
+            else [{"role": "user", "content": p} for p in prompt]
         )
 
         response = completion(
@@ -62,7 +64,7 @@ class ModuleLLM:
 
     async def agenerate(
         self,
-        prompt: str,
+        prompt: str | list[str],
         tool_schema: list[dict] | None = None,
         tool_choice: str = "auto",
         response_format: dict | object | None = None,
@@ -77,6 +79,8 @@ class ModuleLLM:
             ]
             if self.system_prompt
             else [{"role": "user", "content": prompt}]
+            if isinstance(prompt, str)
+            else [{"role": "user", "content": p} for p in prompt]
         )
 
         response = await acompletion(
