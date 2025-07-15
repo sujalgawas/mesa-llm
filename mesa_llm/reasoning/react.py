@@ -71,16 +71,12 @@ class ReActReasoning(Reasoning):
         """
         Plan the next (ReAct) action based on the current observation and the agent's memory.
         """
-        # If no prompt is provided, use the agent's default step prompt
-        if prompt is None:
-            if self.agent.step_prompt is not None:
-                prompt = self.agent.step_prompt
-            else:
-                raise ValueError("No prompt provided and agent.step_prompt is None.")
 
         # ---------------- prepare the prompt ----------------
         self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
         prompt_list = self.get_react_prompt(obs)
+        if prompt:
+            prompt_list.append(prompt)
 
         # ---------------- generate the plan ----------------
         selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
@@ -107,8 +103,8 @@ class ReActReasoning(Reasoning):
 
     async def aplan(
         self,
-        prompt: str,
         obs: Observation,
+        prompt: str | None = None,
         ttl: int = 1,
         selected_tools: list[str] | None = None,
     ) -> Plan:
@@ -119,6 +115,8 @@ class ReActReasoning(Reasoning):
         # ---------------- prepare the prompt ----------------
         self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
         prompt_list = self.get_react_prompt(obs)
+        if prompt:
+            prompt_list.append(prompt)
 
         selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
             selected_tools
