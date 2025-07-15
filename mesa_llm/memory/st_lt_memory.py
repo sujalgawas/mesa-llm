@@ -2,9 +2,6 @@ import os
 from collections import deque
 from typing import TYPE_CHECKING
 
-from rich.console import Console
-from rich.panel import Panel
-
 from mesa_llm.memory.memory import Memory, MemoryEntry
 
 if TYPE_CHECKING:
@@ -92,6 +89,7 @@ class STLTMemory(Memory):
         # Add the new entry to the short term memory
         if pre_step:
             new_entry = MemoryEntry(
+                agent=self.agent,
                 content=self.step_content,
                 step=None,
             )
@@ -103,6 +101,7 @@ class STLTMemory(Memory):
             pre_step = self.short_term_memory.pop()
             self.step_content.update(pre_step.content)
             new_entry = MemoryEntry(
+                agent=self.agent,
                 content=self.step_content,
                 step=self.agent.model.steps,
             )
@@ -124,32 +123,28 @@ class STLTMemory(Memory):
 
         # Display the new entry
         if self.display:
-            title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
-            panel = Panel(
-                new_entry.style_format(),
-                title=title,
-                title_align="left",
-                border_style="bright_blue",
-                padding=(0, 1),
-            )
-            console = Console()
-            console.print(panel)
-
-    def format_short_term(self) -> str:
-        if not self.short_term_memory:
-            return "No recent memory."
-
-        lines = [f"[{self.agent} Short-Term Memory]"]
-        for entry in self.short_term_memory:
-            lines.append(f"\n[Step {entry.step}]")
-            lines.append(str(entry.content))
-        return str("\n".join(lines))
+            new_entry.display()
 
     def format_long_term(self) -> str:
         """
         Get the long term memory
         """
         return str(self.long_term_memory)
+
+    def format_short_term(self) -> str:
+        """
+        Get the short term memory
+        """
+        if not self.short_term_memory:
+            return "No recent memory."
+
+        else:
+            lines = []
+            for st_memory_entry in self.short_term_memory:
+                lines.append(
+                    f"Step {st_memory_entry.step}: \n{st_memory_entry.content}"
+                )
+            return "\n".join(lines)
 
     def __str__(self) -> str:
         return f"Short term memory:\n {self.format_short_term()}\n\nLong term memory: \n{self.format_long_term()}"

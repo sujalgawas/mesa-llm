@@ -42,16 +42,14 @@ class ModuleLLM:
         tool_choice: str = "auto",
         response_format: dict | object | None = None,
     ) -> str:
-        messages = (
-            [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            if self.system_prompt
-            else [{"role": "user", "content": prompt}]
-            if isinstance(prompt, str)
-            else [{"role": "user", "content": p} for p in prompt]
-        )
+        if prompt:
+            if isinstance(prompt, str):
+                messages = [
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": prompt},
+                ]
+            elif isinstance(prompt, list):
+                messages = [{"role": "user", "content": p} for p in prompt]
 
         response = completion(
             model=self.llm_model,

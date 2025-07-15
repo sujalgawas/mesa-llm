@@ -1,7 +1,9 @@
-import json
 import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from rich.console import Console
+from rich.panel import Panel
 
 from mesa_llm.module_llm import ModuleLLM
 
@@ -13,14 +15,9 @@ if TYPE_CHECKING:
 class MemoryEntry:
     content: dict
     step: int
+    agent: "LLMAgent"
 
     def __str__(self) -> str:
-        """
-        Returns the memory entry as a string without formatting (simply an indented dict)
-        """
-        return str(json.dumps(self.content, indent=4))
-
-    def style_format(self) -> str:
         """
         content is a dict that can have nested dictionaries of arbitrary depth
         """
@@ -50,7 +47,20 @@ class MemoryEntry:
 
         content = "\n".join(lines)
 
-        return content
+        return str(content)
+
+    def display(self):
+        if self.display:
+            title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
+            panel = Panel(
+                self.__str__(),
+                title=title,
+                title_align="left",
+                border_style="bright_blue",
+                padding=(0, 1),
+            )
+            console = Console()
+            console.print(panel)
 
 
 class Memory:
@@ -83,15 +93,6 @@ class Memory:
         self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
 
         self.display = display
-
-        self.system_prompt = """
-        You are a helpful assistant that summarizes the short term memory into a long term memory.
-        The long term memory should be a summary of the short term memory that is concise and informative.
-        If the short term memory is empty, return the long term memory unchanged.
-        If the long term memory is not empty, update it to include the new information from the short term memory.
-        """
-
-        self.llm.system_prompt = self.system_prompt
 
         self.step_content: dict = {}
         self.last_observation: dict = {}

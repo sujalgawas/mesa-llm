@@ -7,10 +7,9 @@ from rich import print
 
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from mesa_llm.reasoning.reasoning import Reasoning
-from mesa_llm.recording.integration_hooks import record_model
 
 
-@record_model
+# @record_model
 class NegotiationModel(Model):
     """
     A model for a negotiation game between a seller and a buyer.
