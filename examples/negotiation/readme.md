@@ -34,7 +34,14 @@ The model tracks the number of sales for each seller using a data collector, all
 
 ## How to Run
 
-To run the model interactively, in this directory, run the following command
+To run the model interactively, you will need an api key of an LLM-provider of your choice. Once you have obtained the api-key follow the below steps to set it up for this model.
+1) Ensure the dotenv package is installed. If not, run ``pip install python-dotenv``.
+2) In the root folder of the project, create a file named .env.
+3) If you are using openAI's api key, add the following command in the .env file: ``OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx``. If you have a Gemini based api-key, use this line instead: ``GEMINI_API_KEY=your-gemini-api-key-here``.
+4) Change the  ``api_key`` specification in app.py according to the provider you have chosen.
+5) Similarly change the ``llm_model`` attribute as well in app.py to the name of a model you have access to. Ensure it is in the form of {provider}/{model_name}. For e.g. ``openai/gpt-4o-mini``.
+
+Once you have set up the api-key in your system, run the following command from this directory:
 
 ```
     $ solara run app.py
