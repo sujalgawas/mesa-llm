@@ -75,14 +75,19 @@ class ReActReasoning(Reasoning):
         # ---------------- prepare the prompt ----------------
         self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
         prompt_list = self.get_react_prompt(obs)
-        if prompt:
-            prompt_list.append(prompt)
 
-        # ---------------- generate the plan ----------------
+        # If no prompt is provided, use the agent's default step prompt
+        if prompt is None:
+            if self.agent.step_prompt is not None:
+                prompt_list.append(self.agent.step_prompt)
+            else:
+                raise ValueError("No prompt provided and agent.step_prompt is None.")
+
         selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
             selected_tools
         )
 
+        # ---------------- generate the plan ----------------
         rsp = self.agent.llm.generate(
             prompt=prompt_list,
             tool_schema=selected_tools_schema,
@@ -104,8 +109,8 @@ class ReActReasoning(Reasoning):
     async def aplan(
         self,
         obs: Observation,
-        prompt: str | None = None,
         ttl: int = 1,
+        prompt: str | None = None,
         selected_tools: list[str] | None = None,
     ) -> Plan:
         """
@@ -115,8 +120,13 @@ class ReActReasoning(Reasoning):
         # ---------------- prepare the prompt ----------------
         self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
         prompt_list = self.get_react_prompt(obs)
-        if prompt:
-            prompt_list.append(prompt)
+
+        # If no prompt is provided, use the agent's default step prompt
+        if prompt is None:
+            if self.agent.step_prompt is not None:
+                prompt_list.append(self.agent.step_prompt)
+            else:
+                raise ValueError("No prompt provided and agent.step_prompt is None.")
 
         selected_tools_schema = self.agent.tool_manager.get_all_tools_schema(
             selected_tools
