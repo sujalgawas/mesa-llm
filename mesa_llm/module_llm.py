@@ -35,13 +35,16 @@ class ModuleLLM:
                 f"Warning: {self.llm_model} does not support function calling. This model may not be able to use tools."
             )
 
-    def generate(
-        self,
-        prompt: str | list[str],
-        tool_schema: list[dict] | None = None,
-        tool_choice: str = "auto",
-        response_format: dict | object | None = None,
-    ) -> str:
+    def get_messages(self, prompt: str | list[str]) -> list[dict]:
+        """
+        Format the prompt messages for the LLM of the form : {"role": ..., "content": ...}
+
+        Args:
+            prompt: The prompt to generate a response for
+
+        Returns:
+            The messages for the LLM
+        """
         if prompt:
             if isinstance(prompt, str):
                 messages = [
@@ -50,6 +53,32 @@ class ModuleLLM:
                 ]
             elif isinstance(prompt, list):
                 messages = [{"role": "user", "content": p} for p in prompt]
+        else:
+            messages = []
+
+        return messages
+
+    def generate(
+        self,
+        prompt: str | list[str],
+        tool_schema: list[dict] | None = None,
+        tool_choice: str = "auto",
+        response_format: dict | object | None = None,
+    ) -> str:
+        """
+        Generate a response from the LLM using litellm based on the prompt
+
+        Args:
+            prompt: The prompt to generate a response for
+            tool_schema: The schema of the tools to use
+            tool_choice: The choice of tool to use
+            response_format: The format of the response
+
+        Returns:
+            The response from the LLM
+        """
+
+        messages = self.get_messages(prompt)
 
         response = completion(
             model=self.llm_model,
@@ -70,16 +99,8 @@ class ModuleLLM:
         """
         Asynchronous version of generate() method for parallel LLM calls.
         """
-        messages = (
-            [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            if self.system_prompt
-            else [{"role": "user", "content": prompt}]
-            if isinstance(prompt, str)
-            else [{"role": "user", "content": p} for p in prompt]
-        )
+
+        messages = self.get_messages(prompt)
 
         response = await acompletion(
             model=self.llm_model,

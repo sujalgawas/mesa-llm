@@ -41,16 +41,23 @@ class TestMemoryEntry:
 
     def test_memory_entry_creation(self):
         """Test MemoryEntry creation and basic functionality"""
+        from unittest.mock import Mock
+
+        mock_agent = Mock()
         content = {"observation": "Test content", "metadata": "value"}
-        entry = MemoryEntry(content=content, step=1)
+        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
 
         assert entry.content == content
         assert entry.step == 1
+        assert entry.agent == mock_agent
 
     def test_memory_entry_str(self):
         """Test MemoryEntry string representation"""
+        from unittest.mock import Mock
+
+        mock_agent = Mock()
         content = {"observation": "Test content", "type": "observation"}
-        entry = MemoryEntry(content=content, step=1)
+        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
 
         str_repr = str(entry)
         assert "Test content" in str_repr
@@ -142,17 +149,16 @@ class TestMemory:
 
         # Test with entries
         memory.short_term_memory.append(
-            MemoryEntry(content={"observation": "Test obs"}, step=1)
+            MemoryEntry(content={"observation": "Test obs"}, step=1, agent=mock_agent)
         )
         memory.short_term_memory.append(
-            MemoryEntry(content={"planning": "Test plan"}, step=2)
+            MemoryEntry(content={"planning": "Test plan"}, step=2, agent=mock_agent)
         )
 
         result = memory.format_short_term()
-        assert "[TestAgent(123) Short-Term Memory]" in result
-        assert "[Step 1]" in result
+        assert "Step 1:" in result
         assert "Test obs" in result
-        assert "[Step 2]" in result
+        assert "Step 2:" in result
         assert "Test plan" in result
 
         # Test long-term memory formatting

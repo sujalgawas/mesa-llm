@@ -19,7 +19,8 @@ class MemoryEntry:
 
     def __str__(self) -> str:
         """
-        content is a dict that can have nested dictionaries of arbitrary depth
+        Format the memory entry as a string.
+        Note : 'content' is a dict that can have nested dictionaries of arbitrary depth
         """
 
         def format_nested_dict(data, indent_level=0):
@@ -50,7 +51,7 @@ class MemoryEntry:
         return str(content)
 
     def display(self):
-        if self.display:
+        if self.agent and hasattr(self.agent, "memory") and self.agent.memory.display:
             title = f"Step [bold purple]{self.agent.model.steps}[/bold purple] [bold]|[/bold] {type(self.agent).__name__} [bold purple]{self.agent.unique_id}[/bold purple]"
             panel = Panel(
                 self.__str__(),
