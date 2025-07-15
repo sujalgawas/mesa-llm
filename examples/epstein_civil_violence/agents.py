@@ -180,6 +180,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         system_prompt,
         vision,
         internal_state,
+        step_prompt,
         max_jail_term=2,
     ):
         """
@@ -198,6 +199,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
             system_prompt=system_prompt,
             vision=vision,
             internal_state=internal_state,
+            step_prompt=step_prompt,
         )
         self.max_jail_term = max_jail_term
         self.tool_manager = cop_tool_manager
