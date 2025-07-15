@@ -53,7 +53,7 @@ class LLMAgent(Agent):
         super().__init__(model=model)
 
         self.model = model
-
+        self.step_prompt = step_prompt
         self.llm = ModuleLLM(
             api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
         )
@@ -68,7 +68,6 @@ class LLMAgent(Agent):
 
         self.tool_manager = ToolManager()
         self.recorder = recorder
-        self.step_prompt = step_prompt
         self.vision = vision
         self.reasoning = reasoning(agent=self)
         self.system_prompt = system_prompt
