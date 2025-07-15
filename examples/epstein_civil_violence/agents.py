@@ -49,6 +49,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         system_prompt,
         vision,
         internal_state,
+        step_prompt,
         arrest_prob_constant=0.5,
         regime_legitimacy=0.5,
         threshold=0.5,
@@ -62,6 +63,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
             system_prompt=system_prompt,
             vision=vision,
             internal_state=internal_state,
+            step_prompt=step_prompt,
         )
 
         self.hardship = self.random.random()
@@ -134,7 +136,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         if self.jail_sentence_left == 0:
             self.update_estimated_arrest_probability()
             observation = self.generate_obs()
-            prompt = "Move around and change your state if necessary."
+            prompt = self.step_prompt
             plan = self.reasoning.plan(
                 prompt=prompt,
                 obs=observation,
@@ -148,7 +150,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         if self.jail_sentence_left == 0:
             self.update_estimated_arrest_probability()
             observation = self.generate_obs()
-            prompt = "Move around and change your state if necessary."
+            prompt = self.step_prompt
             plan = await self.reasoning.aplan(
                 prompt=prompt,
                 obs=observation,
@@ -215,7 +217,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         applicable.
         """
         observation = self.generate_obs()
-        prompt = "Inspect your local vision and arrest a random active agent. Move if applicable."
+        prompt = self.step_prompt
         plan = self.reasoning.plan(
             prompt=prompt,
             obs=observation,
@@ -229,7 +231,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         applicable.
         """
         observation = self.generate_obs()
-        prompt = "Inspect your local vision and arrest a random active agent. Move if applicable."
+        prompt = self.step_prompt
         plan = await self.reasoning.aplan(
             prompt=prompt,
             obs=observation,

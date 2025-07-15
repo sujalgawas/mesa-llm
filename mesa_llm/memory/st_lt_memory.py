@@ -54,13 +54,15 @@ class STLTMemory(Memory):
 
         self.short_term_memory = deque()
         self.long_term_memory = ""
-
         self.system_prompt = """
-        You are a helpful assistant that summarizes the short term memory into a long term memory.
-        The long term memory should be a summary of the short term memory that is concise and informative.
-        If the short term memory is empty, return the long term memory unchanged.
-        If the long term memory is not empty, update it to include the new information from the short term memory.
-        """
+            You are a helpful assistant that summarizes the short term memory into a long term memory.
+            The long term memory should be a summary of the short term memory that is concise and informative.
+            If the short term memory is empty, return the long term memory unchanged.
+            If the long term memory is not empty, update it to include the new information from the short term memory.
+            """
+
+        if(self.agent.step_prompt):
+            self.system_prompt+=" This is the prompt of the porblem you will be tackling:{self.agent.step_prompt}, ensure you summarize the short-term memory into long-term a way that is relevant to the problem at hand."
 
         self.llm.system_prompt = self.system_prompt
 

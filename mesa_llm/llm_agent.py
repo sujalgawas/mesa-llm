@@ -48,6 +48,7 @@ class LLMAgent(Agent):
         vision: float | None = None,
         internal_state: list[str] | str | None = None,
         recorder: SimulationRecorder | None = None,
+        step_prompt: str | None = None,
     ):
         super().__init__(model=model)
 
@@ -67,7 +68,7 @@ class LLMAgent(Agent):
 
         self.tool_manager = ToolManager()
         self.recorder = recorder
-
+        self.step_prompt = step_prompt
         self.vision = vision
         self.reasoning = reasoning(agent=self)
         self.system_prompt = system_prompt

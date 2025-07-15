@@ -64,6 +64,7 @@ class EpsteinModel(Model):
             system_prompt=cop_system_prompt,
             vision=vision,
             internal_state=None,
+            step_prompt="Inspect your local vision and arrest a random active agent. Move if applicable.",
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_cops,))
@@ -81,6 +82,7 @@ class EpsteinModel(Model):
             system_prompt="",
             vision=vision,
             internal_state=None,
+            step_prompt="Move around and change your state if necessary",
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_citizens,))
