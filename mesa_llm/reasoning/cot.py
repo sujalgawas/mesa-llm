@@ -58,14 +58,21 @@ class CoTReasoning(Reasoning):
 
     def plan(
         self,
-        prompt: str,
         obs: Observation,
         ttl: int = 1,
+        prompt: str | None = None,
         selected_tools: list[str] | None = None,
     ) -> Plan:
         """
         Plan the next (CoT) action based on the current observation and the agent's memory.
         """
+        # If no prompt is provided, use the agent's default step prompt
+        if prompt is None:
+            if self.agent.step_prompt is not None:
+                prompt = self.agent.step_prompt
+            else:
+                raise ValueError("No prompt provided and agent.step_prompt is None.")
+
         step = obs.step + 1
         llm = self.agent.llm
         obs_str = str(obs)

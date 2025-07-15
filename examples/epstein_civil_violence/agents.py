@@ -136,9 +136,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         if self.jail_sentence_left == 0:
             self.update_estimated_arrest_probability()
             observation = self.generate_obs()
-            prompt = self.step_prompt
             plan = self.reasoning.plan(
-                prompt=prompt,
                 obs=observation,
                 selected_tools=["change_state", "move_one_step"],
             )
@@ -217,9 +215,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         applicable.
         """
         observation = self.generate_obs()
-        prompt = self.step_prompt
         plan = self.reasoning.plan(
-            prompt=prompt,
             obs=observation,
             selected_tools=["move_one_step", "arrest_citizen"],
         )
