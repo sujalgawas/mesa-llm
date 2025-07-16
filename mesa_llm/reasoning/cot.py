@@ -15,8 +15,18 @@ class CoTReasoning(Reasoning):
         super().__init__(agent=agent)
 
     def get_cot_system_prompt(self, obs: Observation) -> str:
-        long_term_memory = self.agent.memory.format_long_term()
-        short_term_memory = self.agent.memory.format_short_term()
+        long_term_memory = (
+            self.agent.memory.format_long_term()
+            if hasattr(self.agent.memory, "format_long_term")
+            else ""
+        )
+
+        short_term_memory = (
+            self.agent.memory.format_short_term()
+            if hasattr(self.agent.memory, "format_short_term")
+            else ""
+        )
+
         obs_str = str(obs)
 
         system_prompt = f"""

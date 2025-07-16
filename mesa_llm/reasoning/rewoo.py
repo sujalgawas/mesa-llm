@@ -22,8 +22,18 @@ class ReWOOReasoning(Reasoning):
         self.current_obs: Observation | None = None
 
     def get_rewoo_system_prompt(self, obs: Observation) -> str:
-        long_term_memory = self.agent.memory.format_long_term()
-        short_term_memory = self.agent.memory.format_short_term()
+        long_term_memory = (
+            self.agent.memory.format_long_term()
+            if hasattr(self.agent.memory, "format_long_term")
+            else ""
+        )
+
+        short_term_memory = (
+            self.agent.memory.format_short_term()
+            if hasattr(self.agent.memory, "format_short_term")
+            else ""
+        )
+
 
         system_prompt = f"""
         You are an autonomous agent that creates multi-step plans without re-observing during execution.
