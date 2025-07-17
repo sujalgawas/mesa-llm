@@ -40,6 +40,11 @@ class STLTMemory(Memory):
             llm_model : the model to use for the summarization
             agent : the agent that the memory belongs to
         """
+        if not api_key or not llm_model:
+            raise ValueError(
+                "Both api_key and llm_model must be provided for the usage of st/lt memory"
+            )
+
         super().__init__(
             agent=agent,
             api_key=api_key,
@@ -61,8 +66,8 @@ class STLTMemory(Memory):
             If the long term memory is not empty, update it to include the new information from the short term memory.
             """
 
-        if(self.agent.step_prompt):
-            self.system_prompt+=" This is the prompt of the porblem you will be tackling:{self.agent.step_prompt}, ensure you summarize the short-term memory into long-term a way that is relevant to the problem at hand."
+        if self.agent.step_prompt:
+            self.system_prompt += f" This is the prompt of the problem you will be tackling:{self.agent.step_prompt}, ensure you summarize the short-term memory into long-term a way that is relevant to the problem at hand."
 
         self.llm.system_prompt = self.system_prompt
 

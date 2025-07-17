@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -78,8 +77,8 @@ class Memory:
     def __init__(
         self,
         agent: "LLMAgent",
-        api_key: str = os.getenv("OPENAI_API_KEY"),
-        llm_model: str = "openai/gpt-4o-mini",
+        api_key: str | None = None,
+        llm_model: str | None = None,
         display: bool = True,
     ):
         """
@@ -91,7 +90,10 @@ class Memory:
             agent : the agent that the memory belongs to
         """
         self.agent = agent
-        self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
+        if api_key and llm_model:
+            self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
+        elif (not api_key and llm_model) or (api_key and not llm_model):
+            raise ValueError("Both api_key and llm_model must be provided or neither")
 
         self.display = display
 

@@ -1,10 +1,11 @@
-import os
-from typing import TYPE_CHECKING, List, Optional
+from collections import deque
+from typing import TYPE_CHECKING
 
 from mesa_llm.memory.memory import Memory, MemoryEntry
-from collections import deque
+
 if TYPE_CHECKING:
     from mesa_llm.llm_agent import LLMAgent
+
 
 class ShortTermMemory(Memory):
     """
@@ -17,33 +18,19 @@ class ShortTermMemory(Memory):
         api_key : the API key to use for the LLM
         llm_model : the model to use for the summarization
     """
+
     def __init__(
         self,
         agent: "LLMAgent",
         n: int = 5,
         display: bool = True,
-        api_key: str = os.getenv("OPENAI_API_KEY"),
-        llm_model: str = "openai/gpt-4o-mini",
     ):
         super().__init__(
             agent=agent,
-            api_key=api_key,
-            llm_model=llm_model,
             display=display,
         )
         self.n = n
         self.short_term_memory = deque()
-        self.system_prompt = """
-            You are a helpful assistant that summarizes the short term memory into a long term memory.
-            The long term memory should be a summary of the short term memory that is concise and informative.
-            If the short term memory is empty, return the long term memory unchanged.
-            If the long term memory is not empty, update it to include the new information from the short term memory.
-            """
-
-        if(self.agent.step_prompt):
-            self.system_prompt+=" This is the prompt of the porblem you will be tackling:{self.agent.step_prompt}, ensure you summarize the short-term memory into long-term a way that is relevant to the problem at hand."
-
-        self.llm.system_prompt = self.system_prompt
 
     def process_step(self, pre_step: bool = False):
         """
@@ -96,5 +83,3 @@ class ShortTermMemory(Memory):
 
     def __str__(self) -> str:
         return f"Short term memory:\n {self.format_short_term()}\n"
- 
-
