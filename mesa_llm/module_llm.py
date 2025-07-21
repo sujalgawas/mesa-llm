@@ -1,6 +1,7 @@
 import os
 
 from litellm import acompletion, completion, litellm
+from tenacity import AsyncRetrying, retry, retry_if_exception_type, wait_exponential
 
 
 class ModuleLLM:
@@ -58,6 +59,11 @@ class ModuleLLM:
 
         return messages
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=1, max=60),
+        retry=retry_if_exception_type(Exception),
+        reraise=True,
+    )
     def generate(
         self,
         prompt: str | list[str],
@@ -99,14 +105,18 @@ class ModuleLLM:
         """
         Asynchronous version of generate() method for parallel LLM calls.
         """
-
         messages = self.get_messages(prompt)
-
-        response = await acompletion(
-            model=self.llm_model,
-            messages=messages,
-            tools=tool_schema,
-            tool_choice=tool_choice if tool_schema else None,
-            response_format=response_format,
-        )
+        async for attempt in AsyncRetrying(
+            wait=wait_exponential(multiplier=1, min=1, max=60),
+            retry=retry_if_exception_type(Exception),
+            reraise=True,
+        ):
+            with attempt:
+                response = await acompletion(
+                    model=self.llm_model,
+                    messages=messages,
+                    tools=tool_schema,
+                    tool_choice=tool_choice if tool_schema else None,
+                    response_format=response_format,
+                )
         return response
