@@ -1,8 +1,6 @@
 # Memory System
 
-The memory system in Mesa-LLM provides different types of memory implementations that enable agents to store and retrieve past events (conversations, observations, actions, messages, plans, etc.). Memory enables agents to learn from history and make informed decisions based on accumulated knowledge.
-
-## How It Works
+The memory system in Mesa-LLM provides different types of memory implementations that enable agents to store and retrieve past events (conversations, observations, actions, messages, plans, etc.). Memory serves as the foundation for creating agents with persistent, contextual awareness that enhances their decision-making capabilities.
 
 ### Architecture
 
@@ -13,6 +11,10 @@ The memory module contains two classes:
 - **`Memory`** (Base Class): Provides the foundational interface for all memory implementations. It handles memory entry creation, display management, and basic content filtering to avoid storing redundant observations.
 
 
+**Content Addition**
+- Before each agent step, the agent can add new events to the memory through `add_to_memory(type, content)` so that the memory can be used to reason about the most recent events as well as the past events.
+- During the step, actions, messages, and plans are added to the memory through `add_to_memory(type, content)`
+- At the end of the step, the memory is processed via `process_step()`, managing when memory entries are added,consolidated, displayed, or removed
 
 ## Built-in Memory Types
 
@@ -20,17 +22,11 @@ The memory module contains two classes:
 
 Implements a dual-memory system where recent experiences are stored in short-term memory with limited capacity, and older memories are consolidated into long-term summaries using LLM-based summarization.
 
-#### Memory Processing Flow
-
-**Content Addition**
-- Before each agent step, the agent can add new events to the memory through `add_to_memory(type, content)` so that the memory can be used to reason about the most recent events as well as the past events.
-- During the step, actions, messages, and plans are added to the memory through `add_to_memory(type, content)`
-- At the end of the step, the memory is processed via `process_step()`, managing when memory entries are added,consolidated, displayed, or removed
-
 **Logic behind the implementation**:
 - **Short-term capacity**: Configurable number of recent memory entries (default: short_term_capacity = 5)
 - **Consolidation**: When capacity is exceeded, oldest entries are summarized into long-term memory (number of entries to summarize is configurable, default: consolidation_capacity = 3)
 - **LLM Summarization**: Uses a separate LLM instance to create meaningful summaries of past experiences
+
 
 ![alt text](st_lt_consolidation_explained.png)
 
@@ -77,28 +73,4 @@ class MyAgent(LLMAgent):
         )
 ```
 
-### Memory Integration with Agent Behavior
 
-Memory automatically captures:
-- **Observations**: Agent's perception of environment and neighboring agents
-- **Actions**: Tool calls and their outcomes
-- **Messages**: Communication with other agents
-- **Plans**: Reasoning outputs and decision-making processes
-
-The memory content is automatically incorporated into the agent's reasoning process, enabling sophisticated behaviors like:
-- Learning from past events/information
-- Remembering successful strategies
-- Building relationships with other agents
-- Adapting to environmental changes over time
-
-### Customizing Memory Display
-
-```python
-# Disable memory display for cleaner output
-self.memory = STLTMemory(agent=self, display=False, ...)
-
-# Memory entries are automatically formatted with rich console output
-# showing step numbers, agent IDs, and hierarchical content structure
-```
-
-Memory serves as the foundation for creating agents with persistent, contextual awareness that enhances their decision-making capabilities throughout the simulation.
