@@ -1,0 +1,104 @@
+# Memory System
+
+The memory system in Mesa-LLM provides different types of memory implementations that enable agents to store and retrieve past events (conversations, observations, actions, messages, plans, etc.). Memory enables agents to learn from history and make informed decisions based on accumulated knowledge.
+
+## How It Works
+
+### Architecture
+
+The memory module contains two classes:
+
+- **`MemoryEntry`**: A data structure that stores individual memory records with content, step number, and agent reference. Each entry includes `rich` formatting for display. Content is a nested dictionary of arbitrary depth containing the entry's information. Each entry is designed to hold all the information of a given step for an agent, but can also be used to store a single event if needed.
+
+- **`Memory`** (Base Class): Provides the foundational interface for all memory implementations. It handles memory entry creation, display management, and basic content filtering to avoid storing redundant observations.
+
+
+
+## Built-in Memory Types
+
+### STLTMemory (Short-Term/Long-Term Memory)
+
+Implements a dual-memory system where recent experiences are stored in short-term memory with limited capacity, and older memories are consolidated into long-term summaries using LLM-based summarization.
+
+#### Memory Processing Flow
+
+**Content Addition**
+- Before each agent step, the agent can add new events to the memory through `add_to_memory(type, content)` so that the memory can be used to reason about the most recent events as well as the past events.
+- During the step, actions, messages, and plans are added to the memory through `add_to_memory(type, content)`
+- At the end of the step, the memory is processed via `process_step()`, managing when memory entries are added,consolidated, displayed, or removed
+
+**Logic behind the implementation**:
+- **Short-term capacity**: Configurable number of recent memory entries (default: short_term_capacity = 5)
+- **Consolidation**: When capacity is exceeded, oldest entries are summarized into long-term memory (number of entries to summarize is configurable, default: consolidation_capacity = 3)
+- **LLM Summarization**: Uses a separate LLM instance to create meaningful summaries of past experiences
+
+![alt text](st_lt_consolidation_explained.png)
+
+### STMemory (Short-Term Memory)
+
+Simple short-term memory implementation without consolidation (stores recent entries up to capacity limit). Same functionality as `STLTMemory` but without the long-term memory and consolidation mechanism.
+
+
+
+### EpisodicMemory
+
+Based on a Stanford/DeepMind paper: [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442)
+
+
+Stores memories based on event importance scoring. Each new memory entry is evaluated by an LLM for its relevance and importance (1-5 scale) relative to the agent's current task and previous experiences.
+
+**Logic behind the implementation**:
+- **Importance Grading**: LLM evaluates each memory's relevance to the current problem
+- **Context-Aware Scoring**: Importance is evaluated relative to recent memory entries
+- **Capacity Management**: Maintains a maximum memory limit with automatic pruning (default: max_memory = 15)
+
+
+
+## Usage in Mesa Simulations
+
+### Basic Setup
+
+```python
+from mesa_llm.llm_agent import LLMAgent
+from mesa_llm.memory.st_lt_memory import STLTMemory
+
+class MyAgent(LLMAgent):
+    def __init__(self, model, api_key, reasoning, **kwargs):
+        super().__init__(model, api_key, reasoning, **kwargs)
+
+        # Override default memory with custom configuration
+        self.memory = STLTMemory(
+            agent=self,
+            short_term_capacity=10,    # Store 10 recent experiences
+            consolidation_capacity=3, # Consolidate when 13 total entries
+            api_key=api_key,
+            llm_model="openai/gpt-4o-mini",
+            display=True            # Display the memory entries in the console when they are added to the memory
+        )
+```
+
+### Memory Integration with Agent Behavior
+
+Memory automatically captures:
+- **Observations**: Agent's perception of environment and neighboring agents
+- **Actions**: Tool calls and their outcomes
+- **Messages**: Communication with other agents
+- **Plans**: Reasoning outputs and decision-making processes
+
+The memory content is automatically incorporated into the agent's reasoning process, enabling sophisticated behaviors like:
+- Learning from past events/information
+- Remembering successful strategies
+- Building relationships with other agents
+- Adapting to environmental changes over time
+
+### Customizing Memory Display
+
+```python
+# Disable memory display for cleaner output
+self.memory = STLTMemory(agent=self, display=False, ...)
+
+# Memory entries are automatically formatted with rich console output
+# showing step numbers, agent IDs, and hierarchical content structure
+```
+
+Memory serves as the foundation for creating agents with persistent, contextual awareness that enhances their decision-making capabilities throughout the simulation.
