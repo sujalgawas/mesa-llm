@@ -2,7 +2,7 @@
 
 The memory system in Mesa-LLM provides different types of memory implementations that enable agents to store and retrieve past events (conversations, observations, actions, messages, plans, etc.). Memory serves as the foundation for creating agents with persistent, contextual awareness that enhances their decision-making capabilities. The memory module contains two classes.
 
-
+---
 ### class MemoryEntry(content : dict, step : int, agent : LLMAgent)
 A data structure that stores individual memory records with content, step number, and agent reference. Each entry includes `rich` formatting for display. Content is a nested dictionary of arbitrary depth containing the entry's information. Each entry is designed to hold all the information of a given step for an agent, but can also be used to store a single event if needed.
 
@@ -11,7 +11,7 @@ A data structure that stores individual memory records with content, step number
 - **step** (int)
 - **agent** (LLMAgent reference)
 
-
+---
 ### class Memory(agent : LLMAgent, api_key : str = None, llm_model : str = None, display : bool = True)
 Provides the foundational interface for all memory implementations. It handles memory entry creation, display management, and basic content filtering to avoid storing redundant observations.
 
@@ -32,7 +32,6 @@ Provides the foundational interface for all memory implementations. It handles m
 
 ## Built-in Memory Types
 
----
 ### class STLTMemory(agent : LLMAgent, short_term_capacity : int = 5, consolidation_capacity : int = 2, display : bool = True, api_key : str = None, llm_model : str = "openai/gpt-4o-mini")
 Implements a dual-memory system where recent experiences are stored in short-term memory with limited capacity, and older memories are consolidated into long-term summaries using LLM-based summarization.
 
