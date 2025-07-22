@@ -50,8 +50,8 @@ def arrest_citizen(agent: "LLMAgent", citizen_id: int) -> str:
             a string confirming the citizen's arrest.
     """
     citizen = next(
-        agent for agent in agent.model.agents if agent.unique_id == citizen_id
+        (agent for agent in agent.model.agents if agent.unique_id == citizen_id), None
     )
-    citizen.citizen_state = CitizenState.ARRESTED
+    citizen.state = CitizenState.ARRESTED
     citizen.jail_senttence_left = random.randint(1, agent.max_jail_term)
     return f"agent {citizen_id} arrested by {agent.unique_id}."
