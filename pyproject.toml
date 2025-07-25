@@ -17,6 +17,7 @@ dependencies = [
     "terminal-style",
     "rich",
     "pytest-asyncio",
+    "tenacity",
 ]
 dynamic = ["version"]
 
