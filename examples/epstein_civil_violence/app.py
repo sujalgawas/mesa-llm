@@ -34,9 +34,9 @@ model_params = {
     "initial_cops": 3,
     "width": 5,
     "height": 5,
-    "api_key": os.getenv("OPENAI_API_KEY"),
+    "api_key": os.getenv("GEMINI_API_KEY"),
     "reasoning": ReActReasoning,
-    "llm_model": "openai/gpt-4o-mini",
+    "llm_model": "gemini/gemini-1.5-flash",
     "vision": 5,
     "parallel_stepping": True,
 }

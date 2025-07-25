@@ -82,7 +82,7 @@ class ReActReasoning(Reasoning):
         """
 
         # ---------------- prepare the prompt ----------------
-        self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
+        self.agent.llm.system_prompt = self.get_react_system_prompt()
         prompt_list = self.get_react_prompt(obs)
 
         # If no prompt is provided, use the agent's default step prompt
