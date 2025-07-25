@@ -13,8 +13,9 @@ class ModuleLLM:
 
     def __init__(
         self,
-        api_key: str,
         llm_model: str,
+        api_key: str,
+        api_base: str | None = None,
         system_prompt: str | None = None,
     ):
         """
@@ -26,6 +27,7 @@ class ModuleLLM:
             system_prompt: The system prompt to use for the LLM
         """
         self.api_key = api_key
+        self.api_base = api_base
         self.llm_model = llm_model
         self.system_prompt = system_prompt
         provider = self.llm_model.split("/")[0].upper()
@@ -46,16 +48,15 @@ class ModuleLLM:
         Returns:
             The messages for the LLM
         """
+        messages = [{"role": "system", "content": self.system_prompt}]
+
         if prompt:
             if isinstance(prompt, str):
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
+                messages.append(
                     {"role": "user", "content": prompt},
-                ]
+                )
             elif isinstance(prompt, list):
-                messages = [{"role": "user", "content": p} for p in prompt]
-        else:
-            messages = []
+                messages.extend([{"role": "user", "content": p} for p in prompt])
 
         return messages
 
@@ -86,13 +87,27 @@ class ModuleLLM:
 
         messages = self.get_messages(prompt)
 
-        response = completion(
-            model=self.llm_model,
-            messages=messages,
-            tools=tool_schema,
-            tool_choice=tool_choice if tool_schema else None,
-            response_format=response_format,
-        )
+        # If api_base is provided, use it to override the default API base
+        if self.api_base:
+            response = completion(
+                model=self.llm_model,
+                messages=messages,
+                api_base=self.api_base,
+                tools=tool_schema,
+                tool_choice=tool_choice if tool_schema else None,
+                response_format=response_format,
+            )
+
+        # Otherwise, use the default API base
+        else:
+            response = completion(
+                model=self.llm_model,
+                messages=messages,
+                tools=tool_schema,
+                tool_choice=tool_choice if tool_schema else None,
+                response_format=response_format,
+            )
+
         return response
 
     async def agenerate(
