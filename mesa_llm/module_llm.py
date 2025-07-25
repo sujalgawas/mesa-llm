@@ -1,7 +1,18 @@
 import os
 
 from litellm import acompletion, completion, litellm
+from litellm.exceptions import (
+    APIConnectionError,
+    RateLimitError,
+    Timeout,
+)
 from tenacity import AsyncRetrying, retry, retry_if_exception_type, wait_exponential
+
+RETRYABLE_EXCEPTIONS = (
+    APIConnectionError,
+    Timeout,
+    RateLimitError,
+)
 
 
 class ModuleLLM:
@@ -48,21 +59,24 @@ class ModuleLLM:
         Returns:
             The messages for the LLM
         """
-        messages = [{"role": "system", "content": self.system_prompt}]
+        messages = []
+
+        # Only add system prompt if it exists
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
 
         if prompt:
             if isinstance(prompt, str):
-                messages.append(
-                    {"role": "user", "content": prompt},
-                )
+                messages.append({"role": "user", "content": prompt})
             elif isinstance(prompt, list):
+                # Use extend to add all prompts from the list
                 messages.extend([{"role": "user", "content": p} for p in prompt])
 
         return messages
 
     @retry(
         wait=wait_exponential(multiplier=1, min=1, max=60),
-        retry=retry_if_exception_type(Exception),
+        retry=retry_if_exception_type(RETRYABLE_EXCEPTIONS),
         reraise=True,
     )
     def generate(
@@ -123,7 +137,7 @@ class ModuleLLM:
         messages = self.get_messages(prompt)
         async for attempt in AsyncRetrying(
             wait=wait_exponential(multiplier=1, min=1, max=60),
-            retry=retry_if_exception_type(Exception),
+            retry=retry_if_exception_type(RETRYABLE_EXCEPTIONS),
             reraise=True,
         ):
             with attempt:
