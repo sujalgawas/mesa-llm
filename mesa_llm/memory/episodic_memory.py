@@ -15,13 +15,20 @@ class EventGrade(BaseModel):
 
 
 class EpisodicMemory(Memory):
+    """
+    Stores memories based on event importance scoring. Each new memory entry is evaluated by a LLM
+    for its relevance and importance (1-5 scale) relative to the agent's current task and previous
+    experiences. Based on a Stanford/DeepMind paper:
+    [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442)
+    """
+
     def __init__(
         self,
         agent: "LLMAgent",
         api_key: str | None = None,
         llm_model: str | None = None,
         display: bool = True,
-        max_memory: int = 10,
+        max_capacity: int = 10,
     ):
         """
         Initialize the EpisodicMemory
@@ -33,8 +40,8 @@ class EpisodicMemory(Memory):
 
         super().__init__(agent, api_key=api_key, llm_model=llm_model, display=display)
 
-        self.max_memory = max_memory
-        self.memory = deque(maxlen=self.max_memory)
+        self.max_capacity = max_capacity
+        self.memory = deque(maxlen=self.max_capacity)
 
         self.system_prompt = """
             You are an assistant that evaluates memory entries on a scale from 1 to 5, based on their importance to a specific problem or task. Your goal is to assign a score that reflects how much each entry contributes to understanding, solving, or advancing the task. Use the following grading scale:
@@ -88,13 +95,18 @@ class EpisodicMemory(Memory):
         """
         Retrieve the top k entries based on the importance and recency
         """
-        return []
+        top_list = sorted(
+            self.memory,
+            key=lambda x: x.content["importance"] - (self.agent.model.steps - x.step),
+            reverse=True,
+        )
+
+        return top_list[:k]
 
     def add_to_memory(self, type: str, content: dict):
         """
         Add a new memory entry to the memory
         """
-        self.grade_event_importance(type, content)
         content["importance"] = self.grade_event_importance(type, content)
 
         super().add_to_memory(type, content)
