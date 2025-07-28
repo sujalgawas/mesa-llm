@@ -35,34 +35,10 @@ class ReActReasoning(Reasoning):
         return system_prompt
 
     def get_react_prompt(self, obs: Observation) -> list[str]:
-        if (
-            hasattr(self.agent.memory, "short_term_memory")
-            and self.agent.memory.short_term_memory
-        ):
-            last_communication = self.agent.memory.short_term_memory[-1].content.get(
-                "message", "No recent communication history"
-            )
-        else:
-            last_communication = "No recent communication history"
+        prompt_list = self.agent.memory.get_prompt_ready()
+        last_communication = self.agent.memory.get_communication_history()
 
-        prompt_list = []
-        if (
-            hasattr(self.agent.memory, "short_term_memory")
-            and self.agent.memory.short_term_memory
-        ):
-            prompt_list.extend(
-                [
-                    f"short term memory - step {i}: \n" + str(st_entry)
-                    for i, st_entry in enumerate(self.agent.memory.short_term_memory)
-                ]
-            )
-        if (
-            hasattr(self.agent.memory, "long_term_memory")
-            and self.agent.memory.long_term_memory
-        ):
-            prompt_list.append(
-                "long term memory: \n" + str(self.agent.memory.format_long_term())
-            )
+        prompt_list.append(last_communication)
         if obs:
             prompt_list.append("current observation: \n" + str(obs))
         if last_communication:
