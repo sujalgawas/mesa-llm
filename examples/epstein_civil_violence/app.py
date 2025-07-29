@@ -10,7 +10,7 @@ from mesa.visualization import (
 from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from examples.epstein_civil_violence.model import EpsteinModel
 from mesa_llm.parallel_stepping import enable_automatic_parallel_stepping
-from mesa_llm.reasoning.react import ReActReasoning
+from mesa_llm.reasoning.cot import CoTReasoning
 
 enable_automatic_parallel_stepping(mode="threading")
 
@@ -35,7 +35,7 @@ model_params = {
     "width": 5,
     "height": 5,
     "api_key": os.getenv("OPENAI_API_KEY"),
-    "reasoning": ReActReasoning,
+    "reasoning": CoTReasoning,
     "llm_model": "openai/gpt-4o-mini",
     "vision": 5,
     "parallel_stepping": True,
