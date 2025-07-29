@@ -38,7 +38,10 @@ class MemoryEntry:
             return lines
 
         lines = []
-        for key, value in [item for item in self.content.items() if item[1]]:
+        for key, value in self.content.items():
+            if not value:
+                continue
+
             lines.append(f"\n[bold cyan][{key.title()}][/bold cyan]")
             if isinstance(value, dict):
                 lines.extend(format_nested_dict(value, 1))
@@ -47,7 +50,7 @@ class MemoryEntry:
 
         content = "\n".join(lines)
 
-        return str(content)
+        return content
 
     def display(self):
         if self.agent and hasattr(self.agent, "memory") and self.agent.memory.display:

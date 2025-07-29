@@ -68,7 +68,7 @@ Simple short-term memory implementation without consolidation (stores recent ent
 
 ---
 ### class EpisodicMemory(agent : LLMAgent, api_key : str = None, llm_model : str = None, display : bool = True, max_memory : int = 10)
-Stores memories based on event importance scoring. Each new memory entry is evaluated by an LLM for its relevance and importance (1-5 scale) relative to the agent's current task and previous experiences. Based on a Stanford/DeepMind paper: [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442)
+Stores memories based on event importance scoring. Each new memory entry is evaluated by a LLM for its relevance and importance (1-5 scale) relative to the agent's current task and previous experiences. Based on a Stanford/DeepMind paper: [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442)
 
 **Attributes:**
 - **memory** (deque)
