@@ -22,7 +22,7 @@ class ReActReasoning(Reasoning):
         system_prompt = """
         You are an autonomous agent in a simulation environment.
         You can think about your situation and describe your plan.
-        Use your short-term and long-term memory to guide your behavior.
+        Use your short-term and/or long-term memory to guide your behavior.
         You should also use the current observation you have made of the environrment to take suitable actions.
 
         # Instructions
