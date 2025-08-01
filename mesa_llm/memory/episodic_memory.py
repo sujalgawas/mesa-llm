@@ -29,6 +29,7 @@ class EpisodicMemory(Memory):
         llm_model: str | None = None,
         display: bool = True,
         max_capacity: int = 10,
+        considered_entries: int = 5,
     ):
         """
         Initialize the EpisodicMemory
@@ -41,7 +42,8 @@ class EpisodicMemory(Memory):
         super().__init__(agent, api_key=api_key, llm_model=llm_model, display=display)
 
         self.max_capacity = max_capacity
-        self.memory = deque(maxlen=self.max_capacity)
+        self.memory_entries = deque(maxlen=self.max_capacity)
+        self.considered_entries = considered_entries
 
         self.system_prompt = """
             You are an assistant that evaluates memory entries on a scale from 1 to 5, based on their importance to a specific problem or task. Your goal is to assign a score that reflects how much each entry contributes to understanding, solving, or advancing the task. Use the following grading scale:
@@ -63,13 +65,13 @@ class EpisodicMemory(Memory):
         """
         Grade this event based on the content respect to the previous memory entries
         """
-        if len(self.memory) in range(5):
+        if len(self.memory_entries) in range(5):
             previous_entries = "previous memory entries:\n\n".join(
-                [str(entry) for entry in self.memory]
+                [str(entry) for entry in self.memory_entries]
             )
-        elif len(self.memory) > 5:
+        elif len(self.memory_entries) > 5:
             previous_entries = "previous memory entries:\n\n".join(
-                [str(entry) for entry in self.memory[-5:]]
+                [str(entry) for entry in self.memory_entries[-5:]]
             )
         else:
             previous_entries = "No previous memory entries"
@@ -96,7 +98,7 @@ class EpisodicMemory(Memory):
         Retrieve the top k entries based on the importance and recency
         """
         top_list = sorted(
-            self.memory,
+            self.memory_entries,
             key=lambda x: x.content["importance"] - (self.agent.model.steps - x.step),
             reverse=True,
         )
@@ -110,3 +112,23 @@ class EpisodicMemory(Memory):
         content["importance"] = self.grade_event_importance(type, content)
 
         super().add_to_memory(type, content)
+
+    def get_prompt_ready(self) -> str:
+        return f"Top {self.considered_entries} memory entries:\n\n" + "\n".join(
+            [
+                str(entry)
+                for entry in self.retrieve_top_k_entries(self.considered_entries)
+            ]
+        )
+
+    def get_communication_history(self) -> str:
+        """
+        Get the communication history
+        """
+        return "\n".join(
+            [
+                f"step {entry.step}: {entry.content['message']}\n\n"
+                for entry in self.memory_entries
+                if "message" in entry.content
+            ]
+        )

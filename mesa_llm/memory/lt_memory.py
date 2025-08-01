@@ -1,5 +1,4 @@
 import os
-from collections import deque
 from typing import TYPE_CHECKING
 
 from mesa_llm.memory.memory import Memory, MemoryEntry
@@ -65,7 +64,6 @@ class LongTermMemory(Memory):
 
         self.long_term_memory = self.llm.generate(prompt)
 
-    
     def process_step(self, pre_step: bool = False):
         """
         Process the step of the agent :
@@ -79,7 +77,7 @@ class LongTermMemory(Memory):
                 content=self.step_content,
                 step=None,
             )
-            self.buffer= new_entry
+            self.buffer = new_entry
             self.step_content = {}
             return
 
@@ -94,7 +92,6 @@ class LongTermMemory(Memory):
             self._update_long_term_memory()
             self.step_content = {}
 
-
         # Display the new entry
         if self.display:
             self.buffer.display()
@@ -105,5 +102,11 @@ class LongTermMemory(Memory):
         """
         return str(self.long_term_memory)
 
-    def __str__(self) -> str:
+    def get_prompt_ready(self) -> str:
         return f"Long term memory: \n{self.format_long_term()}"
+
+    def get_communication_history(self) -> str:
+        """
+        Get the communication history
+        """
+        return "communication history is in memory of the agent"

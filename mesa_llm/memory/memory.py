@@ -1,9 +1,11 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.panel import Panel
 
+from mesa_llm.llm_agent import LLMAgent
 from mesa_llm.module_llm import ModuleLLM
 
 if TYPE_CHECKING:
@@ -66,7 +68,7 @@ class MemoryEntry:
             console.print(panel)
 
 
-class Memory:
+class Memory(ABC):
     """
     Create a memory generic parent class that can be used to create different types of memories
 
@@ -102,6 +104,18 @@ class Memory:
 
         self.step_content: dict = {}
         self.last_observation: dict = {}
+
+    @abstractmethod
+    def get_prompt_ready(self) -> str:
+        """
+        Get the memory in a format that can be used for reasoning
+        """
+
+    @abstractmethod
+    def get_communication_history(self) -> str:
+        """
+        Get the communication history in a format that can be used for reasoning
+        """
 
     def add_to_memory(self, type: str, content: dict):
         """
