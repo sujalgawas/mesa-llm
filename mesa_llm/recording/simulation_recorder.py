@@ -46,10 +46,6 @@ class SimulationRecorder:
         self,
         model,
         output_dir: str = "recordings",
-        record_observations: bool = True,
-        record_plans: bool = True,
-        record_actions: bool = True,
-        record_messages: bool = True,
         record_state_changes: bool = True,
         auto_save_interval: int | None = None,
     ):
@@ -58,10 +54,6 @@ class SimulationRecorder:
         self.output_dir.mkdir(exist_ok=True)
 
         # Recording configuration
-        self.record_observations = record_observations
-        self.record_plans = record_plans
-        self.record_actions = record_actions
-        self.record_messages = record_messages
         self.record_state_changes = record_state_changes
         self.auto_save_interval = auto_save_interval
 
@@ -82,11 +74,7 @@ class SimulationRecorder:
             "start_time": self.start_time.isoformat(),
             "model_class": self.model.__class__.__name__,
             "recording_config": {
-                "observations": record_observations,
-                "plans": record_plans,
-                "actions": record_actions,
-                "messages": record_messages,
-                "state_changes": record_state_changes,
+                "state_changes": self.record_state_changes,
             },
         }
 
@@ -112,13 +100,7 @@ class SimulationRecorder:
         record_config = self.simulation_metadata["recording_config"]
 
         # Map event types to config keys
-        config_key_map = {
-            "observation": "observations",
-            "plan": "plans",
-            "action": "actions",
-            "message": "messages",
-            "state_change": "state_changes",
-        }
+        config_key_map = {"state_change": "state_changes"}
 
         config_key = config_key_map.get(event_type, event_type)
         if not record_config.get(config_key, True):
@@ -126,7 +108,7 @@ class SimulationRecorder:
 
         # Handle different content formats based on event type
         if event_type == "message":
-            if isinstance(content, str | dict):
+            if isinstance(content, str | dict | list):
                 formatted_content = {
                     "message": content,
                     "recipient_ids": recipient_ids or [],
@@ -144,10 +126,6 @@ class SimulationRecorder:
 
         # Set metadata source
         source_map = {
-            "observation": "agent_observation",
-            "plan": "agent_planning",
-            "action": "agent_action",
-            "message": "agent_communication",
             "state_change": "state_tracking",
         }
 

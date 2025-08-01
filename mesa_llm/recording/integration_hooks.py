@@ -1,16 +1,41 @@
+"""Class decorator that instruments a Mesa `Model` subclass with a :class:`SimulationRecorder`.
+
+Usage::
+
+    from mesa_llm.recording.integration_hooks import record_model
+
+    @record_model
+    class MyModel(Model):
+        ...
+
+The decorator will:
+1. Instantiate a ``SimulationRecorder`` after the model's original ``__init__`` completes and assign it to ``self.recorder``.
+2. Attach the same recorder to every agent that exposes a ``recorder`` attribute (e.g., subclasses of ``LLMAgent``).
+3. Wrap the model's ``step`` method to automatically record ``step_start`` and ``step_end`` events and ensure late-added agents also receive the recorder.
+4. Provide a convenience ``save_recording`` method on the model for persisting the captured simulation events.
+
+Parameters
+----------
+recorder_kwargs : dict | None
+    Extra keyword arguments forwarded to :class:`SimulationRecorder` when it is created.  This allows callers to
+    customise output directory or disable certain event types::
+
+        @record_model(recorder_kwargs={"output_dir": "my_runs", "auto_save_interval": 100})
+        class MyModel(Model):
+            ...
+"""
+
 import atexit
 from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    from mesa.model import Model
-
+from mesa.model import Model
 
 from mesa_llm.recording.simulation_recorder import SimulationRecorder
 
 
-def _attach_recorder_to_agents(model: "Model", recorder: SimulationRecorder):
+def _attach_recorder_to_agents(model: Model, recorder: SimulationRecorder):
     """Utility that iterates over all agents and attaches the recorder."""
     for agent in list(model.agents):
         # Only set if the attribute exists to avoid leaking recorder to non-LLM agents
@@ -19,35 +44,8 @@ def _attach_recorder_to_agents(model: "Model", recorder: SimulationRecorder):
 
 
 def record_model(
-    cls: type["Model"] | None = None, *, recorder_kwargs: dict[str, Any] | None = None
-) -> Callable[[type["Model"]], type["Model"]] | type["Model"]:
-    """Class decorator that instruments a Mesa `Model` subclass with a :class:`SimulationRecorder`.
-
-    Usage::
-
-        from mesa_llm.recording.integration_hooks import record_model
-
-        @record_model
-        class MyModel(Model):
-            ...
-
-    The decorator will:
-    1. Instantiate a ``SimulationRecorder`` after the model's original ``__init__`` completes and assign it to ``self.recorder``.
-    2. Attach the same recorder to every agent that exposes a ``recorder`` attribute (e.g., subclasses of ``LLMAgent``).
-    3. Wrap the model's ``step`` method to automatically record ``step_start`` and ``step_end`` events and ensure late-added agents also receive the recorder.
-    4. Provide a convenience ``save_recording`` method on the model for persisting the captured simulation events.
-
-    Parameters
-    ----------
-    recorder_kwargs : dict | None
-        Extra keyword arguments forwarded to :class:`SimulationRecorder` when it is created.  This allows callers to
-        customise output directory or disable certain event types::
-
-            @record_model(recorder_kwargs={"output_dir": "my_runs", "auto_save_interval": 100})
-            class MyModel(Model):
-                ...
-    """
-
+    cls: type[Model] | None = None, *, recorder_kwargs: dict[str, Any] | None = None
+) -> Callable[[type[Model]], type[Model]] | type[Model]:
     if cls is None:
         # Decorator was called with optional kwargs -> return wrapper awaiting the class
         return lambda actual_cls: record_model(
@@ -59,9 +57,11 @@ def record_model(
     original_init = cls.__init__
     original_step = getattr(cls, "step", None)
 
+    # ----------------------------- Wrap the model's __init__ method to create and attach the recorder -----------------------------
     @wraps(original_init)
     def init_wrapper(self: "Model", *args, **kwargs):  # type: ignore[override]
         original_init(self, *args, **kwargs)  # type: ignore[arg-type]
+
         # Create and attach recorder
         self.recorder = SimulationRecorder(model=self, **recorder_kwargs)  # type: ignore[attr-defined]
         _attach_recorder_to_agents(self, self.recorder)
@@ -80,7 +80,7 @@ def record_model(
     cls.__init__ = init_wrapper  # type: ignore[assignment]
 
     if original_step is not None:
-
+        # ----------------------------- Wrap the model's step method to record step start and end events -----------------------------
         @wraps(original_step)
         def step_wrapper(self: "Model", *args, **kwargs):  # type: ignore[override]
             # Record beginning of step
@@ -100,7 +100,6 @@ def record_model(
 
         cls.step = step_wrapper  # type: ignore[assignment]
 
-    # Convenience helper so that user code can save the recording easily
     def save_recording(
         self: "Model", filename: str | None = None, format: str = "json"
     ):
