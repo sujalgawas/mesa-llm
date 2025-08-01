@@ -121,13 +121,6 @@ class CoTReasoning(Reasoning):
 
         self.agent.memory.add_to_memory(type="Plan-Execution", content=str(cot_plan))
 
-        if self.agent.recorder is not None:
-            self.agent.recorder.record_event(
-                event_type="plan",
-                content={"plan": str(cot_plan)},
-                agent_id=self.agent.unique_id,
-            )
-
         return cot_plan
 
     async def aplan(
@@ -169,12 +162,5 @@ class CoTReasoning(Reasoning):
         cot_plan = Plan(step=step, llm_plan=response_message, ttl=1)
 
         self.agent.memory.add_to_memory(type="Plan-Execution", content=str(cot_plan))
-
-        if self.agent.recorder is not None:
-            self.agent.recorder.record_event(
-                event_type="plan",
-                content={"plan": str(cot_plan)},
-                agent_id=self.agent.unique_id,
-            )
 
         return cot_plan

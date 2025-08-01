@@ -87,7 +87,6 @@ class TestReActReasoning:
         agent.model = Mock()
         agent.model.steps = 1
         agent.unique_id = "test_agent"
-        agent.recorder = None
 
         # Setup memory mock methods
         agent.memory.format_long_term.return_value = "Long term memory content"
@@ -203,7 +202,6 @@ class TestCoTReasoning:
         agent.model = Mock()
         agent.model.steps = 1
         agent.unique_id = "test_agent"
-        agent.recorder = None
 
         # Setup memory mock methods
         agent.memory.format_long_term.return_value = "Long term memory content"
@@ -300,7 +298,7 @@ class TestReWOOReasoning:
         agent.model = Mock()
         agent.model.steps = 1
         agent.unique_id = "test_agent"
-        agent.recorder = None
+
         agent.generate_obs = Mock()
 
         # Setup memory mock methods
@@ -470,7 +468,7 @@ class TestIntegration:
         agent.model = Mock()
         agent.model.steps = 10
         agent.unique_id = "integration_test_agent"
-        agent.recorder = None
+
         agent.generate_obs = Mock()
 
         # Setup memory mock methods

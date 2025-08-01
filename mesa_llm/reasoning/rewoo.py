@@ -22,6 +22,7 @@ class ReWOOReasoning(Reasoning):
         self.current_obs: Observation | None = None
 
     def get_rewoo_system_prompt(self, obs: Observation) -> str:
+
         memory = getattr(self.agent, "memory", None)
 
         long_term_memory = ""
@@ -140,16 +141,6 @@ class ReWOOReasoning(Reasoning):
             self.remaining_tool_calls = 0
         self.current_plan = rewoo_plan.llm_plan
 
-        # --------------------------------------------------
-        # Recording hook for plan event
-        # --------------------------------------------------
-        if self.agent.recorder is not None:
-            self.agent.recorder.record_event(
-                event_type="plan",
-                content={"plan": str(rewoo_plan)},
-                agent_id=self.agent.unique_id,
-            )
-
         return rewoo_plan
 
     async def aplan(self, prompt: str, selected_tools: list[str] | None = None) -> Plan:
@@ -192,15 +183,5 @@ class ReWOOReasoning(Reasoning):
         else:
             self.remaining_tool_calls = 0
         self.current_plan = rewoo_plan.llm_plan
-
-        # --------------------------------------------------
-        # Recording hook for plan event
-        # --------------------------------------------------
-        if self.agent.recorder is not None:
-            self.agent.recorder.record_event(
-                event_type="plan",
-                content={"plan": str(rewoo_plan)},
-                agent_id=self.agent.unique_id,
-            )
 
         return rewoo_plan
