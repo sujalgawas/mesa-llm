@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.panel import Panel
 
-from mesa_llm.llm_agent import LLMAgent
 from mesa_llm.module_llm import ModuleLLM
 
 if TYPE_CHECKING:
