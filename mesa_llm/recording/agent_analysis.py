@@ -1,5 +1,10 @@
 """
-Simple agent viewer for recorded mesa-llm simulations with rich formatting.
+Enhanced agent viewer for recorded mesa-llm simulations with rich formatting.
+
+This module provides comprehensive analysis and visualization tools for exploring
+recorded simulation data, including agent behavior, conversations, decision-making
+processes, and simulation metadata. Compatible with both legacy and enhanced
+simulation recorder formats.
 """
 
 import json
@@ -21,6 +26,8 @@ class AgentViewer:
         self.recording_path = Path(recording_path)
         self.data = self._load_recording()
         self.events = self.data["events"]
+        self.metadata = self.data.get("metadata", {})
+        self.agent_summaries = self.data.get("agent_summaries", {})
         self.agent_events = self._organize_events_by_agent()
         self.console = Console()
 
@@ -48,45 +55,140 @@ class AgentViewer:
 
     def _format_event(self, event):
         """Format event content for rich display."""
-        content = event["content"]
-        event_type = event["event_type"]
+        try:
+            content = event.get("content", {})
+            event_type = event.get("event_type", "unknown")
 
-        if event_type == "message":
-            msg = content.get("message", "")
-            recipients = content.get("recipient_ids", [])
-            return f"MESSAGE to {recipients}: {msg}"
+            if event_type == "message":
+                msg = (
+                    content.get("message", "")
+                    if isinstance(content, dict)
+                    else str(content)
+                )
+                recipients = (
+                    content.get("recipient_ids", [])
+                    if isinstance(content, dict)
+                    else []
+                )
+                return f"MESSAGE to {recipients}: {msg}"
 
-        elif event_type == "observation":
-            lines = ["OBSERVATION"]
-            if isinstance(content, dict) and "self_state" in content:
-                self_state = content["self_state"]
-                lines.append(f"Position: {self_state.get('location', 'Unknown')}")
-                if "internal_state" in self_state:
-                    lines.append(
-                        f"Internal State: {', '.join(map(str, self_state['internal_state']))}"
-                    )
+            elif event_type == "observation":
+                lines = ["OBSERVATION"]
+                if isinstance(content, dict):
+                    if "self_state" in content:
+                        self_state = content["self_state"]
+                        lines.append(
+                            f"Position: {self_state.get('location', 'Unknown')}"
+                        )
+                        if "internal_state" in self_state:
+                            lines.append(
+                                f"Internal State: {', '.join(map(str, self_state['internal_state']))}"
+                            )
+                    elif "data" in content:
+                        lines.append(str(content["data"]))
+                    else:
+                        lines.append(str(content))
+                else:
+                    lines.append(str(content))
+                return "\n".join(lines)
+
+            elif event_type == "plan":
+                lines = ["PLANNING"]
+                if isinstance(content, dict):
+                    if "plan_content" in content:
+                        plan = content["plan_content"].get("content", "")
+                        lines.append(f"Reasoning: {plan}")
+                    elif "data" in content:
+                        lines.append(str(content["data"]))
+                    else:
+                        lines.append(str(content))
+                else:
+                    lines.append(str(content))
+                return "\n".join(lines)
+
+            elif event_type == "action":
+                if isinstance(content, dict):
+                    action = content.get("action_type", content.get("data", ""))
+                else:
+                    action = str(content)
+                return f"ACTION: {action}"
+
+            elif event_type == "state_change":
+                lines = ["STATE CHANGE"]
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        lines.append(f"{key}: {value}")
+                else:
+                    lines.append(str(content))
+                return "\n".join(lines)
+
+            elif event_type in ["simulation_start", "simulation_end"]:
+                lines = [event_type.upper().replace("_", " ")]
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        lines.append(f"{key}: {value}")
+                else:
+                    lines.append(str(content))
+                return "\n".join(lines)
+
             else:
-                lines.append(str(content))
-            return "\n".join(lines)
+                # Handle any other event types
+                if isinstance(content, dict):
+                    if "data" in content:
+                        return f"{event_type.upper()}: {content['data']}"
+                    else:
+                        return f"{event_type.upper()}: {content}"
+                else:
+                    return f"{event_type.upper()}: {content}"
 
-        elif event_type == "plan":
-            lines = ["PLANNING"]
-            if isinstance(content, dict) and "plan_content" in content:
-                plan = content["plan_content"].get("content", "")
-                lines.append(f"Reasoning: {plan}")
-            else:
-                lines.append(str(content))
-            return "\n".join(lines)
+        except Exception as e:
+            # Fallback for any formatting errors
+            return f"ERROR formatting {event.get('event_type', 'unknown')} event: {e}"
 
-        elif event_type == "action":
-            action = (
-                content.get("action_type", "")
-                if isinstance(content, dict)
-                else str(content)
+    def show_simulation_info(self):
+        """Show simulation metadata and overview."""
+        self.console.print("\nSimulation Information", style="bold blue")
+
+        if self.metadata:
+            info_table = Table(title="Simulation Metadata")
+            info_table.add_column("Property", style="cyan")
+            info_table.add_column("Value", style="green")
+
+            # Display key metadata fields
+            for key, value in self.metadata.items():
+                if key in [
+                    "simulation_id",
+                    "start_time",
+                    "end_time",
+                    "model_class",
+                    "total_steps",
+                    "total_events",
+                    "total_agents",
+                    "duration_minutes",
+                    "completion_status",
+                ]:
+                    if key == "duration_minutes" and isinstance(value, int | float):
+                        v = f"{value:.2f} minutes"
+                    info_table.add_row(key.replace("_", " ").title(), str(v))
+
+            self.console.print(info_table)
+
+        # Show agent overview
+        self.console.print("\nAgent Overview", style="bold blue")
+
+        agent_table = Table(show_header=True, header_style="bold magenta")
+        agent_table.add_column("Agent ID", style="dim", width=12)
+        agent_table.add_column("Total Events", justify="right")
+        agent_table.add_column("Event Types", style="green")
+
+        for agent_id in sorted(self.agent_events.keys()):
+            events = self.agent_events[agent_id]
+            event_types = {e["event_type"] for e in events}
+            agent_table.add_row(
+                str(agent_id), str(len(events)), ", ".join(sorted(event_types))
             )
-            return f"ACTION: {action}"
-        else:
-            return f"{event_type.upper()}: {content}"
+
+        self.console.print(agent_table)
 
     def list_agents(self):
         """Show all agents."""
@@ -228,6 +330,40 @@ class AgentViewer:
             return
 
         events = self.agent_events[agent_id]
+        self.console.print(f"\nAgent {agent_id} Summary", style="bold blue")
+
+        # Check if we have precomputed summary from new recorder format
+        if str(agent_id) in self.agent_summaries:
+            summary = self.agent_summaries[str(agent_id)]
+
+            # Display precomputed summary info
+            summary_table = Table(title="Summary Information")
+            summary_table.add_column("Metric", style="cyan")
+            summary_table.add_column("Value", style="green")
+
+            summary_table.add_row("Total Events", str(summary.get("total_events", 0)))
+            summary_table.add_row(
+                "Event Types", ", ".join(summary.get("event_types", []))
+            )
+            summary_table.add_row(
+                "Active Steps", str(len(summary.get("active_steps", [])))
+            )
+
+            if summary.get("first_event"):
+                first_time = datetime.fromisoformat(
+                    summary["first_event"].replace("Z", "+00:00")
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                summary_table.add_row("First Event", first_time)
+
+            if summary.get("last_event"):
+                last_time = datetime.fromisoformat(
+                    summary["last_event"].replace("Z", "+00:00")
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                summary_table.add_row("Last Event", last_time)
+
+            self.console.print(summary_table)
+
+        # Detailed statistics table (computed from events)
         event_counts = defaultdict(int)
         for event in events:
             event_counts[event["event_type"]] += 1
@@ -243,21 +379,28 @@ class AgentViewer:
                 ].get("recipient_ids", []):
                     received_count += 1
 
-        self.console.print(f"\nAgent {agent_id} Summary", style="bold blue")
+        # Activity statistics table
+        activity_table = Table(title="Activity Statistics")
+        activity_table.add_column("Metric", style="cyan")
+        activity_table.add_column("Value", style="green")
 
-        # Statistics table
-        table = Table(title="Activity Statistics")
-        table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green")
+        activity_table.add_row("Total Events", str(len(events)))
+        activity_table.add_row("Messages Sent", str(event_counts["message"]))
+        activity_table.add_row("Messages Received", str(received_count))
+        activity_table.add_row("Observations", str(event_counts["observation"]))
+        activity_table.add_row("Plans", str(event_counts["plan"]))
+        activity_table.add_row("Actions", str(event_counts["action"]))
 
-        table.add_row("Total Events", str(len(events)))
-        table.add_row("Messages Sent", str(event_counts["message"]))
-        table.add_row("Messages Received", str(received_count))
-        table.add_row("Observations", str(event_counts["observation"]))
-        table.add_row("Plans", str(event_counts["plan"]))
-        table.add_row("Actions", str(event_counts["action"]))
+        # Add other event types if they exist
+        other_types = [
+            etype
+            for etype in event_counts
+            if etype not in ["message", "observation", "plan", "action"]
+        ]
+        for etype in sorted(other_types):
+            activity_table.add_row(etype.title(), str(event_counts[etype]))
 
-        self.console.print(table)
+        self.console.print(activity_table)
 
     def interactive_mode(self):
         """Interactive mode for exploring agents."""
@@ -267,6 +410,7 @@ class AgentViewer:
         )
 
         commands = {
+            "info": "Show simulation information",
             "list": "Show all agents",
             "timeline": "View agent timeline",
             "conversations": "View agent conversations",
@@ -285,6 +429,8 @@ class AgentViewer:
             if command in ["quit", "q"]:
                 self.console.print("Goodbye!", style="yellow")
                 break
+            elif command == "info":
+                self.show_simulation_info()
             elif command == "list":
                 self.list_agents()
             else:
@@ -311,11 +457,15 @@ class AgentViewer:
                     self.console.print("Usage: <command> <agent_id>", style="red")
 
 
-def quick_agent_view(recording_path: str, agent_id: int, view_type: str = "summary"):
-    """Quick view of a specific agent."""
+def quick_agent_view(
+    recording_path: str, agent_id: int | None = None, view_type: str = "summary"
+):
+    """Quick view of a specific agent or simulation info."""
     viewer = AgentViewer(recording_path)
 
-    if view_type == "timeline":
+    if agent_id is None or view_type == "info":
+        viewer.show_simulation_info()
+    elif view_type == "timeline":
         viewer.view_agent_timeline(agent_id)
     elif view_type == "conversations":
         viewer.view_agent_conversations(agent_id)

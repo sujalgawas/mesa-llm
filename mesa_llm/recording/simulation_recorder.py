@@ -8,7 +8,6 @@ including agent observations, plans, actions, messages, and state changes.
 import json
 import pickle
 import uuid
-from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -31,15 +30,8 @@ class SimulationEvent:
 class SimulationRecorder:
     """
     Centralized recorder for capturing all simulation events for post-analysis.
-
-    This recorder captures:
-    - Agent observations and perceptions
-    - Agent plans and reasoning processes
-    - Agent actions and their outcomes
-    - Inter-agent messages and communication
-    - Agent state changes over time
-    - Model-level events and transitions
-
+    It captures agent observations, plans, actions, messages, state changes, etc.
+    as well as model-level events and transitions.
     """
 
     def __init__(
@@ -73,9 +65,6 @@ class SimulationRecorder:
             "simulation_id": self.simulation_id,
             "start_time": self.start_time.isoformat(),
             "model_class": self.model.__class__.__name__,
-            "recording_config": {
-                "state_changes": self.record_state_changes,
-            },
         }
 
     def record_event(
@@ -96,16 +85,6 @@ class SimulationRecorder:
             recipient_ids: List of recipient IDs for message events
         """
 
-        # Check if recording is enabled for this event type
-        record_config = self.simulation_metadata["recording_config"]
-
-        # Map event types to config keys
-        config_key_map = {"state_change": "state_changes"}
-
-        config_key = config_key_map.get(event_type, event_type)
-        if not record_config.get(config_key, True):
-            return
-
         # Handle different content formats based on event type
         if event_type == "message":
             if isinstance(content, str | dict | list):
@@ -124,16 +103,6 @@ class SimulationRecorder:
             else:
                 formatted_content = {"data": content}
 
-        # Set metadata source
-        source_map = {
-            "state_change": "state_tracking",
-        }
-
-        # Merge provided metadata with source metadata
-        final_metadata = {"source": source_map.get(event_type, "unknown")}
-        if metadata:
-            final_metadata.update(metadata)
-
         # Create the event
         event_id = f"{self.simulation_id}_{len(self.events):06d}"
 
@@ -144,7 +113,7 @@ class SimulationRecorder:
             agent_id=agent_id,
             event_type=event_type,
             content=formatted_content,
-            metadata=final_metadata,
+            metadata=metadata,
         )
 
         self.events.append(event)
@@ -156,29 +125,6 @@ class SimulationRecorder:
             and self.events_since_save >= self.auto_save_interval
         ):
             self.auto_save()
-
-    def track_agent_state(self, agent_id: int, current_state: dict[str, Any]):
-        """Track agent state and record changes."""
-        if not self.record_state_changes:
-            return
-
-        if agent_id in self.previous_agent_states:
-            changes = {}
-            previous_state = self.previous_agent_states[agent_id]
-
-            for key, new_value in current_state.items():
-                old_value = previous_state.get(key)
-                if old_value != new_value:
-                    changes[key] = {"old": old_value, "new": new_value}
-
-            if changes:
-                self.record_event(
-                    event_type="state_change",
-                    content=changes,
-                    agent_id=agent_id,
-                )
-
-        self.previous_agent_states[agent_id] = current_state.copy()
 
     def record_model_event(self, event_type: str, content: dict[str, Any]):
         """Record a model-level event."""
@@ -221,33 +167,6 @@ class SimulationRecorder:
             },
         }
 
-    def get_communication_network(self) -> dict[str, Any]:
-        """Analyze communication patterns between agents."""
-        message_events = self.get_events_by_type("message")
-
-        # Build communication graph
-        communications = defaultdict(lambda: defaultdict(int))
-        for event in message_events:
-            sender = event.agent_id
-            recipients = event.content.get("recipient_ids", [])
-            for recipient in recipients:
-                communications[sender][recipient] += 1
-
-        return {
-            "total_messages": len(message_events),
-            "communication_matrix": dict(communications),
-            "agents_involved": list(
-                set(
-                    [event.agent_id for event in message_events]
-                    + [
-                        r
-                        for event in message_events
-                        for r in event.content.get("recipient_ids", [])
-                    ]
-                )
-            ),
-        }
-
     def auto_save(self):
         """Automatically save current state."""
         filename = f"autosave_{self.simulation_id}_{len(self.events)}.json"
@@ -277,9 +196,10 @@ class SimulationRecorder:
                 "total_steps": self.model.steps,
                 "total_events": len(self.events),
                 "total_agents": len(self.model.agents),
-                "duration_seconds": (
+                "duration_minutes": (
                     datetime.now(UTC) - self.start_time
-                ).total_seconds(),
+                ).total_seconds()
+                / 60,
                 # Determine completion status gracefully when `max_steps` is absent
                 "completion_status": (
                     "unknown"
@@ -290,7 +210,6 @@ class SimulationRecorder:
                         else "completed"
                     )
                 ),
-                "final_step": self.model.steps,
             }
         )
 
@@ -324,7 +243,6 @@ class SimulationRecorder:
                     if event.agent_id is not None
                 }
             },
-            "communication_network": self.get_communication_network(),
         }
 
         # Save based on format
@@ -349,7 +267,10 @@ class SimulationRecorder:
             "unique_agents": len(agent_ids),
             "event_types": list({event.event_type for event in self.events}),
             "simulation_steps": self.model.steps,
-            "recording_duration": (datetime.now(UTC) - self.start_time).total_seconds(),
+            "recording_duration_minutes": (
+                datetime.now(UTC) - self.start_time
+            ).total_seconds()
+            / 60,
             "events_per_agent": {
                 agent_id: len(self.get_agent_events(agent_id)) for agent_id in agent_ids
             },
