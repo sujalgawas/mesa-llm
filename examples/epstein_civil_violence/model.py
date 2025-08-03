@@ -14,7 +14,6 @@ class EpsteinModel(Model):
         initial_citizens: int,
         width: int,
         height: int,
-        api_key: str,
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
@@ -58,7 +57,6 @@ class EpsteinModel(Model):
         agents = Cop.create_agents(
             self,
             n=initial_cops,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=cop_system_prompt,
@@ -76,7 +74,6 @@ class EpsteinModel(Model):
         agents = Citizen.create_agents(
             self,
             n=initial_citizens,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt="",

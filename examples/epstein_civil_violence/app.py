@@ -1,5 +1,3 @@
-import os
-
 from dotenv import load_dotenv
 from mesa.visualization import (
     SolaraViz,
@@ -34,7 +32,6 @@ model_params = {
     "initial_cops": 3,
     "width": 5,
     "height": 5,
-    "api_key": os.getenv("OPENAI_API_KEY"),
     "reasoning": ReWOOReasoning,
     "llm_model": "openai/gpt-4o-mini",
     "vision": 5,
@@ -47,7 +44,6 @@ model = EpsteinModel(
     initial_cops=model_params["initial_cops"],
     width=model_params["width"],
     height=model_params["height"],
-    api_key=model_params["api_key"],
     reasoning=model_params["reasoning"],
     llm_model=model_params["llm_model"],
     vision=model_params["vision"],
@@ -101,5 +97,6 @@ if __name__ == "__main__":
 
 
 """run with:
-conda activate mesa-llm && solara run examples/epstein_civil_violence/app.py
+cd examples/epstein_civil_violence
+conda activate mesa-llm && solara run app.py
 """

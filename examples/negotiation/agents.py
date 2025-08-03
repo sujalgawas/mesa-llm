@@ -9,7 +9,6 @@ class SellerAgent(LLMAgent):
     def __init__(
         self,
         model,
-        api_key,
         reasoning,
         llm_model,
         system_prompt,
@@ -18,7 +17,6 @@ class SellerAgent(LLMAgent):
     ):
         super().__init__(
             model=model,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=system_prompt,
@@ -42,7 +40,6 @@ class BuyerAgent(LLMAgent):
     def __init__(
         self,
         model,
-        api_key,
         reasoning,
         llm_model,
         system_prompt,
@@ -52,7 +49,6 @@ class BuyerAgent(LLMAgent):
     ):
         super().__init__(
             model=model,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=system_prompt,

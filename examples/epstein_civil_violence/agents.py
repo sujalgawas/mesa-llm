@@ -43,7 +43,6 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
     def __init__(
         self,
         model,
-        api_key,
         reasoning,
         llm_model,
         system_prompt,
@@ -57,7 +56,6 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         # Call the superclass constructor with updated internal state
         super().__init__(
             model=model,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=system_prompt,
@@ -172,7 +170,6 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
     def __init__(
         self,
         model,
-        api_key,
         reasoning,
         llm_model,
         system_prompt,
@@ -191,7 +188,6 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         """
         super().__init__(
             model=model,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=system_prompt,

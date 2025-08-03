@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import solara
 from dotenv import load_dotenv
@@ -24,7 +22,6 @@ model_params = {
     "initial_buyers": 1,
     "width": 4,
     "height": 4,
-    "api_key": os.getenv("OPENAI_API_KEY"),
     "reasoning": ReActReasoning,
     "llm_model": "openai/gpt-4o",
     "vision": 5,
@@ -35,7 +32,6 @@ model = NegotiationModel(
     initial_buyers=model_params["initial_buyers"],
     width=model_params["width"],
     height=model_params["height"],
-    api_key=model_params["api_key"],
     reasoning=model_params["reasoning"],
     llm_model=model_params["llm_model"],
     vision=model_params["vision"],

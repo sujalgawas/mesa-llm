@@ -26,7 +26,6 @@ class NegotiationModel(Model):
         initial_buyers: int,
         width: int,
         height: int,
-        api_key: str,
         reasoning: type[Reasoning],
         llm_model: str,
         vision: int,
@@ -45,7 +44,6 @@ class NegotiationModel(Model):
         agents = BuyerAgent.create_agents(
             self,
             n=initial_buyers - math.floor(initial_buyers / 2),
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=buyer_system_prompt,
@@ -62,7 +60,6 @@ class NegotiationModel(Model):
         agents = BuyerAgent.create_agents(
             self,
             n=math.floor(initial_buyers / 2),
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt=buyer_system_prompt,
@@ -79,7 +76,6 @@ class NegotiationModel(Model):
         # ---------------------Create the seller agents---------------------
         seller_a = SellerAgent(
             model=self,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt="You are a Seller in a negotiation game trying to sell shoes($40) and track suit($50) of brand A. You are trying to pitch your product to the Buyer type Agents. You are extremely good at persuading, and have good sales skills. You are also hardworking and dedicated to your work. To do any action, you must use the tools provided to you.",
@@ -95,7 +91,6 @@ class NegotiationModel(Model):
         # Just for testing purposes, we can add more seller agents later
         seller_b = SellerAgent(
             model=self,
-            api_key=api_key,
             reasoning=reasoning,
             llm_model=llm_model,
             system_prompt="You are a Seller in a negotiation game trying to sell shoes($35) and track suit($47) of brand B. You are trying to pitch your product to the Buyer type Agents. You are not interested in your work and are doing it for the sake of doing. To do any action, you must use the tools provided to you.",
