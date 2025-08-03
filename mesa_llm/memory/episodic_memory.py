@@ -25,7 +25,6 @@ class EpisodicMemory(Memory):
     def __init__(
         self,
         agent: "LLMAgent",
-        api_key: str | None = None,
         llm_model: str | None = None,
         display: bool = True,
         max_capacity: int = 10,
@@ -34,12 +33,12 @@ class EpisodicMemory(Memory):
         """
         Initialize the EpisodicMemory
         """
-        if not api_key or not llm_model:
+        if not llm_model:
             raise ValueError(
-                "Both api_key and llm_model must be provided for the usage of episodic memory"
+                "llm_model must be provided for the usage of episodic memory"
             )
 
-        super().__init__(agent, api_key=api_key, llm_model=llm_model, display=display)
+        super().__init__(agent, llm_model=llm_model, display=display)
 
         self.max_capacity = max_capacity
         self.memory_entries = deque(maxlen=self.max_capacity)

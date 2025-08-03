@@ -124,7 +124,9 @@ class SimulationRecorder:
             self.auto_save_interval
             and self.events_since_save >= self.auto_save_interval
         ):
-            self.auto_save()
+            filename = f"autosave_{self.simulation_id}_{len(self.events)}.json"
+            self.save(filename)
+            self.events_since_save = 0
 
     def record_model_event(self, event_type: str, content: dict[str, Any]):
         """Record a model-level event."""
@@ -166,12 +168,6 @@ class SimulationRecorder:
                 ),
             },
         }
-
-    def auto_save(self):
-        """Automatically save current state."""
-        filename = f"autosave_{self.simulation_id}_{len(self.events)}.json"
-        self.save(filename)
-        self.events_since_save = 0
 
     def save(self, filename: str | None = None, format: str = "json"):
         """Save complete simulation recording.

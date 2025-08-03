@@ -8,7 +8,7 @@ from .parallel_stepping import (
     step_agents_parallel_sync,
 )
 from .reasoning.reasoning import Observation, Plan
-from .tools import ToolManager
+from .tools.tool_manager import ToolManager
 
 # Enable automatic parallel stepping when mesa_llm is imported
 enable_automatic_parallel_stepping()
@@ -17,7 +17,10 @@ __all__ = [
     "Observation",
     "Plan",
     "ToolManager",
+    "enable_automatic_parallel_stepping",
     "step_agents_parallel",
+    "step_agents_parallel",
+    "step_agents_parallel_sync",
     "step_agents_parallel_sync",
 ]
 

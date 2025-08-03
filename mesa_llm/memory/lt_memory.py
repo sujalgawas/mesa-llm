@@ -1,4 +1,3 @@
-import os
 from typing import TYPE_CHECKING
 
 from mesa_llm.memory.memory import Memory, MemoryEntry
@@ -14,7 +13,6 @@ class LongTermMemory(Memory):
     Attributes:
         agent : the agent that the memory belongs to
         display : whether to display the memory
-        api_key : the API key to use for the LLM
         llm_model : the model to use for the summarization
 
     """
@@ -23,17 +21,15 @@ class LongTermMemory(Memory):
         self,
         agent: "LLMAgent",
         display: bool = True,
-        api_key: str = os.getenv("OPENAI_API_KEY"),
         llm_model: str = "openai/gpt-4o-mini",
     ):
-        if not api_key or not llm_model:
+        if not llm_model:
             raise ValueError(
-                "Both api_key and llm_model must be provided for the usage of long term memory"
+                "llm_model must be provided for the usage of long term memory"
             )
 
         super().__init__(
             agent=agent,
-            api_key=api_key,
             llm_model=llm_model,
             display=display,
         )

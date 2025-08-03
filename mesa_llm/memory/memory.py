@@ -73,7 +73,6 @@ class Memory(ABC):
 
     Attributes:
         agent : the agent that the memory belongs to
-        api_key : the API key to use for the LLM
         llm_model : the model to use for the summarization
         display : whether to display the memory
     """
@@ -81,7 +80,6 @@ class Memory(ABC):
     def __init__(
         self,
         agent: "LLMAgent",
-        api_key: str | None = None,
         llm_model: str | None = None,
         display: bool = True,
     ):
@@ -89,15 +87,12 @@ class Memory(ABC):
         Initialize the memory
 
         Args:
-            api_key : the API key to use for the LLM
             llm_model : the model to use for the summarization
             agent : the agent that the memory belongs to
         """
         self.agent = agent
-        if api_key and llm_model:
-            self.llm = ModuleLLM(api_key=api_key, llm_model=llm_model)
-        elif (not api_key and llm_model) or (api_key and not llm_model):
-            raise ValueError("Both api_key and llm_model must be provided or neither")
+        if llm_model:
+            self.llm = ModuleLLM(llm_model=llm_model)
 
         self.display = display
 

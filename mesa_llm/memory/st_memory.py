@@ -15,7 +15,6 @@ class ShortTermMemory(Memory):
         agent : the agent that the memory belongs to
         n : number of short-term memories to remember
         display : whether to display the memory
-        api_key : the API key to use for the LLM
         llm_model : the model to use for the summarization
     """
 

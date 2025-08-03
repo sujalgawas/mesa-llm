@@ -26,7 +26,6 @@ class LLMAgent(Agent):
 
     Parameters:
         model (Model): The mesa model the agent in linked to.
-        api_key (str): The API key for the LLM provider.
         llm_model (str): The model to use for the LLM in the format 'provider/model'. Defaults to 'gemini/gemini-2.0-flash'.
         system_prompt (str | None): Optional system prompt to be used in LLM completions.
         reasoning (str): Optional reasoning method to be used in LLM completions.
@@ -40,7 +39,6 @@ class LLMAgent(Agent):
     def __init__(
         self,
         model: Model,
-        api_key: str,
         reasoning: type[Reasoning],
         llm_model: str = "gemini/gemini-2.0-flash",
         system_prompt: str | None = None,
@@ -52,15 +50,12 @@ class LLMAgent(Agent):
 
         self.model = model
         self.step_prompt = step_prompt
-        self.llm = ModuleLLM(
-            api_key=api_key, llm_model=llm_model, system_prompt=system_prompt
-        )
+        self.llm = ModuleLLM(llm_model=llm_model, system_prompt=system_prompt)
 
         self.memory = STLTMemory(
             agent=self,
             short_term_capacity=5,
             consolidation_capacity=2,
-            api_key=api_key,
             llm_model=llm_model,
         )
 

@@ -1,4 +1,3 @@
-import os
 from collections import deque
 from typing import TYPE_CHECKING
 
@@ -28,7 +27,6 @@ class STLTMemory(Memory):
         short_term_capacity: int = 5,
         consolidation_capacity: int = 2,
         display: bool = True,
-        api_key: str = os.getenv("OPENAI_API_KEY"),
         llm_model: str = "openai/gpt-4o-mini",
     ):
         """
@@ -36,18 +34,14 @@ class STLTMemory(Memory):
 
         Args:
             short_term_capacity : the number of interactions to store in the short term memory
-            api_key : the API key to use for the LLM
             llm_model : the model to use for the summarization
             agent : the agent that the memory belongs to
         """
-        if not api_key or not llm_model:
-            raise ValueError(
-                "Both api_key and llm_model must be provided for the usage of st/lt memory"
-            )
+        if not llm_model:
+            raise ValueError("llm_model must be provided for the usage of st/lt memory")
 
         super().__init__(
             agent=agent,
-            api_key=api_key,
             llm_model=llm_model,
             display=display,
         )

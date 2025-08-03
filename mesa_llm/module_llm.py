@@ -57,7 +57,7 @@ class ModuleLLM:
                 self.api_key = os.environ[f"{provider}_API_KEY"]
             except KeyError as err:
                 raise ValueError(
-                    f"No API key found for {provider} in dotenv file"
+                    f"No API key found for {provider}. Please set the API key in the dotenv file."
                 ) from err
 
         if not litellm.supports_function_calling(model=self.llm_model):
