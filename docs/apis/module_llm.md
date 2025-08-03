@@ -14,7 +14,15 @@ ModuleLLM provides a unified interface for integrating Large Language Models fro
 - **llm_model** (*str*) – Model identifier in format 'provider/model' (e.g., 'openai/gpt-4o')
 - **system_prompt** (*str | None*) – Optional system prompt for LLM interactions
 
-**Supported Providers:** OpenAI, Anthropic, xAI, Huggingface, Ollama, OpenRouter, NovitaAI, Gemini
+**Supported Providers:**
+- OpenAI
+- Anthropic
+- xAI
+- Huggingface
+- OpenRouter
+- NovitaAI
+- Gemini
+- Ollama
 
 **Methods:**
 
@@ -28,13 +36,21 @@ Generate LLM response with automatic retry logic and exponential backoff. Suppor
 Asynchronous version for parallel LLM calls in multi-agent simulations.
 
 ### Basic LLM Setup
+In your .env file, set the API key for the LLM provider, then in your python file, call the ModuleLLM class with the desired model and system prompt.
+
+```bash
+# .env
+OPENAI_API_KEY=your-api-key
+ANTHROPIC_API_KEY=your-api-key
+```
+
 
 ```python
+# my_agent.py
 from mesa_llm.module_llm import ModuleLLM
 
 # Initialize with specific provider and model
 llm = ModuleLLM(
-    api_key="your-api-key",
     llm_model="openai/gpt-4o",
     system_prompt="You are a helpful simulation agent."
 )

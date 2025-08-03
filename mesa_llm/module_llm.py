@@ -1,11 +1,13 @@
 import os
 
+from dotenv import load_dotenv
 from litellm import acompletion, completion, litellm
 from litellm.exceptions import (
     APIConnectionError,
     RateLimitError,
     Timeout,
 )
+from rich.console import Console
 from tenacity import AsyncRetrying, retry, retry_if_exception_type, wait_exponential
 
 RETRYABLE_EXCEPTIONS = (
@@ -13,6 +15,9 @@ RETRYABLE_EXCEPTIONS = (
     Timeout,
     RateLimitError,
 )
+
+load_dotenv()
+console = Console()
 
 
 class ModuleLLM:
@@ -25,7 +30,6 @@ class ModuleLLM:
     def __init__(
         self,
         llm_model: str,
-        api_key: str,
         api_base: str | None = None,
         system_prompt: str | None = None,
     ):
@@ -33,20 +37,32 @@ class ModuleLLM:
         Initialize the LLM module
 
         Args:
-            api_key: The API key for the LLM provider
             llm_model: The model to use for the LLM in the format of {provider}/{LLM}
+            api_base: The API base to use if the LLM provider is Ollama
             system_prompt: The system prompt to use for the LLM
         """
-        self.api_key = api_key
         self.api_base = api_base
         self.llm_model = llm_model
         self.system_prompt = system_prompt
         provider = self.llm_model.split("/")[0].upper()
-        os.environ[f"{provider}_API_KEY"] = self.api_key
+
+        if provider == "OLLAMA":
+            if self.api_base is None:
+                self.api_base = "http://localhost:11434"
+                console.print(
+                    f"[yellow][Warning] Using default Ollama API base: {self.api_base}. If inference is not working, you may need to set the API base to the correct URL.[/yellow]"
+                )
+        else:
+            try:
+                self.api_key = os.environ[f"{provider}_API_KEY"]
+            except KeyError as err:
+                raise ValueError(
+                    f"No API key found for {provider} in dotenv file"
+                ) from err
 
         if not litellm.supports_function_calling(model=self.llm_model):
-            print(
-                f"Warning: {self.llm_model} does not support function calling. This model may not be able to use tools."
+            console.print(
+                f"[yellow][Warning]: {self.llm_model} does not support function calling. This model may not be able to use tools. Please check the model documentation at https://docs.litellm.ai/docs/providers for more information.[/yellow]"
             )
 
     def get_messages(self, prompt: str | list[str]) -> list[dict]:
