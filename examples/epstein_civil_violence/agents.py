@@ -197,6 +197,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         )
         self.max_jail_term = max_jail_term
         self.tool_manager = cop_tool_manager
+        self.system_prompt = "You are a cop in a country that is experiencing civil violence. You are a member of the police force and your job is to arrest active citizens. You can arrest a citizen ONLY if they are active. You can move one step in a nearby cell or arrest a citizen."
 
         self.memory = STLTMemory(
             agent=self,

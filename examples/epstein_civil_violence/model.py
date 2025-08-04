@@ -79,7 +79,7 @@ class EpsteinModel(Model):
             system_prompt="",
             vision=vision,
             internal_state=None,
-            step_prompt="Move around and change your state if necessary",
+            step_prompt="Move around and change your state if the conditions indicate it.",
         )
 
         x = self.rng.integers(0, self.grid.width, size=(initial_citizens,))

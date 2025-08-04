@@ -40,7 +40,7 @@ def change_state(agent: "LLMAgent", state: str) -> str:
 @tool(tool_manager=cop_tool_manager)
 def arrest_citizen(agent: "LLMAgent", citizen_id: int) -> str:
     """
-    Arrest a citizen.
+    Arrest a citizen (only if they are active).
 
         Args:
             citizen_id: The unique id of the citizen to arrest.
