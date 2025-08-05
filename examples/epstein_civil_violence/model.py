@@ -5,8 +5,10 @@ from rich import print
 
 from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from mesa_llm.reasoning.reasoning import Reasoning
+from mesa_llm.recording.record_model import record_model
 
 
+@record_model(output_dir="recordings")
 class EpsteinModel(Model):
     def __init__(
         self,
