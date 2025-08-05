@@ -125,10 +125,3 @@ class Memory(ABC):
             self.last_observation = content
         else:
             self.step_content[type] = content
-
-        if self.agent.recorder is not None:
-            self.recorder.record_event(
-                event_type=type,
-                content=content,
-                agent_id=self.agent.unique_id,
-            )
