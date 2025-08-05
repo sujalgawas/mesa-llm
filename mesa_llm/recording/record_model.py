@@ -2,7 +2,7 @@
 
 Usage::
 
-    from mesa_llm.recording.integration_hooks import record_model
+    from mesa_llm.recording.record_model import record_model
 
     @record_model
     class MyModel(Model):
@@ -16,11 +16,11 @@ The decorator will:
 
 Parameters
 ----------
-recorder_kwargs : dict | None
-    Extra keyword arguments forwarded to :class:`SimulationRecorder` when it is created.  This allows callers to
-    customise output directory or disable certain event types::
+**kwargs
+    Any keyword arguments are forwarded directly to :class:`SimulationRecorder` when it is created.
+    This allows callers to customize output directory, auto-save intervals, or disable certain event types::
 
-        @record_model(recorder_kwargs={"output_dir": "my_runs", "auto_save_interval": 100})
+        @record_model(output_dir="recordings", auto_save_interval=100)
         class MyModel(Model):
             ...
 """
@@ -28,7 +28,6 @@ recorder_kwargs : dict | None
 import atexit
 from collections.abc import Callable
 from functools import wraps
-from typing import Any
 
 from mesa.model import Model
 
@@ -44,15 +43,14 @@ def _attach_recorder_to_agents(model: Model, recorder: SimulationRecorder):
 
 
 def record_model(
-    cls: type[Model] | None = None, *, recorder_kwargs: dict[str, Any] | None = None
+    cls: type[Model] | None = None, **kwargs
 ) -> Callable[[type[Model]], type[Model]] | type[Model]:
     if cls is None:
         # Decorator was called with optional kwargs -> return wrapper awaiting the class
-        return lambda actual_cls: record_model(
-            actual_cls, recorder_kwargs=recorder_kwargs
-        )  # type: ignore[misc]
+        return lambda actual_cls: record_model(actual_cls, **kwargs)  # type: ignore[misc]
 
-    recorder_kwargs = recorder_kwargs or {}
+    # All kwargs are passed directly to SimulationRecorder
+    recorder_kwargs = kwargs
 
     original_init = cls.__init__
     original_step = getattr(cls, "step", None)
