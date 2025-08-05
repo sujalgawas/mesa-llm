@@ -1,3 +1,7 @@
+# app.py (at the very top, before any other imports)
+import logging
+import warnings
+
 import pandas as pd
 import solara
 from dotenv import load_dotenv
@@ -9,6 +13,17 @@ from mesa.visualization import (
 from examples.negotiation.agents import BuyerAgent, SellerAgent
 from examples.negotiation.model import NegotiationModel
 from mesa_llm.reasoning.react import ReActReasoning
+
+# Suppress Pydantic serialization warnings
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    module="pydantic.main",
+    message=r".*Pydantic serializer warnings.*",
+)
+
+# Also suppress through logging
+logging.getLogger("pydantic").setLevel(logging.ERROR)
 
 load_dotenv()
 

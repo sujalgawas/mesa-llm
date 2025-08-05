@@ -1,3 +1,7 @@
+# app.py (at the very top, before any other imports)
+import logging
+import warnings
+
 from dotenv import load_dotenv
 from mesa.visualization import (
     SolaraViz,
@@ -9,6 +13,17 @@ from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from examples.epstein_civil_violence.model import EpsteinModel
 from mesa_llm.parallel_stepping import enable_automatic_parallel_stepping
 from mesa_llm.reasoning.rewoo import ReWOOReasoning
+
+# Suppress Pydantic serialization warnings
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    module="pydantic.main",
+    message=r".*Pydantic serializer warnings.*",
+)
+
+# Also suppress through logging
+logging.getLogger("pydantic").setLevel(logging.ERROR)
 
 enable_automatic_parallel_stepping(mode="threading")
 
