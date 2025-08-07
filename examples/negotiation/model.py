@@ -30,11 +30,12 @@ class NegotiationModel(Model):
         llm_model: str,
         vision: int,
         seed=None,
+        parallel_stepping=True,
     ):
         super().__init__(seed=seed)
         self.width = width
         self.height = height
-
+        self.parallel_stepping = parallel_stepping
         self.grid = MultiGrid(self.height, self.width, torus=False)
 
         # ---------------------Create the buyer agents---------------------
