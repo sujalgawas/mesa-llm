@@ -86,9 +86,9 @@ def speak_to(
     agent: "LLMAgent", listener_agents_unique_ids: list[int], message: str
 ) -> str:
     """
-    Send a message to the recipients and commits it to their memory.
+    Engages in a spoken conversation with the recipients, storing the contents as a message in their memory.
     Args:
-        agent: The agent sending the message (as a LLM, ignore this argument in function calling).
+        agent: The agent sending the message(conversation contents) (as a LLM, ignore this argument in function calling).
         listener_agents_unique_ids: The unique ids of the agents receiving the message
         message: The message to send
     """

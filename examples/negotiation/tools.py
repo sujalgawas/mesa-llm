@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from examples.negotiation.agents import SellerAgent, buyer_tool_manager
+from examples.negotiation.agents import buyer_tool_manager
 from mesa_llm.tools.tool_decorator import tool
 
 if TYPE_CHECKING:
@@ -46,14 +46,9 @@ def buy_product(agent: "LLMAgent", chosen_product: str, chosen_price: int) -> st
     brand = "A" if "Brand A" in chosen_product else "B"
 
     # Increment sales of appropriate seller
-    for cell in model.grid.coord_iter():
-        contents, x, y = cell
-        for a in contents:
-            if isinstance(a, SellerAgent) and (
-                (brand == "A" and "brand A" in a.system_prompt.lower())
-                or (brand == "B" and "brand B" in a.system_prompt.lower())
-            ):
-                a.sales += 1
-                break
+    if brand == "A":
+        model.seller_a.sales += 1
+    else:  # brand == "B"
+        model.seller_b.sales += 1
 
     return f"The agent has chosen {chosen_product} as their brand of choice. Remaining budget: {agent.budget}."
