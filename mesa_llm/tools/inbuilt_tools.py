@@ -67,6 +67,7 @@ def teleport_to_location(
 
     """
     target_coordinates = tuple(target_coordinates)
+
     if isinstance(agent.model.grid, SingleGrid | MultiGrid):
         agent.model.grid.move_agent(agent, target_coordinates)
 
