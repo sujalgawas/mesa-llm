@@ -6,11 +6,11 @@
 
 This model is a simple negotiation model where two types of agents (buyer and seller) negotiate over a product. The objective is to test out which seller is able to capture most sales and therefore determine what influences customers the most: The Sales pitch, or the value for money.
 
-**Seller A** : has all the necessary skills for negotiation. It's comfortable with persuation, and is pretty committed to the job. It's pitching for Brand A and is aiming to sell its running shoes and track suit. Although the seller has a more superior skill-set, Brand A products are very slightly more over-prized for the same quality : \$40 Shoes and $50 Track Suit
+**Seller A** : Has all the necessary skills for negotiation. It's comfortable with persuation, and is pretty committed to the job. It's pitching for Brand A and is aiming to sell running shoes and track suits. Although the seller has a more superior skill-set, Brand A products are slightly more over-prized for the same quality : $40 for Shoes and $50 for the Track Suit
 
-**Seller B** : is a bit more apathetic and is not particularly good at persuation or negotiation. It sells the same products as seller A, but is prized slightly cheaper. : \$35 Shoes and \$47 Track Suit
+**Seller B** : Is a bit more apathetic and is not particularly good at persuation or negotiation. It sells the same products as seller A, but is prized slightly cheaper. : $35 for Shoes and $47 for Track Suit
 
-**Buyers** : there are mainly 2 types of buyers, buyers with a budget of \$50 and buyers who have a budget of \$100.
+**Buyers** : there are mainly 2 types of buyers, buyers with a budget of $50 and buyers who have a budget of $100.
 
 ## Agent Decision Logic
 
