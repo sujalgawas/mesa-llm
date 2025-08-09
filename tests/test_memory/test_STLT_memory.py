@@ -1,70 +1,10 @@
-import os
-from collections import deque
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import patch
 
 from mesa_llm.memory.memory import MemoryEntry
 from mesa_llm.memory.st_lt_memory import STLTMemory
 
 
-@pytest.fixture(autouse=True)
-def mock_environment():
-    """Ensure tests don't depend on real environment variables"""
-    with patch.dict(os.environ, {"OPENAI_API_KEY": "test_key"}, clear=True):
-        yield
-
-
-@pytest.fixture
-def mock_agent():
-    """Create a mock agent for testing"""
-    agent = Mock()
-    agent.__class__.__name__ = "TestAgent"
-    agent.unique_id = 123
-    agent.__str__ = Mock(return_value="TestAgent(123)")
-    agent.model = Mock()
-    agent.model.steps = 1
-    return agent
-
-
-@pytest.fixture
-def mock_llm():
-    """Create a mock LLM for testing"""
-    with patch("mesa_llm.module_llm.ModuleLLM") as mock_llm_class:
-        mock_llm_instance = Mock()
-        mock_llm_class.return_value = mock_llm_instance
-        yield mock_llm_instance
-
-
-class TestMemoryEntry:
-    """Test the MemoryEntry dataclass"""
-
-    def test_memory_entry_creation(self):
-        """Test MemoryEntry creation and basic functionality"""
-        from unittest.mock import Mock
-
-        mock_agent = Mock()
-        content = {"observation": "Test content", "metadata": "value"}
-        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
-
-        assert entry.content == content
-        assert entry.step == 1
-        assert entry.agent == mock_agent
-
-    def test_memory_entry_str(self):
-        """Test MemoryEntry string representation"""
-        from unittest.mock import Mock
-
-        mock_agent = Mock()
-        content = {"observation": "Test content", "type": "observation"}
-        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
-
-        str_repr = str(entry)
-        assert "Test content" in str_repr
-        assert "observation" in str_repr
-
-
-class TestMemory:
+class TestSTLTMemory:
     """Test the Memory class core functionality"""
 
     def test_memory_initialization(self, mock_agent, mock_llm):
@@ -73,20 +13,21 @@ class TestMemory:
             agent=mock_agent,
             short_term_capacity=3,
             consolidation_capacity=1,
-            api_key="test_key",
             llm_model="test_model",
         )
 
         assert memory.agent == mock_agent
         assert memory.capacity == 3
         assert memory.consolidation_capacity == 1
-        assert isinstance(memory.short_term_memory, deque)
+        assert isinstance(
+            memory.short_term_memory,
+        )
         assert memory.long_term_memory == ""
         assert memory.llm.system_prompt is not None
 
     def test_add_to_memory(self, mock_agent, mock_llm):
         """Test adding memories to short-term memory"""
-        memory = STLTMemory(agent=mock_agent, api_key="test_key")
+        memory = STLTMemory(agent=mock_agent)
 
         # Test basic addition with observation
         memory.add_to_memory("observation", {"step": 1, "content": "Test content"})
@@ -102,7 +43,7 @@ class TestMemory:
 
     def test_process_step(self, mock_agent, mock_llm):
         """Test process_step functionality"""
-        memory = STLTMemory(agent=mock_agent, api_key="test_key")
+        memory = STLTMemory(agent=mock_agent)
 
         # Add some content
         memory.add_to_memory("observation", {"content": "Test observation"})
@@ -124,7 +65,6 @@ class TestMemory:
             agent=mock_agent,
             short_term_capacity=2,
             consolidation_capacity=1,
-            api_key="test_key",
         )
 
         # Add memories to trigger consolidation
@@ -142,7 +82,7 @@ class TestMemory:
 
     def test_format_memories(self, mock_agent, mock_llm):
         """Test formatting of short-term and long-term memory"""
-        memory = STLTMemory(agent=mock_agent, api_key="test_key")
+        memory = STLTMemory(agent=mock_agent)
 
         # Test empty short-term memory
         assert memory.format_short_term() == "No recent memory."
@@ -169,7 +109,7 @@ class TestMemory:
         """Test long-term memory update process"""
         mock_llm.generate.return_value = "Updated long-term memory"
 
-        memory = STLTMemory(agent=mock_agent, api_key="test_key")
+        memory = STLTMemory(agent=mock_agent)
         # Replace the real LLM with our mock
         memory.llm = mock_llm
         memory.long_term_memory = "Previous memory"
@@ -186,7 +126,7 @@ class TestMemory:
 
     def test_observation_tracking(self, mock_agent, mock_llm):
         """Test that observations are properly tracked and only changes stored"""
-        memory = STLTMemory(agent=mock_agent, api_key="test_key")
+        memory = STLTMemory(agent=mock_agent)
 
         # First observation
         obs1 = {"position": (0, 0), "health": 100}

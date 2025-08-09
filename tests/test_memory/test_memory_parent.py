@@ -1,0 +1,79 @@
+from typing import TYPE_CHECKING
+from unittest.mock import Mock
+
+from memory_utils import mock_agent
+
+from mesa_llm.memory.memory import Memory, MemoryEntry
+from mesa_llm.module_llm import ModuleLLM
+
+if TYPE_CHECKING:
+    from mesa_llm.llm_agent import LLMAgent
+
+
+class TestMemoryEntry:
+    """Test the MemoryEntry dataclass"""
+
+    def test_memory_entry_creation(self):
+        """Test MemoryEntry creation and basic functionality"""
+
+        mock_agent = Mock()
+        content = {"observation": "Test content", "metadata": "value"}
+        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
+
+        assert entry.content == content
+        assert entry.step == 1
+        assert entry.agent == mock_agent
+
+    def test_memory_entry_str(self):
+        """Test MemoryEntry string representation"""
+        from unittest.mock import Mock
+
+        mock_agent = Mock()
+        content = {"observation": "Test content", "type": "observation"}
+        entry = MemoryEntry(content=content, step=1, agent=mock_agent)
+
+        str_repr = str(entry)
+        assert "Test content" in str_repr
+        assert "observation" in str_repr
+
+
+class MemoryMock(Memory):
+    def __init__(
+        self, agent: "LLMAgent", llm_model: str | None = None, display: bool = True
+    ):
+        super().__init__(agent, llm_model, display)
+
+    def get_prompt_ready(self) -> str:
+        return ""
+
+    def get_communication_history(self) -> str:
+        return ""
+
+
+class TestMemoryParent:
+    """Test the Memory class"""
+
+    def test_memory_init(self):
+        """Test the init of Memory class"""
+        mock_agent = Mock()
+        memory = MemoryMock(agent=mock_agent, llm_model="provider/test_model")
+
+        # Parameters init
+        assert memory.display
+        assert memory.step_content == {}
+        assert memory.last_observation == {}
+
+        # llm init with ModuleLLM
+        assert isinstance(memory.llm, ModuleLLM)
+        assert memory.llm.llm_model == "provider/test_model"
+
+        memory = MemoryMock(agent=mock_agent)
+        assert not hasattr(memory, "llm")
+
+    def test_add_to_memory(self):
+        memory = MemoryMock(agent=mock_agent)
+        type = "message"
+        content = {"recency": "now"}
+        memory.add_to_memory(type=type, content=content)
+
+        assert memory.step_content[type] is not None
