@@ -13,13 +13,11 @@ if TYPE_CHECKING:
 
 class ToolManager:
     """
-    The user can use instances of ToolManager to register functions as tools through the decorator.
-    The user can also use the ToolManager instance to get the schema of the tools, call a tool with validated arguments, and check if a tool is registered.
-    Moreover, the user can group like tools together by creating a new ToolManager instance and registering the tools to it.
-    So if agent A requires tools A1, A2, and A3, and agent B requires tools B1, B2, and B3, the user can create two ToolManager instances: tool_manager_A and tool_manager_B.
+    ToolManager is used to register functions as tools through the decorator.
+    There can be multiple instances of ToolManager for different group of agents.
 
     Attributes:
-        tools: A dictionary of tools of the form {name: function}. E.g. {"get_current_weather": get_current_weather}.
+        tools: A dictionary of tools of the form {tool_name: tool_function}. E.g. {"get_current_weather": get_current_weather}.
     """
 
     instances: list["ToolManager"] = []
@@ -128,7 +126,7 @@ class ToolManager:
                             agent=agent, **function_args
                         )
                     except TypeError as e:
-                        # Handle case where function arguments don't match function signature
+                        # If function arguments don't match function signature :
                         sprint(
                             f"Warning: Function call failed with TypeError: {e}",
                             color="yellow",

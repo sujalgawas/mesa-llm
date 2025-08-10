@@ -1,3 +1,4 @@
+from collections import deque
 from unittest.mock import patch
 
 from mesa_llm.memory.memory import MemoryEntry
@@ -7,27 +8,25 @@ from mesa_llm.memory.st_lt_memory import STLTMemory
 class TestSTLTMemory:
     """Test the Memory class core functionality"""
 
-    def test_memory_initialization(self, mock_agent, mock_llm):
+    def test_memory_initialization(self, mock_agent):
         """Test Memory class initialization with defaults and custom values"""
         memory = STLTMemory(
             agent=mock_agent,
             short_term_capacity=3,
             consolidation_capacity=1,
-            llm_model="test_model",
+            llm_model="provider/test_model",
         )
 
         assert memory.agent == mock_agent
         assert memory.capacity == 3
         assert memory.consolidation_capacity == 1
-        assert isinstance(
-            memory.short_term_memory,
-        )
+        assert isinstance(memory.short_term_memory, deque)
         assert memory.long_term_memory == ""
         assert memory.llm.system_prompt is not None
 
-    def test_add_to_memory(self, mock_agent, mock_llm):
+    def test_add_to_memory(self, mock_agent):
         """Test adding memories to short-term memory"""
-        memory = STLTMemory(agent=mock_agent)
+        memory = STLTMemory(agent=mock_agent, llm_model="provider/test_model")
 
         # Test basic addition with observation
         memory.add_to_memory("observation", {"step": 1, "content": "Test content"})
@@ -41,9 +40,9 @@ class TestSTLTMemory:
         # Should be empty step_content initially
         assert memory.step_content != {}
 
-    def test_process_step(self, mock_agent, mock_llm):
+    def test_process_step(self, mock_agent):
         """Test process_step functionality"""
-        memory = STLTMemory(agent=mock_agent)
+        memory = STLTMemory(agent=mock_agent, llm_model="provider/test_model")
 
         # Add some content
         memory.add_to_memory("observation", {"content": "Test observation"})
@@ -65,6 +64,7 @@ class TestSTLTMemory:
             agent=mock_agent,
             short_term_capacity=2,
             consolidation_capacity=1,
+            llm_model="provider/test_model",
         )
 
         # Add memories to trigger consolidation
@@ -80,9 +80,9 @@ class TestSTLTMemory:
             <= memory.capacity + memory.consolidation_capacity
         )
 
-    def test_format_memories(self, mock_agent, mock_llm):
+    def test_format_memories(self, mock_agent):
         """Test formatting of short-term and long-term memory"""
-        memory = STLTMemory(agent=mock_agent)
+        memory = STLTMemory(agent=mock_agent, llm_model="provider/test_model")
 
         # Test empty short-term memory
         assert memory.format_short_term() == "No recent memory."
@@ -109,7 +109,7 @@ class TestSTLTMemory:
         """Test long-term memory update process"""
         mock_llm.generate.return_value = "Updated long-term memory"
 
-        memory = STLTMemory(agent=mock_agent)
+        memory = STLTMemory(agent=mock_agent, llm_model="provider/test_model")
         # Replace the real LLM with our mock
         memory.llm = mock_llm
         memory.long_term_memory = "Previous memory"
@@ -124,9 +124,9 @@ class TestSTLTMemory:
 
         assert memory.long_term_memory == "Updated long-term memory"
 
-    def test_observation_tracking(self, mock_agent, mock_llm):
+    def test_observation_tracking(self, mock_agent):
         """Test that observations are properly tracked and only changes stored"""
-        memory = STLTMemory(agent=mock_agent)
+        memory = STLTMemory(agent=mock_agent, llm_model="provider/test_model")
 
         # First observation
         obs1 = {"position": (0, 0), "health": 100}

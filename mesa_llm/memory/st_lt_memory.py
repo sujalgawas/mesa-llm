@@ -27,7 +27,7 @@ class STLTMemory(Memory):
         short_term_capacity: int = 5,
         consolidation_capacity: int = 2,
         display: bool = True,
-        llm_model: str = "openai/gpt-4o-mini",
+        llm_model: str | None = None,
     ):
         """
         Initialize the memory
@@ -38,7 +38,9 @@ class STLTMemory(Memory):
             agent : the agent that the memory belongs to
         """
         if not llm_model:
-            raise ValueError("llm_model must be provided for the usage of st/lt memory")
+            raise ValueError(
+                "llm_model must be provided for the usage of st/lt memory. You can use the pre-built 'short-term-only' memory without a model."
+            )
 
         super().__init__(
             agent=agent,
