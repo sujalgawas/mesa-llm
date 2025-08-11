@@ -46,7 +46,7 @@ class EpsteinModel(Model):
             ),
         }
         agent_reporters = {
-            "jail_sentence": lambda a: getattr(a, "jail_sentence", None),
+            "jail_sentence": lambda a: getattr(a, "jail_sentence_left", None),
             "arrest_probability": lambda a: getattr(a, "arrest_probability", None),
         }
         self.datacollector = DataCollector(

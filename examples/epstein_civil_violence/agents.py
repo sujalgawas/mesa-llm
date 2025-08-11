@@ -82,16 +82,16 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
 
         self.threshold = threshold
         self.internal_state.append(
-            f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
+            f"tendency for risk aversion is {self.risk_aversion:.4f} on scale from 0 to 1"
         )
         self.internal_state.append(
-            f"On a scale from 0 to 1, my threshold for suffering is {self.threshold}"
+            f"On a scale from 0 to 1, my threshold for suffering is {self.threshold:.4f}"
         )
         self.internal_state.append(
-            f"On a scale of 0 to 1 my grievance due to current legitimacy of rule and personal hardships is {self.grievance}"
+            f"On a scale of 0 to 1 my grievance due to current legitimacy of rule and personal hardships is {self.grievance:.4f}"
         )
         self.internal_state.append(
-            f"tendency for risk aversion is {self.risk_aversion} on scale from 0 to 1"
+            f"tendency for risk aversion is {self.risk_aversion:.4f} on scale from 0 to 1"
         )
         self.internal_state.append(
             f"my current state in the simulation is {self.state}"
@@ -126,7 +126,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
                 self.internal_state.remove(item)
                 break
         self.internal_state.append(
-            f"my arrest probability is {self.arrest_probability}"
+            f"my arrest probability is {self.arrest_probability:.4f}"
         )
 
     def step(self):
