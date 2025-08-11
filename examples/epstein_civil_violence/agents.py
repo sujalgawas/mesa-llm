@@ -77,6 +77,7 @@ class Citizen(LLMAgent, mesa.discrete_space.CellAgent):
         self.memory = STLTMemory(
             agent=self,
             display=True,
+            llm_model="openai/gpt-4o-mini",
         )
 
         self.threshold = threshold
@@ -200,6 +201,7 @@ class Cop(LLMAgent, mesa.discrete_space.CellAgent):
         self.memory = STLTMemory(
             agent=self,
             display=True,
+            llm_model="openai/gpt-4o-mini",
         )
 
     def step(self):
