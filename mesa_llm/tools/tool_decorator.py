@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import inspect
-import json
 import re
 import textwrap
 import warnings
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Union, get_args, get_origin, get_type_hints
 
+try:  # Python 3.10+ provides UnionType for PEP 604 unions (e.g., int | str)
+    from types import UnionType  # type: ignore[attr-defined]
+except Exception:  # pragma: no cover - fallback for very old Python
+    UnionType = None  # type: ignore[assignment]
+
 if TYPE_CHECKING:
-    from mesa_llm.llm_agent import LLMAgent
     from mesa_llm.tools.tool_manager import ToolManager
 
 
@@ -112,7 +115,7 @@ def _python_to_json_type(py_type: Any) -> dict[str, Any]:
     args = get_args(py_type)
 
     # Handle Union types (including Optional which is Union[T, None])
-    if origin is Union:
+    if origin is Union or (UnionType is not None and origin is UnionType):
         # Check if it's Optional (Union with None)
         non_none_args = [arg for arg in args if arg is not type(None)]
 
@@ -387,71 +390,3 @@ def tool(
 
     # Otherwise, return the decorator for later use
     return decorator
-
-
-if __name__ == "__main__":
-    # Test different type hints
-
-    @tool
-    def test_basic_types(agent: LLMAgent, count: int, name: str, active: bool):
-        """Test basic types.
-        Args:
-            agent: The agent
-            count: Number count
-            name: The name
-            active: Whether active
-        """
-
-    @tool
-    def test_collections(
-        agent: LLMAgent, items: list[int], coords: tuple[int, int], tags: set[str]
-    ):
-        """Test collection types.
-        Args:
-            agent: The agent
-            items: List of integers
-            coords: Coordinate pair
-            tags: Set of tags
-        """
-
-    @tool
-    def test_optional(agent: LLMAgent, required: str, optional: int | None = None):
-        """Test optional types.
-        Args:
-            agent: The agent
-            required: Required string
-            optional: Optional integer
-        """
-
-    @tool
-    def test_union(agent: LLMAgent, value: int | str, data: int | float):
-        """Test union types.
-        Args:
-            agent: The agent
-            value: Either int or string
-            data: Either int or float
-        """
-
-    @tool
-    def test_nested(
-        agent: LLMAgent, matrix: list[list[int]], pairs: list[tuple[str, int]]
-    ):
-        """Test nested types.
-        Args:
-            agent: The agent
-            matrix: Matrix of integers
-            pairs: List of string-int pairs
-        """
-
-    # Print schemas for all test functions
-    test_functions = [
-        test_basic_types,
-        test_collections,
-        test_optional,
-        test_union,
-        test_nested,
-    ]
-
-    for func in test_functions:
-        print(f"\n=== {func.__name__} ===")
-        print(json.dumps(func.__tool_schema__, indent=2))
