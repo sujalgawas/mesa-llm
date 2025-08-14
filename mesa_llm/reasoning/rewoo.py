@@ -22,7 +22,6 @@ class ReWOOReasoning(Reasoning):
         self.current_obs: Observation | None = None
 
     def get_rewoo_system_prompt(self, obs: Observation) -> str:
-
         memory = getattr(self.agent, "memory", None)
 
         long_term_memory = ""

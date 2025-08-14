@@ -26,7 +26,6 @@ class TestMemoryEntry:
 
     def test_memory_entry_str(self):
         """Test MemoryEntry string representation"""
-        from unittest.mock import Mock
 
         mock_agent = Mock()
         content = {"observation": "Test content", "type": "observation"}
