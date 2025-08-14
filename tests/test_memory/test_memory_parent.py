@@ -71,7 +71,6 @@ class TestMemoryParent:
 
     def test_add_to_memory(self):
         memory = MemoryMock(agent=mock_agent)
-        type = "message"
         # Test basic addition with observation
         memory.add_to_memory("observation", {"step": 1, "content": "Test content"})
 
@@ -81,6 +80,6 @@ class TestMemoryParent:
         # Test with action
         memory.add_to_memory("action", {"action": "Test action"})
 
-        # Should be empty step_content initially
+        # Should be non-empty step_content after adding to memory
         assert memory.step_content != {}
-        assert memory.step_content[type] is not None
+        assert "observation" in memory.step_content
