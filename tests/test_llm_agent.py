@@ -56,8 +56,7 @@ def test_apply_plan_adds_to_memory(monkeypatch):
     resp = agent.apply_plan(plan)
 
     assert resp == fake_response
-    # Check step_content instead of short_term_memory since process_step hasn't been called
-    # The exact key might vary depending on how add_to_memory works
+
     assert {
         "tool": "foo",
         "argument": "bar",
@@ -65,57 +64,6 @@ def test_apply_plan_adds_to_memory(monkeypatch):
         "tool": "foo",
         "argument": "bar",
     }
-
-
-# def test_apply_plan_adds_to_memory(monkeypatch):
-#     monkeypatch.setenv("GEMINI_API_KEY", "dummy")
-#     class DummyModel(Model):
-#         def __init__(self):
-#             super().__init__(seed=45)
-#             self.grid = MultiGrid(3, 3, torus=False)
-
-#         def add_agent(self, pos):
-#             system_prompt = "You are an agent in a simulation."
-#             agents = LLMAgent.create_agents(
-#                 self,
-#                 n=1,
-#                 reasoning=ReActReasoning,
-#                 system_prompt=system_prompt,
-#                 vision=-1,
-#                 internal_state=["test_state"],
-#             )
-
-
-#             x, y = pos
-
-#             self.grid.place_agent(agents[0], (x, y))
-#             return agents[0]
-
-#     model = DummyModel()
-#     agent = model.add_agent((1, 1))
-#     agent.memory=ShortTermMemory(
-#             agent=agent,
-#             n=5,
-#             display=True,
-#         )
-
-#     # fake response returned by the tool manager
-#     fake_response = [{"tool": "foo", "argument": "bar"}]
-
-#     # monkeypatch the tool manager so no real tool calls are made
-#     monkeypatch.setattr(
-#         agent.tool_manager,
-#         "call_tools",
-#         lambda agent, llm_response: fake_response
-#     )
-
-#     plan = Plan(step=0, llm_plan="do something")
-
-#     resp = agent.apply_plan(plan)
-
-#     assert resp == fake_response
-#     last_memory_item = agent.memory.short_term_memory[0].content
-#     assert last_memory_item == {"tool": "foo", "argument": "bar"}
 
 
 def test_generate_obs_with_one_neighbor(monkeypatch):
@@ -142,7 +90,6 @@ def test_generate_obs_with_one_neighbor(monkeypatch):
 
     model = DummyModel()
 
-    # create the agent under test
     agent = model.add_agent((1, 1))
     agent.memory = ShortTermMemory(
         agent=agent,
@@ -151,7 +98,6 @@ def test_generate_obs_with_one_neighbor(monkeypatch):
     )
     agent.unique_id = 1
 
-    # create one neighbor agent
     neighbor = model.add_agent((1, 2))
     neighbor.memory = ShortTermMemory(
         agent=agent,
@@ -159,13 +105,10 @@ def test_generate_obs_with_one_neighbor(monkeypatch):
         display=True,
     )
     neighbor.unique_id = 2
-    # avoid writing to memory during the test
     monkeypatch.setattr(agent.memory, "add_to_memory", lambda *args, **kwargs: None)
 
-    # act
     obs = agent.generate_obs()
 
-    # assert self_state
     assert obs.self_state["agent_unique_id"] == 1
 
     # we should have exactly one neighboring agent in local_state
