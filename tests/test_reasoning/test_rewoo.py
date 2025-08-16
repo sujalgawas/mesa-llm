@@ -1,5 +1,6 @@
 # tests/test_reasoning/test_rewoo.py
 
+import asyncio
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -260,8 +261,6 @@ class TestReWOOReasoning:
         reasoning.current_plan.tool_calls = [mock_tool_1, mock_tool_2]  # 2 tool calls
         reasoning.current_obs = Observation(step=1, self_state={}, local_state={})
 
-        import asyncio
-
         result = asyncio.run(reasoning.aplan("test prompt"))
 
         assert isinstance(result, Plan)
@@ -307,8 +306,6 @@ class TestReWOOReasoning:
             return_value=Plan(step=1, llm_plan=mock_exec_response.choices[0].message)
         )
 
-        import asyncio
-
         result = asyncio.run(reasoning.aplan("test prompt"))
 
         assert isinstance(result, Plan)
@@ -352,8 +349,6 @@ class TestReWOOReasoning:
         )
 
         selected_tools = ["tool1", "tool2"]
-        import asyncio
-
         result = asyncio.run(
             reasoning.aplan("test prompt", selected_tools=selected_tools)
         )
@@ -396,8 +391,6 @@ class TestReWOOReasoning:
         reasoning.aexecute_tool_call = AsyncMock(
             return_value=Plan(step=1, llm_plan=mock_plan_without_tool_calls)
         )
-
-        import asyncio
 
         result = asyncio.run(reasoning.aplan("test prompt"))
 
