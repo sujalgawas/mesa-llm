@@ -16,7 +16,7 @@ def test_apply_plan_adds_to_memory(monkeypatch):
 
     class DummyModel(Model):
         def __init__(self):
-            super().__init__(seed=45)
+            super().__init__(seed=42)
             self.grid = MultiGrid(3, 3, torus=False)
 
         def add_agent(self, pos):

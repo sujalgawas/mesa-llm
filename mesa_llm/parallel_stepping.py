@@ -38,13 +38,14 @@ def step_agents_multithreaded(agents: list[Agent | LLMAgent]) -> None:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for agent in agents:
-            if hasattr(agent, "step"):
-                futures.append(executor.submit(agent.step))
-            elif hasattr(agent, "astep"):
-                # Optionally, run async steps in the event loop in a thread
+            if hasattr(agent, "astep"):
+                # run async steps in the event loop in a thread
                 futures.append(
                     executor.submit(lambda agent=agent: asyncio.run(agent.astep()))
                 )
+            elif hasattr(agent, "step"):
+                futures.append(executor.submit(agent.step))
+
         for future in futures:
             future.result()
 

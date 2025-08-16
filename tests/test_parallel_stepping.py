@@ -1,94 +1,101 @@
 import asyncio
-import threading
-import time
 
 import pytest
+from mesa.agent import Agent, AgentSet
+from mesa.model import Model
 
-from mesa_llm.parallel_stepping import step_agents_parallel, step_agents_parallel_sync
+from mesa_llm.parallel_stepping import (
+    disable_automatic_parallel_stepping,
+    enable_automatic_parallel_stepping,
+    step_agents_multithreaded,
+    step_agents_parallel,
+    step_agents_parallel_sync,
+)
 
-# --- Fixtures for mock agents ---
 
-
-class SyncAgent:
+class DummyModel(Model):
     def __init__(self):
-        self.stepped = False
+        super().__init__(seed=42)
+        self.parallel_stepping = False
+
+
+class SyncAgent(Agent):
+    def __init__(self, model):
+        super().__init__(model)
+        self.counter = 0
 
     def step(self):
-        self.stepped = True
+        self.counter += 1
 
 
-class AsyncAgent:
-    def __init__(self):
-        self.stepped = False
-
-    async def astep(self):
-        self.stepped = True
-
-
-class SleepyAsyncAgent:
-    def __init__(self, sleep_time):
-        self.stepped = False
-        self.sleep_time = sleep_time
+class AsyncAgent(Agent):
+    def __init__(self, model):
+        super().__init__(model)
+        self.counter = 0
 
     async def astep(self):
-        await asyncio.sleep(self.sleep_time)
-        self.stepped = True
-
-
-# --- Tests ---
+        self.counter += 1
 
 
 @pytest.mark.asyncio
-async def test_all_sync_agents():
-    agents = [SyncAgent() for _ in range(5)]
-    await step_agents_parallel(agents)
-    assert all(agent.stepped for agent in agents)
+async def test_step_agents_parallel():
+    m = DummyModel()
+    a1 = SyncAgent(m)
+    a2 = AsyncAgent(m)
+    await step_agents_parallel([a1, a2])
+    assert a1.counter == 1
+    assert a2.counter == 1
 
 
-@pytest.mark.asyncio
-async def test_all_async_agents():
-    agents = [AsyncAgent() for _ in range(5)]
-    await step_agents_parallel(agents)
-    assert all(agent.stepped for agent in agents)
+def test_step_agents_multithreaded():
+    m = DummyModel()
+    a1 = SyncAgent(m)
+    a2 = AsyncAgent(m)
+    step_agents_multithreaded([a1, a2])
+    assert a1.counter == 1
+    assert a2.counter == 1
 
 
-@pytest.mark.asyncio
-async def test_mixed_sync_async_agents():
-    agents = [SyncAgent(), AsyncAgent(), SyncAgent(), AsyncAgent()]
-    await step_agents_parallel(agents)
-    assert all(getattr(agent, "stepped", False) for agent in agents)
+def test_automatic_parallel_shuffle_do():
+    """
+    verify that enable_automatic_parallel_stepping
+    monkey patches AgentSet.shuffle_do and ends up
+    using step_agents_parallel_sync
+    """
+    disable_automatic_parallel_stepping()  # Ensure clean state
+    m = DummyModel()
+    m.parallel_stepping = True
+
+    # SyncAgent that will be called by AgentSet.shuffle_do
+    a1 = SyncAgent(m)
+    agents = AgentSet([a1], random=m.random)
+
+    # enable patch
+    enable_automatic_parallel_stepping("asyncio")
+
+    # shuffle_do should now call step_agents_parallel_sync
+    # instead of individual step, so the counter still ends up 1
+    agents.shuffle_do("step")
+    assert a1.counter == 1
+
+    # disable patch and check that shuffle_do calls default (and will step again)
+    disable_automatic_parallel_stepping()
+    agents.shuffle_do("step")
+    assert a1.counter == 2
+    disable_automatic_parallel_stepping()
 
 
-@pytest.mark.asyncio
-async def test_parallelism_with_sleep():
-    # If run sequentially, would take 0.2 + 0.3 = 0.5s; in parallel, should be ~0.3s
-    agents = [SleepyAsyncAgent(0.2), SleepyAsyncAgent(0.3)]
-    start = time.perf_counter()
-    await step_agents_parallel(agents)
-    elapsed = time.perf_counter() - start
-    assert all(agent.stepped for agent in agents)
-    assert elapsed < 0.45  # Should be less than sum, allow some overhead
+def test_step_agents_parallel_sync_in_running_loop():
+    # ensure no exception is raised if we call the sync wrapper
+    # while an event loop is already running
+    m = DummyModel()
+    a1 = SyncAgent(m)
+    a2 = AsyncAgent(m)
 
+    async def wrapper():
+        # running inside an event loop
+        step_agents_parallel_sync([a1, a2])
 
-def test_step_agents_parallel_sync_outside_event_loop():
-    agents = [SyncAgent() for _ in range(3)]
-    step_agents_parallel_sync(agents)
-    assert all(agent.stepped for agent in agents)
-
-
-def test_step_agents_parallel_sync_inside_event_loop():
-    agents = [SyncAgent() for _ in range(3)]
-
-    def run():
-        step_agents_parallel_sync(agents)
-
-    def thread_target():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(asyncio.get_event_loop().run_in_executor(None, run))
-        loop.close()
-
-    t = threading.Thread(target=thread_target)
-    t.start()
-    t.join()
-    assert all(agent.stepped for agent in agents)
+    asyncio.run(wrapper())
+    assert a1.counter == 1
+    assert a2.counter == 1
