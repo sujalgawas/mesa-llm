@@ -38,11 +38,10 @@ class ReActReasoning(Reasoning):
         prompt_list = self.agent.memory.get_prompt_ready()
         last_communication = self.agent.memory.get_communication_history()
 
-        prompt_list.append(last_communication)
-        if obs:
-            prompt_list.append("current observation: \n" + str(obs))
         if last_communication:
             prompt_list.append("last communication: \n" + str(last_communication))
+        if obs:
+            prompt_list.append("current observation: \n" + str(obs))
 
         return prompt_list
 
@@ -103,7 +102,7 @@ class ReActReasoning(Reasoning):
         """
 
         # ---------------- prepare the prompt ----------------
-        self.agent.llm.system_prompt = self.get_react_system_prompt(obs)
+        self.agent.llm.system_prompt = self.get_react_system_prompt()
         prompt_list = self.get_react_prompt(obs)
 
         # If no prompt is provided, use the agent's default step prompt

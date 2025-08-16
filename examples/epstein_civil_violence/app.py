@@ -12,7 +12,7 @@ from mesa.visualization import (
 from examples.epstein_civil_violence.agents import Citizen, CitizenState, Cop
 from examples.epstein_civil_violence.model import EpsteinModel
 from mesa_llm.parallel_stepping import enable_automatic_parallel_stepping
-from mesa_llm.reasoning.rewoo import ReWOOReasoning
+from mesa_llm.reasoning.react import ReActReasoning
 
 # Suppress Pydantic serialization warnings
 warnings.filterwarnings(
@@ -47,7 +47,7 @@ model_params = {
     "initial_cops": 3,
     "width": 5,
     "height": 5,
-    "reasoning": ReWOOReasoning,
+    "reasoning": ReActReasoning,
     "llm_model": "openai/gpt-4o-mini",
     "vision": 5,
     "parallel_stepping": True,
