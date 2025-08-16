@@ -1,5 +1,6 @@
 # tests/test_reasoning/test_cot.py
 
+import asyncio
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -176,9 +177,6 @@ class TestCoTReasoning:
         reasoning = CoTReasoning(mock_agent)
 
         obs = Observation(step=1, self_state={}, local_state={})
-
-        # Test async execution
-        import asyncio
 
         result = asyncio.run(reasoning.aplan(prompt="Async prompt", obs=obs))
 
