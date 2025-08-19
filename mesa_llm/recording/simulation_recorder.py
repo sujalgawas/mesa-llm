@@ -43,7 +43,7 @@ class SimulationRecorder:
     ):
         self.model = model
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Recording configuration
         self.record_state_changes = record_state_changes

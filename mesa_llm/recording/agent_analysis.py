@@ -169,7 +169,9 @@ class AgentViewer:
                 ]:
                     if key == "duration_minutes" and isinstance(value, int | float):
                         v = f"{value:.2f} minutes"
-                    info_table.add_row(key.replace("_", " ").title(), str(v))
+                    else:
+                        v = str(value)
+                    info_table.add_row(key.replace("_", " ").title(), v)
 
             self.console.print(info_table)
 
