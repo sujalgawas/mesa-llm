@@ -330,5 +330,13 @@ pip-log.txt
 # Cursor file
 .cursorrules
 
+#############
+## External
+#############
+
 # Gathered data
 **/recordings
+
+#GSoC documentation
+final_architecture.png
+GSoC_2025.md

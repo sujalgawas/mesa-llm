@@ -73,7 +73,7 @@ class Memory(ABC):
 
     Attributes:
         agent : the agent that the memory belongs to
-        llm_model : the model to use for the summarization
+        llm_model : the model to use for the summarization if used
         display : whether to display the memory
     """
 
