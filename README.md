@@ -52,6 +52,7 @@ Mesa-LLM supports the following LLM models :
 - Ollama
 - OpenRouter
 - NovitaAI
+- Gemini
 
 
 ## Contributing to Mesa-LLM
