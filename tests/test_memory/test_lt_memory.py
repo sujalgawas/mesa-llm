@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from mesa_llm.memory.lt_memory import LongTermMemory
 from mesa_llm.memory.memory import MemoryEntry
 
@@ -35,6 +37,7 @@ class TestLTMemory:
 
         memory._update_long_term_memory()
 
+        # Verify LLM can call with correct prompt structure
         call_args = mock_llm.generate.call_args[0][0]
         assert "new memory entry" in call_args
         assert "Long term memory" in call_args
@@ -42,5 +45,31 @@ class TestLTMemory:
         assert memory.long_term_memory == "Updated long-term memory"
 
     # process step test
+    def test_process_step(self, mock_agent):
+        """Test process_step functionality"""
+        memory = LongTermMemory(agent=mock_agent, llm_model="provider/test_model")
+
+        # Add some content
+        memory.add_to_memory("observation", {"content": "Test observation"})
+        memory.add_to_memory("plan", {"content": "Test plan"})
+
+        # Process the step
+        with (
+            patch("rich.console.Console"),
+            patch.object(memory.llm, "generate", return_value="mocked summary"),
+        ):
+            memory.process_step(pre_step=True)
+            assert isinstance(memory.buffer, MemoryEntry)
+            # assert memory.buffer is not None
+
+            # Process post-step
+            memory.process_step(pre_step=False)
+            assert memory.long_term_memory == "mocked summary"
 
     # format memories test
+    def test_format_long_term(self, mock_agent):
+        """Test formatting long-term memory"""
+        memory = LongTermMemory(agent=mock_agent, llm_model="provider/test_model")
+        memory.long_term_memory = "Long-term summary"
+
+        assert memory.format_long_term() == "Long-term summary"
