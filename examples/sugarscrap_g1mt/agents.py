@@ -1,3 +1,5 @@
+from enum import Enum
+
 import mesa
 
 from mesa_llm.llm_agent import LLMAgent
@@ -5,6 +7,13 @@ from mesa_llm.memory.st_lt_memory import STLTMemory
 from mesa_llm.tools.tool_manager import ToolManager
 
 trader_tool_manager = ToolManager()
+resource_tool_manager = ToolManager()
+
+
+class TraderState(Enum):
+    Total_Spice = 4
+    Total_Sugar = 6
+    Total_Count = 10
 
 
 class Trader(LLMAgent, mesa.discrete_space.CellAgent):
@@ -134,6 +143,8 @@ class Resource(mesa.discrete_space.CellAgent):
         self.max_capacity = max_capacity
         self.current_amount = current_amount
         self.growback = growback
+
+        self.tool_manager = resource_tool_manager
 
     def step(self):
         if self.current_amount < self.max_capacity:

@@ -1,3 +1,5 @@
+import random
+
 from mesa.datacollection import DataCollector
 from mesa.model import Model
 from mesa.space import MultiGrid
@@ -49,13 +51,13 @@ class SugarScapeModel(Model):
         )
 
         for _i in range(initial_resources):
-            max_cap = self.random.randint(2, 5)
+            max_cap = random.randint(2, 5)
             resource = Resource(
                 model=self, max_capacity=max_cap, current_amount=max_cap, growback=1
             )
 
-            x = self.random.randrange(self.width)
-            y = self.random.randrange(self.height)
+            x = random.randrange(self.width)
+            y = random.randrange(self.height)
 
             self.grid.place_agent(resource, (x, y))
 
@@ -78,14 +80,14 @@ class SugarScapeModel(Model):
             step_prompt="Observe your inventory and MRS. Move to the best resource or propose a trade.",
         )
 
-        x_pos = self.random.integers(0, self.grid.width, size=(initial_traders,))
-        y_pos = self.random.integers(0, self.grid.height, size=(initial_traders,))
+        x_pos = self.rng.integers(0, self.grid.width, size=(initial_traders,))
+        y_pos = self.rng.integers(0, self.grid.height, size=(initial_traders,))
 
         for agent, i, j in zip(agents, x_pos, y_pos):
-            agent.sugar = self.random.randint(5, 25)
-            agent.spice = self.random.randint(5, 25)
-            agent.metabolism_sugar = self.random.randint(1, 4)
-            agent.metabolism_spice = self.random.randint(1, 4)
+            agent.sugar = random.randint(5, 25)
+            agent.spice = random.randint(5, 25)
+            agent.metabolism_sugar = random.randint(1, 4)
+            agent.metabolism_spice = random.randint(1, 4)
 
             agent.update_internal_metrics()
 
